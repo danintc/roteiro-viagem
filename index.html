@@ -569,34 +569,42 @@
       <div id="saved-places-container" class="saved-grid"></div>
     </section>
 
-    <!-- TAB 3: MAPA INTERATIVO COM TODOS OS PONTOS -->
+    <!-- TAB 3: GOOGLE MAPS COM OS PONTOS DA VIAGEM -->
     <section id="tab-mapa" class="hidden">
       <div class="card" style="padding: 12px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
           <div>
-            <h2 style="margin:0; font-size:16px;">🗺️ Mapa Geral da Viagem</h2>
-            <p style="margin:2px 0 0 0; font-size:12px; color:var(--muted);">Toque nos pinos para ver o dia ou abrir direto no Google Maps</p>
+            <h2 style="margin:0; font-size:16px;">🗺️ Google Maps da Viagem</h2>
+            <p style="margin:2px 0 0 0; font-size:12px; color:var(--muted);">Toque em qualquer local da lista abaixo para focar nele no Google Maps</p>
           </div>
           <div style="display:flex; gap:6px;">
-            <button onclick="focusMapRegion('orlando')" class="chip">🏰 Focar Orlando</button>
-            <button onclick="focusMapRegion('miami')" class="chip">🌴 Focar Miami</button>
-            <button onclick="focusMapRegion('all')" class="chip">🌎 Tudo</button>
+            <button onclick="focusMapRegion('orlando')" class="chip">🏰 Orlando</button>
+            <button onclick="focusMapRegion('miami')" class="chip">🌴 Miami</button>
+            <button onclick="focusMapRegion('all')" class="chip">🌎 Todos os Pinos</button>
           </div>
         </div>
 
         <!-- Filtro de Pinos no Mapa -->
         <div class="scroll-strip" style="margin-bottom: 10px;">
-          <button onclick="setMapPinFilter('all')" id="mpin-all" class="chip active">📍 Todos os Pontos</button>
+          <button onclick="setMapPinFilter('all')" id="mpin-all" class="chip active">📍 Todos os Locais</button>
           <button onclick="setMapPinFilter('roteiro')" id="mpin-roteiro" class="chip">📅 No Roteiro</button>
           <button onclick="setMapPinFilter('salvos')" id="mpin-salvos" class="chip">🔖 Lugares Salvos</button>
         </div>
 
-        <div id="map-view"></div>
+        <!-- Google Maps Embed Direto -->
+        <div style="position:relative; width:100%; height:360px; border-radius:16px; overflow:hidden; border:1px solid var(--border); background:var(--bg);">
+          <iframe id="gmaps-iframe" src="https://maps.google.com/maps?q=Walt+Disney+World+Resort+Orlando+FL&t=m&z=11&output=embed&iwloc=near" style="width:100%; height:100%; border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
 
-        <!-- Lista rápida abaixo do mapa -->
+        <!-- Modo Visão Geral com Múltiplos Pinos (estilo Google Maps Tiles) -->
+        <div id="multi-pins-wrap" class="hidden" style="margin-top:10px;">
+          <div id="map-view" style="height:340px;"></div>
+        </div>
+
+        <!-- Lista interativa abaixo do Google Maps -->
         <div style="margin-top:12px;">
-          <strong style="font-size:13px;">📍 Locais mapeados (<span id="map-places-count">0</span>):</strong>
-          <div id="map-places-list" style="margin-top:8px; max-height:260px; overflow-y:auto;"></div>
+          <strong style="font-size:13px;">📍 Toque em um local para ver no Google Maps acima (<span id="map-places-count">0</span>):</strong>
+          <div id="map-places-list" style="margin-top:8px; max-height:280px; overflow-y:auto;"></div>
         </div>
       </div>
     </section>
@@ -925,46 +933,21 @@
     function utf8ToB64(str) { return btoa(unescape(encodeURIComponent(str))); }
     function b64ToUtf8(b64) { return decodeURIComponent(escape(atob(b64.replace(/\s/g, '')))); }
 
+    let lastRenderedHash = '';
+
     async function initApp() {
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached) {
           appState = JSON.parse(cached);
           if (!appState.savedPlaces) appState.savedPlaces = [];
+          lastRenderedHash = JSON.stringify(appState);
           renderAll();
+          updateUnsavedUI();
         }
       } catch (e) {}
 
       await pullFromServer(false);
-      await checkAppInterfaceUpdate();
-
-      // Auto-sync whenever the user switches back to the app on iPhone
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          pullFromServer(false);
-          checkAppInterfaceUpdate();
-        }
-      });
-    }
-
-    // Checks if index.html on the server has a newer APP_BUILD_ID and hot-reloads without needing to re-add to Home Screen
-    async function checkAppInterfaceUpdate() {
-      try {
-        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${PUBLIC_APP_REPO}/contents/index.html?t=${Date.now()}`, {
-          headers: {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': `token ${_getAuth()}`
-          }
-        });
-        if (res.ok) {
-          const meta = await res.json();
-          const remoteHtml = b64ToUtf8(meta.content);
-          const match = remoteHtml.match(/const APP_BUILD_ID = (\d+);/);
-          if (match && parseInt(match[1], 10) > APP_BUILD_ID) {
-            window.location.replace(window.location.pathname + '?v=' + match[1]);
-          }
-        }
-      } catch (e) {}
     }
 
     function renderAll() {
@@ -987,13 +970,18 @@
           const meta = await res.json();
           const remoteData = JSON.parse(b64ToUtf8(meta.content));
           if (remoteData && Array.isArray(remoteData.days)) {
+            const newHash = JSON.stringify(remoteData);
             appState = remoteData;
             if (!appState.savedPlaces) appState.savedPlaces = [];
             hasUnsavedChanges = false;
             updateUnsavedUI();
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-            renderAll();
-            if (forceOverwriteLocal) showSyncMessage('✅ Roteiro privado sincronizado!', '#059669');
+            localStorage.setItem(STORAGE_KEY, newHash);
+            // Only re-render DOM if the data actually changed, preventing image flickering and scroll jumps
+            if (newHash !== lastRenderedHash || forceOverwriteLocal) {
+              lastRenderedHash = newHash;
+              renderAll();
+            }
+            if (forceOverwriteLocal) showSyncMessage('✅ Roteiro atualizado!', '#059669');
           }
         }
       } catch (e) {}
@@ -1562,13 +1550,36 @@
     }
 
     function initOrUpdateMap() {
+      const pts = collectMapPoints();
+      document.getElementById('map-places-count').textContent = pts.length;
+
+      // Render interactive list that updates the Google Maps Embed iframe on tap
+      const listEl = document.getElementById('map-places-list');
+      listEl.innerHTML = pts.map((p, idx) => {
+        const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location)}`;
+        const safeQuery = escapeHtml(p.location || p.title).replace(/'/g, "\\'");
+        return `
+          <div class="version-item" onclick="focusGoogleMapQuery('${safeQuery}', ${p.lat}, ${p.lng})" style="cursor:pointer;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:${p.color};">${escapeHtml(p.subtitle)}</div>
+              <div style="font-size:13px; font-weight:700;">${escapeHtml(p.title)}</div>
+              <div style="font-size:11px; color:var(--muted);">${escapeHtml(p.location)}</div>
+            </div>
+            <a href="${gmapsLink}" target="_blank" onclick="event.stopPropagation()" class="chip" style="text-decoration:none; color:var(--primary); font-weight:700;">📍 Abrir App</a>
+          </div>
+        `;
+      }).join('');
+
+      // Also initialize the multi-pin map using Google Maps Official Road Tiles!
       const mapEl = document.getElementById('map-view');
       if (!mapEl || typeof L === 'undefined') return;
 
       if (!leafletMap) {
         leafletMap = L.map('map-view').setView([28.3852, -81.51], 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap'
+        // Official Google Maps Road Tiles instead of OpenStreetMap
+        L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+          maxZoom: 20,
+          attribution: 'Map data © Google'
         }).addTo(leafletMap);
         leafletMarkersGroup = L.layerGroup().addTo(leafletMap);
       }
@@ -1576,11 +1587,8 @@
       leafletMap.invalidateSize();
       leafletMarkersGroup.clearLayers();
 
-      const pts = collectMapPoints();
-      document.getElementById('map-places-count').textContent = pts.length;
-
       const bounds = [];
-      pts.forEach((p, idx) => {
+      pts.forEach(p => {
         bounds.push([p.lat, p.lng]);
         const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location)}`;
         const marker = L.circleMarker([p.lat, p.lng], {
@@ -1589,7 +1597,7 @@
           color: '#ffffff',
           weight: 2,
           opacity: 1,
-          fillOpacity: 0.92
+          fillOpacity: 0.95
         });
         marker.bindPopup(`
           <div style="font-family:sans-serif; min-width:170px;">
@@ -1605,33 +1613,41 @@
       if (bounds.length > 0) {
         leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
       }
-
-      const listEl = document.getElementById('map-places-list');
-      listEl.innerHTML = pts.map(p => {
-        const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location)}`;
-        return `
-          <div class="version-item" onclick="panToPoint(${p.lat}, ${p.lng})" style="cursor:pointer;">
-            <div>
-              <div style="font-size:11px; font-weight:700; color:${p.color};">${escapeHtml(p.subtitle)}</div>
-              <div style="font-size:13px; font-weight:700;">${escapeHtml(p.title)}</div>
-            </div>
-            <a href="${gmapsLink}" target="_blank" onclick="event.stopPropagation()" class="chip" style="text-decoration:none; color:var(--primary);">📍 GPS</a>
-          </div>
-        `;
-      }).join('');
     }
 
-    function panToPoint(lat, lng) {
-      if (leafletMap) {
-        leafletMap.setView([lat, lng], 15);
+    function focusGoogleMapQuery(query, lat, lng) {
+      const iframe = document.getElementById('gmaps-iframe');
+      const multiWrap = document.getElementById('multi-pins-wrap');
+      if (multiWrap) multiWrap.classList.add('hidden');
+      if (iframe) {
+        iframe.parentElement.classList.remove('hidden');
+        iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=15&output=embed&iwloc=near`;
       }
     }
 
     function focusMapRegion(region) {
-      if (!leafletMap) return;
-      if (region === 'orlando') leafletMap.setView([28.3852, -81.51], 11);
-      else if (region === 'miami') leafletMap.setView([25.79, -80.22], 11);
-      else initOrUpdateMap();
+      const iframe = document.getElementById('gmaps-iframe');
+      const multiWrap = document.getElementById('multi-pins-wrap');
+      if (region === 'orlando') {
+        if (multiWrap) multiWrap.classList.add('hidden');
+        if (iframe) {
+          iframe.parentElement.classList.remove('hidden');
+          iframe.src = 'https://maps.google.com/maps?q=Celebration+Suites+Kissimmee+Orlando+FL&t=m&z=11&output=embed';
+        }
+      } else if (region === 'miami') {
+        if (multiWrap) multiWrap.classList.add('hidden');
+        if (iframe) {
+          iframe.parentElement.classList.remove('hidden');
+          iframe.src = 'https://maps.google.com/maps?q=Miami+Beach+FL&t=m&z=11&output=embed';
+        }
+      } else {
+        // Show all pins plotted together on Google Maps tiles
+        if (iframe) iframe.parentElement.classList.add('hidden');
+        if (multiWrap) {
+          multiWrap.classList.remove('hidden');
+          setTimeout(() => initOrUpdateMap(), 60);
+        }
+      }
     }
 
     // ================= ACTIVITY MODAL =================
