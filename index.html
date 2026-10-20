@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Roteiro Flórida">
   <title>Roteiro Orlando & Miami (04/11 a 19/11)</title>
+  <!-- Leaflet Interactive Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --bg: #f1f5f9;
@@ -45,18 +48,18 @@
     }
     .container { max-width: 680px; margin: 0 auto; padding: 0 12px; }
     
-    /* Header - Com recuo automático para o relógio/bateria do iPhone (Safe Area) */
+    /* Header - Com suporte ao Notch / Dynamic Island do iPhone */
     .app-header {
       background: linear-gradient(135deg, #2563eb 0%, #4f46e5 55%, #7c3aed 100%);
       color: #fff;
       padding-top: calc(env(safe-area-inset-top, 44px) + 12px);
       padding-right: 14px;
-      padding-bottom: 14px;
+      padding-bottom: 12px;
       padding-left: 14px;
       position: sticky;
       top: 0;
       z-index: 40;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.14);
     }
     .header-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .pill-date {
@@ -75,7 +78,7 @@
       background: rgba(255,255,255,0.2);
       color: #fff;
       border: 1px solid rgba(255,255,255,0.35);
-      padding: 8px 12px;
+      padding: 7px 11px;
       border-radius: 10px;
       font-size: 12px;
       font-weight: 700;
@@ -83,7 +86,6 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      position: relative;
     }
     .unsaved-dot {
       width: 8px;
@@ -93,10 +95,38 @@
       box-shadow: 0 0 0 2px rgba(0,0,0,0.25);
     }
 
+    /* Main 4-Tab Bar */
+    .main-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-top: 12px;
+      background: rgba(0,0,0,0.24);
+      padding: 4px;
+      border-radius: 12px;
+    }
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.9);
+      padding: 7px 4px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .tab-btn.active {
+      background: #ffffff;
+      color: #3730a3;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.14);
+    }
+
     /* Cloud Sync Status Bar */
     .sync-banner {
       background: var(--primary-light);
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      border: 1px solid rgba(99, 102, 241, 0.35);
       border-radius: 12px;
       padding: 10px 12px;
       margin-bottom: 12px;
@@ -107,43 +137,17 @@
       font-size: 12px;
     }
 
-    /* Main Tabs */
-    .main-tabs {
-      display: flex;
-      gap: 6px;
-      margin-top: 12px;
-      background: rgba(0,0,0,0.22);
-      padding: 4px;
-      border-radius: 12px;
-    }
-    .tab-btn {
-      flex: 1;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,0.88);
-      padding: 8px 6px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .tab-btn.active {
-      background: #ffffff;
-      color: #3730a3;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
-    }
-
     /* Filter Bar */
     .filter-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin: 12px 0 8px 0;
+      margin: 10px 0 8px 0;
     }
     .scroll-strip {
       display: flex;
-      gap: 8px;
+      gap: 7px;
       overflow-x: auto;
       padding-bottom: 4px;
       -webkit-overflow-scrolling: touch;
@@ -173,7 +177,7 @@
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding: 6px 0 10px 0;
+      padding: 4px 0 10px 0;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
@@ -251,15 +255,16 @@
       cursor: pointer;
     }
 
-    /* Activity Items */
+    /* Wanderlog-style Activity Cards with Thumbnail Image */
     .item-card {
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 12px;
       margin-top: 10px;
       display: flex;
       align-items: flex-start;
-      gap: 10px;
+      gap: 12px;
+      background: var(--card);
     }
     .item-card.done { opacity: 0.55; }
     .check-btn {
@@ -283,6 +288,15 @@
       border-color: var(--success);
     }
     .item-body { flex: 1; min-width: 0; }
+    .item-thumb {
+      width: 76px;
+      height: 76px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
     .item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
     .time-pill {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -307,7 +321,7 @@
 
     .item-title { font-size: 14px; font-weight: 700; margin: 5px 0 3px 0; }
     .item-notes { font-size: 12px; color: var(--muted); margin: 0; }
-    .item-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding-top: 6px; }
+    .item-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding-top: 4px; }
     .link-btn {
       font-size: 12px;
       font-weight: 600;
@@ -320,6 +334,80 @@
     }
     .link-muted { color: var(--muted); }
     .link-danger { color: var(--danger); }
+
+    /* Saved Places (Wanderlog Bucket List Grid) */
+    .saved-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 520px) {
+      .saved-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .saved-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .saved-img-wrap {
+      position: relative;
+      height: 135px;
+      background: var(--border);
+    }
+    .saved-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .saved-list-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      backdrop-filter: blur(4px);
+    }
+    .saved-city-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(79, 70, 229, 0.9);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .saved-content { padding: 12px; flex: 1; display: flex; flex-direction: column; }
+    .tag-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary);
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+
+    /* Map Container */
+    #map-view {
+      width: 100%;
+      height: 410px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      z-index: 10;
+    }
 
     /* Modal */
     .modal-backdrop {
@@ -377,8 +465,6 @@
       background-position: right 12px center;
       padding-right: 32px;
     }
-
-    /* Version History Item */
     .version-item {
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -402,31 +488,33 @@
           <h1 class="app-title">Orlando & Miami 🏰🌴</h1>
         </div>
         <button onclick="openCloudModal()" class="btn-header">
-          <span>☁️ Nuvem / Versões</span>
-          <span id="unsaved-indicator" class="unsaved-dot hidden" title="Há alterações locais não publicadas"></span>
+          <span>☁️ Nuvem</span>
+          <span id="unsaved-indicator" class="unsaved-dot hidden" title="Há alterações não publicadas"></span>
         </button>
       </div>
 
+      <!-- 4 Main Navigation Tabs (Wanderlog / TripIt style) -->
       <div class="main-tabs">
         <button onclick="switchMainTab('roteiro')" id="tab-btn-roteiro" class="tab-btn active">📅 Roteiro</button>
-        <button onclick="switchMainTab('info')" id="tab-btn-info" class="tab-btn">🏨 Voos & Hotéis</button>
-        <button onclick="switchMainTab('checklist')" id="tab-btn-checklist" class="tab-btn">✅ Checklist</button>
+        <button onclick="switchMainTab('salvos')" id="tab-btn-salvos" class="tab-btn">🔖 Salvos</button>
+        <button onclick="switchMainTab('mapa')" id="tab-btn-mapa" class="tab-btn">🗺️ Mapa</button>
+        <button onclick="switchMainTab('info')" id="tab-btn-info" class="tab-btn">🏨 Info/Check</button>
       </div>
     </div>
   </header>
 
   <main class="container" style="padding-top: 12px;">
 
-    <!-- Banner de publicação rápida quando o usuário edita algo -->
+    <!-- Banner de publicação rápida -->
     <div id="publish-banner" class="sync-banner hidden">
       <div>
         <strong>✨ Você fez alterações!</strong>
-        <div style="color:var(--muted);">Publique na nuvem para atualizar o roteiro nos celulares de toda a família.</div>
+        <div style="color:var(--muted);">Publique para atualizar o roteiro nos celulares de toda a família.</div>
       </div>
-      <button onclick="publishToServer()" id="btn-quick-publish" class="btn-success" style="white-space:nowrap;">☁️ Publicar para Todos</button>
+      <button onclick="publishToServer()" id="btn-quick-publish" class="btn-success" style="white-space:nowrap;">☁️ Publicar</button>
     </div>
 
-    <!-- TAB 1: ROTEIRO -->
+    <!-- TAB 1: ROTEIRO DIÁRIO (Com fotos nos cards) -->
     <section id="tab-roteiro">
       <div class="filter-row">
         <div class="scroll-strip">
@@ -453,7 +541,64 @@
       <div id="days-container"></div>
     </section>
 
-    <!-- TAB 2: VOOS & HOTEIS -->
+    <!-- TAB 2: LUGARES SALVOS / QUERO VISITAR (Sem data fixa, com Tags e Listas) -->
+    <section id="tab-salvos" class="hidden">
+      <div class="card" style="margin-bottom: 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div>
+            <h2 style="margin:0; font-size:16px;">🔖 Lugares Salvos & Desejos</h2>
+            <p style="margin:2px 0 0 0; font-size:12px; color:var(--muted);">Guarde restaurantes, lojas, cafeterias e passeios sem precisar definir dia/hora agora.</p>
+          </div>
+          <button onclick="openSavedPlaceModal()" class="btn-add">＋ Salvar Lugar</button>
+        </div>
+
+        <!-- Filtros de Lista (Todos / Quero Visitar / Favoritos) -->
+        <div class="scroll-strip" style="margin-top: 12px;">
+          <button onclick="setSavedListFilter('all')" id="slist-all" class="chip active">Todos</button>
+          <button onclick="setSavedListFilter('quero_visitar')" id="slist-quero_visitar" class="chip">📌 Quero Visitar</button>
+          <button onclick="setSavedListFilter('favoritos')" id="slist-favoritos" class="chip">⭐ Favoritos</button>
+        </div>
+
+        <!-- Filtros por Tags -->
+        <div id="saved-tags-strip" class="scroll-strip" style="margin-top: 8px;"></div>
+      </div>
+
+      <div id="saved-places-container" class="saved-grid"></div>
+    </section>
+
+    <!-- TAB 3: MAPA INTERATIVO COM TODOS OS PONTOS -->
+    <section id="tab-mapa" class="hidden">
+      <div class="card" style="padding: 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+          <div>
+            <h2 style="margin:0; font-size:16px;">🗺️ Mapa Geral da Viagem</h2>
+            <p style="margin:2px 0 0 0; font-size:12px; color:var(--muted);">Toque nos pinos para ver o dia ou abrir direto no Google Maps</p>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="focusMapRegion('orlando')" class="chip">🏰 Focar Orlando</button>
+            <button onclick="focusMapRegion('miami')" class="chip">🌴 Focar Miami</button>
+            <button onclick="focusMapRegion('all')" class="chip">🌎 Tudo</button>
+          </div>
+        </div>
+
+        <!-- Filtro de Pinos no Mapa -->
+        <div class="scroll-strip" style="margin-bottom: 10px;">
+          <button onclick="setMapPinFilter('all')" id="mpin-all" class="chip active">📍 Todos os Pontos</button>
+          <button onclick="setMapPinFilter('roteiro')" id="mpin-roteiro" class="chip">📅 No Roteiro</button>
+          <button onclick="setMapPinFilter('salvos')" id="mpin-salvos" class="chip">🔖 Lugares Salvos</button>
+        </div>
+
+        <div id="map-view"></div>
+
+        <!-- Lista rápida abaixo do mapa -->
+        <div style="margin-top:12px;">
+          <strong style="font-size:13px;">📍 Locais mapeados (<span id="map-places-count">0</span>):</strong>
+          <div id="map-places-list" style="margin-top:8px; max-height:260px; overflow-y:auto;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: VOOS, HOTÉIS & CHECKLIST -->
     <section id="tab-info" class="hidden">
       <div class="card">
         <h2 style="margin:0 0 12px 0; font-size:16px;">✈️ Voos Confirmados</h2>
@@ -471,45 +616,49 @@
 
       <div class="card">
         <h2 style="margin:0 0 12px 0; font-size:16px;">🏨 Hospedagens</h2>
-        <div style="padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid var(--border);">
-          <div style="font-size:11px; font-weight:800; color:#9333ea;">ORLANDO • 04/11 A 14/11 (10 NOITES)</div>
-          <div style="font-size:16px; font-weight:800; margin-top:2px;">Celebration Suites</div>
-          <div style="font-size:12px; color:var(--muted); margin:4px 0 8px 0;">📍 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL 34746</div>
-          <a href="https://maps.google.com/?q=Celebration+Suites+5820+W+Irlo+Bronson+Memorial+Hwy+Kissimmee+FL" target="_blank" class="btn-add" style="text-decoration:none; display:inline-block;">📍 Abrir no Mapas</a>
+        <div style="display:flex; gap:12px; align-items:center; padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid var(--border);">
+          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80" class="item-thumb" alt="Celebration Suites">
+          <div style="flex:1;">
+            <div style="font-size:11px; font-weight:800; color:#9333ea;">ORLANDO • 04/11 A 14/11 (10 NOITES)</div>
+            <div style="font-size:15px; font-weight:800; margin-top:2px;">Celebration Suites</div>
+            <div style="font-size:12px; color:var(--muted); margin:3px 0 6px 0;">📍 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL</div>
+            <a href="https://maps.google.com/?q=Celebration+Suites+5820+W+Irlo+Bronson+Memorial+Hwy+Kissimmee+FL" target="_blank" class="link-btn">📍 Abrir no Google Maps</a>
+          </div>
         </div>
 
-        <div>
-          <div style="font-size:11px; font-weight:800; color:#059669;">MIAMI • 14/11 A 18/11 (4 NOITES)</div>
-          <div style="font-size:16px; font-weight:800; margin-top:2px;">Hampton Inn Miami-Airport West</div>
-          <div style="font-size:12px; color:var(--muted); margin:4px 0 8px 0;">📍 3620 NW 79th Ave, Doral / Miami, FL 33166</div>
-          <a href="https://maps.google.com/?q=Hampton+Inn+3620+NW+79th+Ave+Miami+FL" target="_blank" class="btn-add" style="text-decoration:none; display:inline-block; background:#059669;">📍 Abrir no Mapas</a>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=400&q=80" class="item-thumb" alt="Hampton Inn">
+          <div style="flex:1;">
+            <div style="font-size:11px; font-weight:800; color:#059669;">MIAMI • 14/11 A 18/11 (4 NOITES)</div>
+            <div style="font-size:15px; font-weight:800; margin-top:2px;">Hampton Inn Miami-Airport West</div>
+            <div style="font-size:12px; color:var(--muted); margin:3px 0 6px 0;">📍 3620 NW 79th Ave, Doral / Miami, FL</div>
+            <a href="https://maps.google.com/?q=Hampton+Inn+3620+NW+79th+Ave+Miami+FL" target="_blank" class="link-btn">📍 Abrir no Google Maps</a>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <h2 style="margin:0 0 8px 0; font-size:16px;">📝 Anotações e Reservas</h2>
-        <textarea id="general-notes" rows="6" oninput="saveGeneralNotes(this.value)" class="form-textarea" placeholder="Anote aqui localizadores de voo, reserva do carro, ingressos..."></textarea>
-      </div>
-    </section>
-
-    <!-- TAB 3: CHECKLIST -->
-    <section id="tab-checklist" class="hidden">
+      <!-- Checklist integrado -->
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="margin:0; font-size:16px;">✅ Checklist da Viagem</h2>
           <span id="checklist-progress" class="badge badge-primary">0/0</span>
         </div>
         <form onsubmit="addChecklistItem(event)" style="display:flex; gap:8px; margin-bottom:12px;">
-          <input type="text" id="new-check-input" placeholder="Novo item..." class="form-input">
+          <input type="text" id="new-check-input" placeholder="Adicionar item ao checklist..." class="form-input">
           <button type="submit" class="btn-add">+ Adicionar</button>
         </form>
         <div id="checklist-container"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 8px 0; font-size:16px;">📝 Anotações e Códigos de Reserva</h2>
+        <textarea id="general-notes" rows="5" oninput="saveGeneralNotes(this.value)" class="form-textarea" placeholder="Anote aqui localizadores de voo, reserva do carro, ingressos..."></textarea>
       </div>
     </section>
 
   </main>
 
-  <!-- MODAL ADICIONAR / EDITAR -->
+  <!-- MODAL ADICIONAR / EDITAR ATIVIDADE DO ROTEIRO -->
   <div id="activity-modal" class="modal-backdrop hidden">
     <div class="modal-sheet">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -555,6 +704,11 @@
         </div>
 
         <div class="form-group">
+          <label class="form-label">Foto do Local (URL opcional — se vazio, escolhemos automaticamente!)</label>
+          <input type="url" id="act-image" placeholder="https://..." class="form-input">
+        </div>
+
+        <div class="form-group">
           <label class="form-label">Observações / Dicas</label>
           <textarea id="act-notes" rows="2" class="form-textarea"></textarea>
         </div>
@@ -562,6 +716,101 @@
         <div style="display:flex; gap:8px; margin-top:14px;">
           <button type="button" onclick="closeActivityModal()" class="chip" style="flex:1; padding:10px;">Cancelar</button>
           <button type="submit" class="btn-add" style="flex:1; padding:10px;">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL ADICIONAR / EDITAR LUGAR SALVO ("QUERO VISITAR" / "FAVORITOS") -->
+  <div id="saved-place-modal" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 id="saved-modal-title" style="margin:0; font-size:16px;">🔖 Salvar Lugar para Visitar</h3>
+        <button onclick="closeSavedPlaceModal()" style="border:none; background:none; font-size:18px; color:var(--muted); cursor:pointer;">✕</button>
+      </div>
+
+      <form onsubmit="saveBucketPlace(event)">
+        <input type="hidden" id="sp-id">
+
+        <div class="form-group">
+          <label class="form-label">Nome do Lugar *</label>
+          <input type="text" id="sp-title" required placeholder="Ex: Cheesecake Factory, Crumbl Cookies, Apple Store..." class="form-input">
+        </div>
+
+        <div class="form-row-2col" style="grid-template-columns: 1fr 1fr;">
+          <div>
+            <label class="form-label">Lista</label>
+            <select id="sp-list" class="form-select">
+              <option value="quero_visitar">📌 Quero Visitar</option>
+              <option value="favoritos">⭐ Favoritos</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Cidade</label>
+            <select id="sp-city" class="form-select">
+              <option value="Orlando">🏰 Orlando</option>
+              <option value="Miami">🌴 Miami</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tags (separe por vírgula ou toque nas sugestões abaixo)</label>
+          <input type="text" id="sp-tags" placeholder="Ex: restaurante, shopping, cafeteria, doces" class="form-input">
+          <div class="scroll-strip" style="margin-top:6px;">
+            <button type="button" onclick="appendTag('restaurante')" class="chip">🍔 restaurante</button>
+            <button type="button" onclick="appendTag('shopping')" class="chip">🛍️ shopping</button>
+            <button type="button" onclick="appendTag('cafeteria')" class="chip">☕ cafeteria</button>
+            <button type="button" onclick="appendTag('outlet')" class="chip">🏷️ outlet</button>
+            <button type="button" onclick="appendTag('doces')" class="chip">🍪 doces</button>
+            <button type="button" onclick="appendTag('passeio')" class="chip">🌴 passeio</button>
+            <button type="button" onclick="appendTag('mercado')" class="chip">🛒 mercado</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Endereço / Localização</label>
+          <input type="text" id="sp-location" placeholder="Ex: 4200 Conroy Rd, Orlando, FL" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Link de Foto (Opcional — escolhemos automaticamente pelo tema!)</label>
+          <input type="url" id="sp-image" placeholder="https://..." class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notas / O que pedir / Dicas</label>
+          <textarea id="sp-notes" rows="2" placeholder="Ex: Pedir o pãozinho de entrada..." class="form-textarea"></textarea>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button type="button" onclick="closeSavedPlaceModal()" class="chip" style="flex:1; padding:10px;">Cancelar</button>
+          <button type="submit" class="btn-add" style="flex:1; padding:10px;">Salvar na Lista</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL ENVIAR LUGAR SALVO PARA UM DIA DO ROTEIRO -->
+  <div id="schedule-saved-modal" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:16px;">📅 Incluir no Roteiro Diário</h3>
+        <button onclick="document.getElementById('schedule-saved-modal').classList.add('hidden')" style="border:none; background:none; font-size:18px; color:var(--muted);">✕</button>
+      </div>
+      <form onsubmit="confirmScheduleSavedPlace(event)">
+        <input type="hidden" id="sched-sp-id">
+        <div class="form-group">
+          <label class="form-label">Escolha o Dia da Viagem:</label>
+          <select id="sched-day-select" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Horário aproximado:</label>
+          <input type="time" id="sched-time" value="13:00" required class="form-input">
+        </div>
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button type="button" onclick="document.getElementById('schedule-saved-modal').classList.add('hidden')" class="chip" style="flex:1; padding:10px;">Cancelar</button>
+          <button type="submit" class="btn-add" style="flex:1; padding:10px;">Adicionar ao Dia</button>
         </div>
       </form>
     </div>
@@ -575,38 +824,31 @@
         <button onclick="closeCloudModal()" style="border:none; background:none; font-size:18px; color:var(--muted); cursor:pointer;">✕</button>
       </div>
 
-      <!-- Bloco 1: Publicar para todo mundo -->
       <div style="padding:12px; border-radius:12px; background:var(--primary-light); margin-bottom:14px;">
         <div style="font-weight:800; font-size:13px; margin-bottom:4px;">🚀 Atualizar Roteiro para Toda a Família</div>
         <p style="font-size:12px; color:var(--muted); margin:0 0 10px 0;">
-          Salva todas as suas alterações direto no arquivo <code>roteiro.json</code> do servidor e cria um ponto de restauração no histórico:
+          Salva todas as alterações direto no arquivo <code>roteiro.json</code> do servidor e cria um ponto de restauração:
         </p>
-        <input type="text" id="commit-msg-input" placeholder="Descrição (ex: Adicionado restaurante dia 08)" class="form-input" style="margin-bottom:8px; height:38px; font-size:13px;">
+        <input type="text" id="commit-msg-input" placeholder="Descrição (ex: Adicionado lugares salvos)" class="form-input" style="margin-bottom:8px; height:38px; font-size:13px;">
         <div style="display:flex; gap:8px;">
           <button onclick="publishToServer()" id="btn-modal-publish" class="btn-success" style="flex:1; padding:10px;">☁️ Publicar no Servidor Agora</button>
-          <button onclick="pullFromServer(true)" class="chip" style="padding:10px;" title="Baixar versão atual do servidor">🔄 Recarregar</button>
+          <button onclick="pullFromServer(true)" class="chip" style="padding:10px;">🔄 Recarregar</button>
         </div>
         <div id="sync-status-msg" style="font-size:12px; font-weight:700; margin-top:8px; display:none;"></div>
       </div>
 
-      <!-- Bloco 2: Histórico de Versões (Rollback) -->
       <div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <strong style="font-size:13px;">⏪ Histórico de Versões (Rollback)</strong>
           <button onclick="loadVersionHistory()" class="link-btn">Atualizar lista</button>
         </div>
-        <p style="font-size:12px; color:var(--muted); margin:0 0 8px 0;">
-          Todas as vezes que o <code>roteiro.json</code> é salvo, o servidor guarda uma versão. Clique em <strong>Restaurar</strong> para voltar a qualquer versão anterior:
-        </p>
-        <div id="version-history-list" style="max-height:220px; overflow-y:auto;">
-          <div style="font-size:12px; color:var(--muted); padding:12px; text-align:center;">Carregando versões do servidor...</div>
-        </div>
+        <div id="version-history-list" style="max-height:220px; overflow-y:auto;"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'roteiro_orlando_miami_familia_v5';
+    const STORAGE_KEY = 'roteiro_orlando_miami_familia_v6';
     const REPO_OWNER = 'danintc';
     const REPO_NAME = 'roteiro-viagem';
     const JSON_PATH = 'roteiro.json';
@@ -621,13 +863,28 @@
     }
 
     const CATEGORY_META = {
-      parque:      { label: 'Parque',      icon: '🎢', cls: 'cat-parque' },
-      compras:     { label: 'Compras',     icon: '🛍️', cls: 'cat-compras' },
-      restaurante: { label: 'Restaurante', icon: '🍔', cls: 'cat-restaurante' },
-      passeio:     { label: 'Passeio',     icon: '🌴', cls: 'cat-passeio' },
-      hotel:       { label: 'Hotel',       icon: '🏨', cls: 'cat-hotel' },
-      logistica:   { label: 'Logística',   icon: '✈️', cls: 'cat-logistica' }
+      parque:      { label: 'Parque',      icon: '🎢', cls: 'cat-parque',      defaultImg: 'https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=600&q=80' },
+      compras:     { label: 'Compras',     icon: '🛍️', cls: 'cat-compras',     defaultImg: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80' },
+      restaurante: { label: 'Restaurante', icon: '🍔', cls: 'cat-restaurante', defaultImg: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80' },
+      passeio:     { label: 'Passeio',     icon: '🌴', cls: 'cat-passeio',     defaultImg: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80' },
+      hotel:       { label: 'Hotel',       icon: '🏨', cls: 'cat-hotel',       defaultImg: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80' },
+      logistica:   { label: 'Logística',   icon: '✈️', cls: 'cat-logistica',   defaultImg: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80' }
     };
+
+    // Smart automatic photo selector based on place title or tags
+    function getAutoImage(title = '', category = 'passeio', tags = []) {
+      const t = (title + ' ' + tags.join(' ')).toLowerCase();
+      if (t.includes('magic kingdom') || t.includes('disney')) return 'https://images.unsplash.com/photo-1524008279394-3aed4643b30b?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('universal') || t.includes('epic') || t.includes('citywalk')) return 'https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('kennedy') || t.includes('nasa') || t.includes('space')) return 'https://images.unsplash.com/photo-1517976487468-f20514c44f53?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('walmart') || t.includes('target') || t.includes('mercado')) return 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('outlet') || t.includes('mall') || t.includes('ross') || t.includes('shopping')) return 'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('cookie') || t.includes('doce') || t.includes('sorvete') || t.includes('cheesecake')) return 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('cafe') || t.includes('cafeteria') || t.includes('bakery')) return 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('burger') || t.includes('shake') || t.includes('five guys') || t.includes('hamburguer')) return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('beach') || t.includes('praia') || t.includes('ocean')) return 'https://images.unsplash.com/photo-1533106497176-45ae19e68ba2?auto=format&fit=crop&w=600&q=80';
+      return (CATEGORY_META[category] || CATEGORY_META.passeio).defaultImg;
+    }
 
     const QUICK_PRESETS = {
       orlando: [
@@ -646,39 +903,42 @@
       ]
     };
 
-    let appState = { generalNotes: '', checklist: [], days: [] };
+    let appState = { generalNotes: '', savedPlaces: [], checklist: [], days: [] };
     let hasUnsavedChanges = false;
     let selectedDayId = 'all';
     let currentPhaseFilter = 'all';
     let currentCategoryFilter = 'all';
+    let currentSavedListFilter = 'all';
+    let currentSavedTagFilter = 'all';
+    let currentMapPinFilter = 'all';
+    let leafletMap = null;
+    let leafletMarkersGroup = null;
 
-    // UTF-8 Base64 helpers
-    function utf8ToB64(str) {
-      return btoa(unescape(encodeURIComponent(str)));
-    }
-    function b64ToUtf8(b64) {
-      return decodeURIComponent(escape(atob(b64.replace(/\s/g, ''))));
-    }
+    function utf8ToB64(str) { return btoa(unescape(encodeURIComponent(str))); }
+    function b64ToUtf8(b64) { return decodeURIComponent(escape(atob(b64.replace(/\s/g, '')))); }
 
     async function initApp() {
-      // 1. Load local cache immediately for instant offline boot
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached) {
           appState = JSON.parse(cached);
-          renderDayStrip();
-          renderDays();
+          if (!appState.savedPlaces) appState.savedPlaces = [];
+          renderAll();
         }
       } catch (e) {}
-
-      // 2. Fetch latest roteiro.json from server
       await pullFromServer(false);
+    }
+
+    function renderAll() {
+      renderDayStrip();
+      renderDays();
+      renderSavedPlaces();
+      renderChecklist();
     }
 
     async function pullFromServer(forceOverwriteLocal) {
       if (hasUnsavedChanges && !forceOverwriteLocal) return;
       try {
-        // Fetch directly from GitHub API contents to bypass CDN caching (always instant!)
         const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}?t=${Date.now()}`, {
           headers: {
             'Accept': 'application/vnd.github+json',
@@ -690,25 +950,22 @@
           const remoteData = JSON.parse(b64ToUtf8(meta.content));
           if (remoteData && Array.isArray(remoteData.days)) {
             appState = remoteData;
+            if (!appState.savedPlaces) appState.savedPlaces = [];
             hasUnsavedChanges = false;
             updateUnsavedUI();
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-            renderDayStrip();
-            renderDays();
-            if (forceOverwriteLocal) {
-              showSyncMessage('✅ Roteiro recarregado do servidor!', '#059669');
-            }
+            renderAll();
+            if (forceOverwriteLocal) showSyncMessage('✅ Roteiro recarregado do servidor!', '#059669');
           }
         }
       } catch (e) {
-        // Fallback to static roteiro.json if offline/API unreachable
         try {
           const fallback = await fetch(`./roteiro.json?t=${Date.now()}`);
           if (fallback.ok) {
             appState = await fallback.json();
+            if (!appState.savedPlaces) appState.savedPlaces = [];
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-            renderDayStrip();
-            renderDays();
+            renderAll();
           }
         } catch (err) {}
       }
@@ -731,7 +988,7 @@
       const msgInput = document.getElementById('commit-msg-input');
       const commitMsg = customMessage || (msgInput && msgInput.value.trim()) || `Atualização do roteiro (${new Date().toLocaleString('pt-BR')})`;
 
-      if (btnQuick) { btnQuick.disabled = true; btnQuick.textContent = '⏳ Publicando...'; }
+      if (btnQuick) { btnQuick.disabled = true; btnQuick.textContent = '⏳...'; }
       if (btnModal) { btnModal.disabled = true; btnModal.textContent = '⏳ Publicando...'; }
 
       try {
@@ -740,23 +997,14 @@
           'Accept': 'application/vnd.github+json',
           'Content-Type': 'application/json'
         };
-
-        // 1. Get current SHA of roteiro.json
         const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}`, { headers });
         let currentSha = null;
         if (getRes.ok) {
           const getJson = await getRes.json();
           currentSha = getJson.sha;
         }
-
-        // 2. Prepare updated JSON payload
         appState.updatedAt = new Date().toISOString();
-        const jsonString = JSON.stringify(appState, null, 2);
-
-        const putBody = {
-          message: commitMsg,
-          content: utf8ToB64(jsonString)
-        };
+        const putBody = { message: commitMsg, content: utf8ToB64(JSON.stringify(appState, null, 2)) };
         if (currentSha) putBody.sha = currentSha;
 
         const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}`, {
@@ -770,7 +1018,7 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
           updateUnsavedUI();
           if (msgInput) msgInput.value = '';
-          showSyncMessage('✅ Publicado! Todos que abrirem o link já verão esta versão.', '#059669');
+          showSyncMessage('✅ Publicado para toda a família!', '#059669');
           loadVersionHistory();
         } else {
           showSyncMessage('❌ Erro ao publicar no servidor.', '#dc2626');
@@ -778,79 +1026,54 @@
       } catch (e) {
         showSyncMessage('❌ Falha de conexão ao publicar.', '#dc2626');
       } finally {
-        if (btnQuick) { btnQuick.disabled = false; btnQuick.textContent = '☁️ Publicar para Todos'; }
+        if (btnQuick) { btnQuick.disabled = false; btnQuick.textContent = '☁️ Publicar'; }
         if (btnModal) { btnModal.disabled = false; btnModal.textContent = '☁️ Publicar no Servidor Agora'; }
       }
     }
 
     async function loadVersionHistory() {
       const listEl = document.getElementById('version-history-list');
-      listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:12px; text-align:center;">Buscando histórico de versões...</div>`;
+      listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:12px; text-align:center;">Buscando versões...</div>`;
       try {
         const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/commits?path=${JSON_PATH}&per_page=15&t=${Date.now()}`, {
-          headers: {
-            'Authorization': `token ${_getAuth()}`,
-            'Accept': 'application/vnd.github+json'
-          }
+          headers: { 'Authorization': `token ${_getAuth()}`, 'Accept': 'application/vnd.github+json' }
         });
-        if (!res.ok) throw new Error('Erro ao carregar histórico');
         const commits = await res.json();
-
-        if (!commits.length) {
-          listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:12px; text-align:center;">Nenhuma versão encontrada.</div>`;
-          return;
-        }
-
         listEl.innerHTML = commits.map((c, idx) => {
           const dateObj = new Date(c.commit.author.date);
           const dateFormatted = dateObj.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
           const msg = escapeHtml(c.commit.message);
           const shortSha = c.sha.substring(0, 7);
-
           return `
             <div class="version-item">
               <div style="min-width:0; flex:1;">
-                <div style="font-weight:700; font-size:12px; display:flex; align-items:center; gap:6px;">
-                  <span>${idx === 0 ? '🟢 Versão Atual' : `🕒 ${dateFormatted}`}</span>
-                  <span style="font-family:monospace; font-size:11px; color:var(--muted);">#${shortSha}</span>
-                </div>
+                <div style="font-weight:700; font-size:12px;">${idx === 0 ? '🟢 Atual' : `🕒 ${dateFormatted}`} <span style="font-family:monospace; color:var(--muted);">#${shortSha}</span></div>
                 <div style="font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${msg}</div>
               </div>
-              ${idx === 0 ? `
-                <span class="badge" style="background:rgba(5,150,105,0.15); color:#059669;">Ativa</span>
-              ` : `
-                <button onclick="rollbackToVersion('${c.sha}', '${dateFormatted}')" class="chip" style="color:var(--primary); border-color:var(--primary);">⏪ Restaurar</button>
-              `}
+              ${idx === 0 ? `<span class="badge" style="background:rgba(5,150,105,0.15); color:#059669;">Ativa</span>` : `<button onclick="rollbackToVersion('${c.sha}', '${dateFormatted}')" class="chip" style="color:var(--primary); border-color:var(--primary);">⏪ Restaurar</button>`}
             </div>
           `;
         }).join('');
       } catch (e) {
-        listEl.innerHTML = `<div style="font-size:12px; color:var(--danger); padding:12px; text-align:center;">Não foi possível carregar o histórico agora.</div>`;
+        listEl.innerHTML = `<div style="font-size:12px; color:var(--danger); padding:12px;">Erro ao carregar histórico.</div>`;
       }
     }
 
     async function rollbackToVersion(commitSha, dateLabel) {
-      if (!confirm(`Deseja voltar o roteiro de todo mundo para a versão de ${dateLabel}?`)) return;
-      showSyncMessage('⏳ Restaurando versão anterior...', '#4f46e5');
+      if (!confirm(`Voltar o roteiro para a versão de ${dateLabel}?`)) return;
       try {
         const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}?ref=${commitSha}`, {
-          headers: {
-            'Authorization': `token ${_getAuth()}`,
-            'Accept': 'application/vnd.github+json'
-          }
+          headers: { 'Authorization': `token ${_getAuth()}`, 'Accept': 'application/vnd.github+json' }
         });
-        if (!res.ok) throw new Error('Falha ao buscar versão');
         const data = await res.json();
         const oldState = JSON.parse(b64ToUtf8(data.content));
         if (oldState && Array.isArray(oldState.days)) {
           appState = oldState;
-          renderDayStrip();
-          renderDays();
+          if (!appState.savedPlaces) appState.savedPlaces = [];
+          renderAll();
           await publishToServer(`Rollback para versão de ${dateLabel} (#${commitSha.substring(0, 7)})`);
         }
-      } catch (e) {
-        showSyncMessage('❌ Erro ao restaurar versão.', '#dc2626');
-      }
+      } catch (e) {}
     }
 
     function showSyncMessage(text, color) {
@@ -865,18 +1088,23 @@
       document.getElementById('cloud-modal').classList.remove('hidden');
       loadVersionHistory();
     }
-
     function closeCloudModal() {
       document.getElementById('cloud-modal').classList.add('hidden');
     }
 
     function switchMainTab(tab) {
-      ['roteiro', 'info', 'checklist'].forEach(t => {
+      ['roteiro', 'salvos', 'mapa', 'info'].forEach(t => {
         document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
         document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
       });
-      if (tab === 'checklist') renderChecklist();
-      if (tab === 'info') document.getElementById('general-notes').value = appState.generalNotes || '';
+      if (tab === 'salvos') renderSavedPlaces();
+      if (tab === 'mapa') {
+        setTimeout(() => initOrUpdateMap(), 80);
+      }
+      if (tab === 'info') {
+        renderChecklist();
+        document.getElementById('general-notes').value = appState.generalNotes || '';
+      }
     }
 
     function filterPhase(phase) {
@@ -904,9 +1132,7 @@
       renderDays();
     }
 
-    function expandAllDays() {
-      filterPhase('all');
-    }
+    function expandAllDays() { filterPhase('all'); }
 
     function renderDayStrip() {
       const strip = document.getElementById('day-strip');
@@ -957,7 +1183,7 @@
             <div>
               ${visibleItems.length === 0 ? `
                 <div style="text-align:center; padding:16px; color:var(--muted); font-size:12px;">
-                  Nenhuma atividade neste filtro. Toque em "+ Adicionar".
+                  Nenhuma atividade neste filtro. Toque em "+ Adicionar" ou escolha um item da aba "🔖 Salvos".
                 </div>
               ` : visibleItems.map(item => renderActivityItem(day.id, item)).join('')}
             </div>
@@ -970,6 +1196,7 @@
       const meta = CATEGORY_META[item.category] || CATEGORY_META.passeio;
       const query = encodeURIComponent(item.location || (item.title + ' Florida'));
       const mapsUrl = `https://maps.google.com/?q=${query}`;
+      const imgUrl = item.image || getAutoImage(item.title, item.category);
 
       return `
         <div class="item-card ${item.done ? 'done' : ''}">
@@ -984,11 +1211,12 @@
             <div class="item-title" style="${item.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(item.title)}</div>
             ${item.notes ? `<p class="item-notes">${escapeHtml(item.notes)}</p>` : ''}
             <div class="item-actions">
-              <a href="${mapsUrl}" target="_blank" class="link-btn">📍 Abrir no GPS</a>
+              <a href="${mapsUrl}" target="_blank" class="link-btn">📍 GPS</a>
               <button onclick="openActivityModal('${dayId}', '${item.id}')" class="link-btn link-muted">✏️ Editar</button>
               <button onclick="deleteActivity('${dayId}', '${item.id}')" class="link-btn link-danger">🗑️ Excluir</button>
             </div>
           </div>
+          <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" class="item-thumb" loading="lazy" onerror="this.src='${meta.defaultImg}'">
         </div>
       `;
     }
@@ -1003,6 +1231,333 @@
       renderDays();
     }
 
+    // ================= SAVED PLACES ("QUERO VISITAR" / "FAVORITOS") =================
+    function setSavedListFilter(listType) {
+      currentSavedListFilter = listType;
+      ['all', 'quero_visitar', 'favoritos'].forEach(k => {
+        const el = document.getElementById('slist-' + k);
+        if (el) el.classList.toggle('active', k === listType);
+      });
+      renderSavedPlaces();
+    }
+
+    function setSavedTagFilter(tag) {
+      currentSavedTagFilter = (currentSavedTagFilter === tag) ? 'all' : tag;
+      renderSavedPlaces();
+    }
+
+    function renderSavedPlaces() {
+      const places = appState.savedPlaces || [];
+      // Collect all unique tags
+      const tagSet = new Set();
+      places.forEach(p => (p.tags || []).forEach(t => tagSet.add(t.toLowerCase())));
+      const allTags = Array.from(tagSet);
+
+      const tagStrip = document.getElementById('saved-tags-strip');
+      if (tagStrip) {
+        tagStrip.innerHTML = [
+          `<button onclick="setSavedTagFilter('all')" class="chip ${currentSavedTagFilter === 'all' ? 'active' : ''}">🏷️ Todas as Tags</button>`,
+          ...allTags.map(t => `<button onclick="setSavedTagFilter('${escapeHtml(t)}')" class="chip ${currentSavedTagFilter === t ? 'active' : ''}">#${escapeHtml(t)}</button>`)
+        ].join('');
+      }
+
+      const filtered = places.filter(p => {
+        const matchList = currentSavedListFilter === 'all' || p.list === currentSavedListFilter;
+        const matchTag = currentSavedTagFilter === 'all' || (p.tags || []).map(x => x.toLowerCase()).includes(currentSavedTagFilter);
+        return matchList && matchTag;
+      });
+
+      const container = document.getElementById('saved-places-container');
+      if (!container) return;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">Nenhum lugar salvo neste filtro. Clique em "＋ Salvar Lugar" acima!</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => {
+        const imgUrl = p.image || getAutoImage(p.title, 'restaurante', p.tags || []);
+        const listLabel = p.list === 'favoritos' ? '⭐ Favorito' : '📌 Quero Visitar';
+        const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(p.location || p.title)}`;
+
+        return `
+          <div class="saved-card">
+            <div class="saved-img-wrap">
+              <img src="${escapeHtml(imgUrl)}" class="saved-img" loading="lazy" alt="${escapeHtml(p.title)}">
+              <span class="saved-list-badge">${listLabel}</span>
+              <span class="saved-city-badge">${escapeHtml(p.city || 'Flórida')}</span>
+            </div>
+            <div class="saved-content">
+              <div style="margin-bottom:4px;">
+                ${(p.tags || []).map(t => `<span class="tag-pill">#${escapeHtml(t)}</span>`).join('')}
+              </div>
+              <div style="font-weight:800; font-size:15px; margin-bottom:4px;">${escapeHtml(p.title)}</div>
+              ${p.location ? `<div style="font-size:11px; color:var(--muted); margin-bottom:6px;">📍 ${escapeHtml(p.location)}</div>` : ''}
+              ${p.notes ? `<p style="font-size:12px; color:var(--muted); margin:0 0 10px 0; flex:1;">${escapeHtml(p.notes)}</p>` : '<div style="flex:1;"></div>'}
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--border); gap:6px; flex-wrap:wrap;">
+                <a href="${mapsUrl}" target="_blank" class="link-btn">📍 Ver no Mapa</a>
+                <button onclick="openScheduleSavedModal('${p.id}')" class="btn-add" style="padding:5px 10px; font-size:11px;">📅 + Colocar num Dia</button>
+                <div style="display:flex; gap:8px;">
+                  <button onclick="openSavedPlaceModal('${p.id}')" class="link-btn link-muted">✏️</button>
+                  <button onclick="deleteSavedPlace('${p.id}')" class="link-btn link-danger">🗑️</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openSavedPlaceModal(placeId = null) {
+      document.getElementById('sp-id').value = placeId || '';
+      if (placeId) {
+        const p = (appState.savedPlaces || []).find(x => x.id === placeId);
+        if (!p) return;
+        document.getElementById('saved-modal-title').textContent = 'Editar Lugar Salvo';
+        document.getElementById('sp-title').value = p.title || '';
+        document.getElementById('sp-list').value = p.list || 'quero_visitar';
+        document.getElementById('sp-city').value = p.city || 'Orlando';
+        document.getElementById('sp-tags').value = (p.tags || []).join(', ');
+        document.getElementById('sp-location').value = p.location || '';
+        document.getElementById('sp-image').value = p.image || '';
+        document.getElementById('sp-notes').value = p.notes || '';
+      } else {
+        document.getElementById('saved-modal-title').textContent = '🔖 Salvar Lugar para Visitar';
+        document.getElementById('sp-title').value = '';
+        document.getElementById('sp-list').value = 'quero_visitar';
+        document.getElementById('sp-city').value = 'Orlando';
+        document.getElementById('sp-tags').value = '';
+        document.getElementById('sp-location').value = '';
+        document.getElementById('sp-image').value = '';
+        document.getElementById('sp-notes').value = '';
+      }
+      document.getElementById('saved-place-modal').classList.remove('hidden');
+    }
+
+    function closeSavedPlaceModal() {
+      document.getElementById('saved-place-modal').classList.add('hidden');
+    }
+
+    function appendTag(tag) {
+      const input = document.getElementById('sp-tags');
+      const current = input.value.split(',').map(s => s.trim()).filter(Boolean);
+      if (!current.includes(tag)) current.push(tag);
+      input.value = current.join(', ');
+    }
+
+    function saveBucketPlace(e) {
+      e.preventDefault();
+      if (!appState.savedPlaces) appState.savedPlaces = [];
+      const id = document.getElementById('sp-id').value;
+      const title = document.getElementById('sp-title').value.trim();
+      const list = document.getElementById('sp-list').value;
+      const city = document.getElementById('sp-city').value;
+      const tags = document.getElementById('sp-tags').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+      const location = document.getElementById('sp-location').value.trim();
+      const customImg = document.getElementById('sp-image').value.trim();
+      const notes = document.getElementById('sp-notes').value.trim();
+
+      const defaultCoords = city === 'Miami' ? { lat: 25.7867, lng: -80.23 } : { lat: 28.37, lng: -81.51 };
+
+      const payload = {
+        id: id || ('sp_' + Date.now()),
+        title,
+        list,
+        city,
+        tags: tags.length ? tags : ['passeio'],
+        location,
+        lat: defaultCoords.lat + (Math.random() - 0.5) * 0.04,
+        lng: defaultCoords.lng + (Math.random() - 0.5) * 0.04,
+        image: customImg || getAutoImage(title, 'restaurante', tags),
+        notes
+      };
+
+      if (id) {
+        const idx = appState.savedPlaces.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          payload.lat = appState.savedPlaces[idx].lat || payload.lat;
+          payload.lng = appState.savedPlaces[idx].lng || payload.lng;
+          appState.savedPlaces[idx] = payload;
+        }
+      } else {
+        appState.savedPlaces.unshift(payload);
+      }
+
+      markChanged();
+      closeSavedPlaceModal();
+      renderSavedPlaces();
+    }
+
+    function deleteSavedPlace(id) {
+      if (!confirm('Remover este lugar da lista de salvos?')) return;
+      appState.savedPlaces = (appState.savedPlaces || []).filter(x => x.id !== id);
+      markChanged();
+      renderSavedPlaces();
+    }
+
+    function openScheduleSavedModal(placeId) {
+      document.getElementById('sched-sp-id').value = placeId;
+      const select = document.getElementById('sched-day-select');
+      select.innerHTML = appState.days.map(d => `<option value="${d.id}">Dia ${d.dayNum} (${d.dateStr} - ${d.weekday}) • ${d.cityLabel}</option>`).join('');
+      document.getElementById('schedule-saved-modal').classList.remove('hidden');
+    }
+
+    function confirmScheduleSavedPlace(e) {
+      e.preventDefault();
+      const placeId = document.getElementById('sched-sp-id').value;
+      const dayId = document.getElementById('sched-day-select').value;
+      const time = document.getElementById('sched-time').value;
+
+      const p = (appState.savedPlaces || []).find(x => x.id === placeId);
+      const day = appState.days.find(d => d.id === dayId);
+      if (!p || !day) return;
+
+      let cat = 'passeio';
+      const tagsStr = (p.tags || []).join(' ');
+      if (tagsStr.includes('restaurante') || tagsStr.includes('cafeteria') || tagsStr.includes('doces') || tagsStr.includes('hamburguer')) cat = 'restaurante';
+      if (tagsStr.includes('shopping') || tagsStr.includes('outlet') || tagsStr.includes('mercado')) cat = 'compras';
+
+      day.items.push({
+        id: 'id_' + Date.now(),
+        time,
+        category: cat,
+        title: p.title,
+        location: p.location || '',
+        lat: p.lat,
+        lng: p.lng,
+        image: p.image,
+        notes: p.notes || '',
+        done: false
+      });
+
+      markChanged();
+      document.getElementById('schedule-saved-modal').classList.add('hidden');
+      renderDayStrip();
+      renderDays();
+      alert(`✅ "${p.title}" foi adicionado ao Dia ${day.dateStr}!`);
+    }
+
+    // ================= INTERACTIVE MAP (WANDERLOG STYLE) =================
+    function setMapPinFilter(filter) {
+      currentMapPinFilter = filter;
+      ['all', 'roteiro', 'salvos'].forEach(k => {
+        const btn = document.getElementById('mpin-' + k);
+        if (btn) btn.classList.toggle('active', k === filter);
+      });
+      initOrUpdateMap();
+    }
+
+    function collectMapPoints() {
+      const points = [];
+      if (currentMapPinFilter === 'all' || currentMapPinFilter === 'roteiro') {
+        (appState.days || []).forEach(day => {
+          (day.items || []).forEach(item => {
+            if (item.lat && item.lng && item.lat > 20) {
+              points.push({
+                title: item.title,
+                subtitle: `📅 Dia ${day.dateStr} às ${item.time}`,
+                location: item.location || item.title,
+                lat: item.lat,
+                lng: item.lng,
+                color: '#4f46e5',
+                type: 'roteiro'
+              });
+            }
+          });
+        });
+      }
+      if (currentMapPinFilter === 'all' || currentMapPinFilter === 'salvos') {
+        (appState.savedPlaces || []).forEach(sp => {
+          if (sp.lat && sp.lng) {
+            points.push({
+              title: sp.title,
+              subtitle: `🔖 Salvo (${sp.list === 'favoritos' ? 'Favorito' : 'Quero Visitar'})`,
+              location: sp.location || sp.title,
+              lat: sp.lat,
+              lng: sp.lng,
+              color: '#d97706',
+              type: 'salvos'
+            });
+          }
+        });
+      }
+      return points;
+    }
+
+    function initOrUpdateMap() {
+      const mapEl = document.getElementById('map-view');
+      if (!mapEl || typeof L === 'undefined') return;
+
+      if (!leafletMap) {
+        leafletMap = L.map('map-view').setView([28.3852, -81.51], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap'
+        }).addTo(leafletMap);
+        leafletMarkersGroup = L.layerGroup().addTo(leafletMap);
+      }
+
+      leafletMap.invalidateSize();
+      leafletMarkersGroup.clearLayers();
+
+      const pts = collectMapPoints();
+      document.getElementById('map-places-count').textContent = pts.length;
+
+      const bounds = [];
+      pts.forEach((p, idx) => {
+        bounds.push([p.lat, p.lng]);
+        const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location)}`;
+        const marker = L.circleMarker([p.lat, p.lng], {
+          radius: 9,
+          fillColor: p.color,
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.92
+        });
+        marker.bindPopup(`
+          <div style="font-family:sans-serif; min-width:170px;">
+            <div style="font-size:11px; font-weight:700; color:${p.color};">${escapeHtml(p.subtitle)}</div>
+            <div style="font-size:13px; font-weight:800; margin:3px 0;">${escapeHtml(p.title)}</div>
+            <div style="font-size:11px; color:#64748b; margin-bottom:6px;">${escapeHtml(p.location)}</div>
+            <a href="${gmapsLink}" target="_blank" style="display:inline-block; background:#4f46e5; color:#fff; text-decoration:none; padding:4px 9px; border-radius:6px; font-size:11px; font-weight:700;">📍 Abrir no Google Maps</a>
+          </div>
+        `);
+        leafletMarkersGroup.addLayer(marker);
+      });
+
+      if (bounds.length > 0) {
+        leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
+      }
+
+      const listEl = document.getElementById('map-places-list');
+      listEl.innerHTML = pts.map(p => {
+        const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location)}`;
+        return `
+          <div class="version-item" onclick="panToPoint(${p.lat}, ${p.lng})" style="cursor:pointer;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:${p.color};">${escapeHtml(p.subtitle)}</div>
+              <div style="font-size:13px; font-weight:700;">${escapeHtml(p.title)}</div>
+            </div>
+            <a href="${gmapsLink}" target="_blank" onclick="event.stopPropagation()" class="chip" style="text-decoration:none; color:var(--primary);">📍 GPS</a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function panToPoint(lat, lng) {
+      if (leafletMap) {
+        leafletMap.setView([lat, lng], 15);
+      }
+    }
+
+    function focusMapRegion(region) {
+      if (!leafletMap) return;
+      if (region === 'orlando') leafletMap.setView([28.3852, -81.51], 11);
+      else if (region === 'miami') leafletMap.setView([25.79, -80.22], 11);
+      else initOrUpdateMap();
+    }
+
+    // ================= ACTIVITY MODAL =================
     function openActivityModal(dayId, itemId = null) {
       const day = appState.days.find(d => d.id === dayId);
       if (!day) return;
@@ -1024,6 +1579,7 @@
         document.getElementById('act-category').value = item.category || 'passeio';
         document.getElementById('act-title').value = item.title || '';
         document.getElementById('act-location').value = item.location || '';
+        document.getElementById('act-image').value = item.image || '';
         document.getElementById('act-notes').value = item.notes || '';
       } else {
         document.getElementById('modal-title').textContent = `Adicionar em ${day.dateStr}`;
@@ -1031,6 +1587,7 @@
         document.getElementById('act-category').value = 'passeio';
         document.getElementById('act-title').value = '';
         document.getElementById('act-location').value = '';
+        document.getElementById('act-image').value = '';
         document.getElementById('act-notes').value = '';
       }
       document.getElementById('activity-modal').classList.remove('hidden');
@@ -1057,12 +1614,20 @@
       const day = appState.days.find(d => d.id === dayId);
       if (!day) return;
 
+      const title = document.getElementById('act-title').value.trim();
+      const category = document.getElementById('act-category').value;
+      const customImg = document.getElementById('act-image').value.trim();
+      const baseCoords = day.phase === 'miami' ? { lat: 25.79, lng: -80.22 } : { lat: 28.37, lng: -81.51 };
+
       const payload = {
         id: itemId || ('id_' + Date.now()),
         time: document.getElementById('act-time').value,
-        category: document.getElementById('act-category').value,
-        title: document.getElementById('act-title').value.trim(),
+        category,
+        title,
         location: document.getElementById('act-location').value.trim(),
+        lat: baseCoords.lat + (Math.random() - 0.5) * 0.04,
+        lng: baseCoords.lng + (Math.random() - 0.5) * 0.04,
+        image: customImg || getAutoImage(title, category),
         notes: document.getElementById('act-notes').value.trim(),
         done: false
       };
@@ -1071,6 +1636,8 @@
         const idx = day.items.findIndex(i => i.id === itemId);
         if (idx !== -1) {
           payload.done = day.items[idx].done;
+          payload.lat = day.items[idx].lat || payload.lat;
+          payload.lng = day.items[idx].lng || payload.lng;
           day.items[idx] = payload;
         }
       } else {
@@ -1094,6 +1661,7 @@
 
     function renderChecklist() {
       const container = document.getElementById('checklist-container');
+      if (!container || !appState.checklist) return;
       const total = appState.checklist.length;
       const doneCount = appState.checklist.filter(c => c.done).length;
       document.getElementById('checklist-progress').textContent = `${doneCount}/${total}`;
@@ -1142,7 +1710,7 @@
 
     function escapeHtml(str) {
       if (!str) return '';
-      return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
 
     initApp();
