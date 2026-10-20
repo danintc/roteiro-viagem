@@ -556,6 +556,78 @@
       background: #dc2626;
       color: #ffffff;
     }
+    /* Botão oficial Google Maps e Cards da Aba Mapa */
+    .btn-gmaps {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      cursor: pointer;
+    }
+    .btn-gmaps:active {
+      transform: scale(0.98);
+    }
+    .map-place-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: var(--card);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .map-place-card.selected {
+      border: 2px solid var(--primary);
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.16);
+    }
+    .map-place-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      cursor: pointer;
+    }
+    .map-place-thumb {
+      width: 78px;
+      height: 78px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .map-place-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .custom-gmap-pin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+    }
+    .custom-gmap-pin span {
+      transform: rotate(45deg);
+      font-size: 15px;
+      line-height: 1;
+    }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -655,13 +727,13 @@
       <div class="card" style="padding: 12px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
           <div>
-            <h2 style="margin:0; font-size:16px;">🗺️ Google Maps da Viagem</h2>
-            <p style="margin:2px 0 0 0; font-size:12px; color:var(--muted);">Toque em qualquer local da lista abaixo para focar nele no Google Maps</p>
+            <h2 style="margin:0; font-size:16px;">🗺️ Mapa dos Locais da Viagem</h2>
+            <p style="margin:2px 0 0 0; font-size:12px; color:var(--muted);">Toque em qualquer pino no mapa ou em um local da lista abaixo para ver os detalhes</p>
           </div>
-          <div style="display:flex; gap:6px;">
-            <button onclick="focusMapRegion('orlando')" class="chip">🏰 Orlando</button>
-            <button onclick="focusMapRegion('miami')" class="chip">🌴 Miami</button>
-            <button onclick="focusMapRegion('all')" class="chip">🌎 Todos os Pinos</button>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button onclick="focusMapRegion('all')" id="mreg-all" class="chip active">🌎 Todos</button>
+            <button onclick="focusMapRegion('orlando')" id="mreg-orlando" class="chip">🏰 Orlando</button>
+            <button onclick="focusMapRegion('miami')" id="mreg-miami" class="chip">🌴 Miami</button>
           </div>
         </div>
 
@@ -672,20 +744,19 @@
           <button onclick="setMapPinFilter('salvos')" id="mpin-salvos" class="chip">🔖 Lugares Salvos</button>
         </div>
 
-        <!-- Google Maps Embed Direto -->
-        <div style="position:relative; width:100%; height:360px; border-radius:16px; overflow:hidden; border:1px solid var(--border); background:var(--bg);">
-          <iframe id="gmaps-iframe" src="https://maps.google.com/maps?q=Walt+Disney+World+Resort+Orlando+FL&t=m&z=11&output=embed&iwloc=near" style="width:100%; height:100%; border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
+        <!-- Mapa Interativo com Todos os Pinos do Filtro (Google Maps Road Tiles) -->
+        <div id="map-view" style="height:370px; width:100%; border-radius:16px; border:1px solid var(--border);"></div>
 
-        <!-- Modo Visão Geral com Múltiplos Pinos (estilo Google Maps Tiles) -->
-        <div id="multi-pins-wrap" class="hidden" style="margin-top:10px;">
-          <div id="map-view" style="height:340px;"></div>
-        </div>
+        <!-- Card de Destaque quando o usuário clica em um pino no mapa -->
+        <div id="selected-map-place-card" class="hidden" style="margin-top:12px;"></div>
 
-        <!-- Lista interativa abaixo do Google Maps -->
-        <div style="margin-top:12px;">
-          <strong style="font-size:13px;">📍 Toque em um local para ver no Google Maps acima (<span id="map-places-count">0</span>):</strong>
-          <div id="map-places-list" style="margin-top:8px; max-height:280px; overflow-y:auto;"></div>
+        <!-- Lista interativa com fotos e botão do Google Maps abaixo do Mapa -->
+        <div style="margin-top:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <strong style="font-size:14px;">📍 Locais neste filtro (<span id="map-places-count">0</span>):</strong>
+            <span style="font-size:11px; color:var(--muted);">Toque no card para focar no mapa</span>
+          </div>
+          <div id="map-places-list"></div>
         </div>
       </div>
     </section>
@@ -1481,6 +1552,8 @@
       }).join('');
     }
 
+    const GMAPS_LOGO_SVG = `<svg width="15" height="15" viewBox="0 0 48 48" style="flex-shrink:0;"><path fill="#48b564" d="M35.76,26.36h0.01c0,0-3.77,5.53-6.94,9.64c-2.74,3.55-3.54,6.59-3.77,8.06C24.97,44.6,24.53,45,24,45s-0.97-0.4-1.06-0.94c-0.23-1.47-1.03-4.51-3.77-8.06c-0.42-0.55-0.85-1.12-1.28-1.7L28.24,22l8.33-9.88C37.49,14.05,38,16.21,38,18.5C38,21.4,37.17,24.09,35.76,26.36z"/><path fill="#fcc60e" d="M28.24,22L17.89,34.3c-2.82-3.78-5.66-7.94-5.66-7.94h0.01c-0.3-0.48-0.57-0.97-0.8-1.48L19.76,15c-0.79,0.95-1.26,2.17-1.26,3.5c0,3.04,2.46,5.5,5.5,5.5C25.71,24,27.24,23.22,28.24,22z"/><path fill="#2c85eb" d="M28.4,4.74l-8.57,10.18L13.27,9.2C15.83,6.02,19.69,4,24,4C25.54,4,27.02,4.26,28.4,4.74z"/><path fill="#ed5748" d="M19.83,14.92L19.76,15l-8.32,9.88C10.52,22.95,10,20.79,10,18.5c0-3.54,1.23-6.79,3.27-9.3L19.83,14.92z"/><path fill="#5695f6" d="M28.24,22c0.79-0.95,1.26-2.17,1.26-3.5c0-3.04-2.46-5.5-5.5-5.5c-1.71,0-3.24,0.78-4.24,2L28.4,4.74c3.59,1.22,6.53,3.91,8.17,7.38L28.24,22z"/></svg>`;
+
     function renderActivityItem(dayId, item) {
       const meta = CATEGORY_META[item.category] || CATEGORY_META.passeio;
       const query = encodeURIComponent(item.location || (item.title + ' Florida'));
@@ -1500,7 +1573,7 @@
             <div class="item-title" style="${item.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(item.title)}</div>
             ${item.notes ? `<p class="item-notes">${escapeHtml(item.notes)}</p>` : ''}
             <div class="item-actions">
-              <a href="${mapsUrl}" target="_blank" class="link-btn">📍 GPS</a>
+              <a href="${mapsUrl}" target="_blank" class="btn-gmaps" style="padding:4px 9px; font-size:11px;">${GMAPS_LOGO_SVG} Abrir no Google Maps</a>
               <button onclick="openActivityModal('${dayId}', '${item.id}')" class="link-btn link-muted">✏️ Editar</button>
               <button onclick="deleteActivity('${dayId}', '${item.id}')" class="link-btn link-danger">🗑️ Excluir</button>
             </div>
@@ -1584,7 +1657,7 @@
               ${p.location ? `<div style="font-size:11px; color:var(--muted); margin-bottom:6px;">📍 ${escapeHtml(p.location)}</div>` : ''}
               ${p.notes ? `<p style="font-size:12px; color:var(--muted); margin:0 0 10px 0; flex:1;">${escapeHtml(p.notes)}</p>` : '<div style="flex:1;"></div>'}
               <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--border); gap:6px; flex-wrap:wrap;">
-                <a href="${mapsUrl}" target="_blank" class="link-btn">📍 Ver no Mapa</a>
+                <a href="${mapsUrl}" target="_blank" class="btn-gmaps" style="padding:5px 10px; font-size:11px;">${GMAPS_LOGO_SVG} Abrir no Google Maps</a>
                 <button onclick="openScheduleSavedModal('${p.id}')" class="btn-add" style="padding:5px 10px; font-size:11px;">📅 + Colocar num Dia</button>
                 <div style="display:flex; gap:8px;">
                   <button onclick="openSavedPlaceModal('${p.id}')" class="link-btn link-muted">✏️</button>
@@ -1745,81 +1818,159 @@
       });
     }
 
-    // ================= INTERACTIVE MAP (WANDERLOG STYLE) =================
+    // ================= INTERACTIVE MAP (TODOS OS PINOS + FOTO E INFO AO CLICAR) =================
+    let currentMapRegionFilter = 'all';
+    let currentMapMarkers = [];
+    let currentMapPointsList = [];
+    let selectedMapPlaceIndex = null;
+
     function setMapPinFilter(filter) {
       currentMapPinFilter = filter;
+      selectedMapPlaceIndex = null;
       ['all', 'roteiro', 'salvos'].forEach(k => {
         const btn = document.getElementById('mpin-' + k);
         if (btn) btn.classList.toggle('active', k === filter);
       });
-      initOrUpdateMap();
+      initOrUpdateMap(true);
+    }
+
+    function focusMapRegion(region) {
+      currentMapRegionFilter = region;
+      selectedMapPlaceIndex = null;
+      ['all', 'orlando', 'miami'].forEach(r => {
+        const btn = document.getElementById('mreg-' + r);
+        if (btn) btn.classList.toggle('active', r === region);
+      });
+      initOrUpdateMap(true);
     }
 
     function collectMapPoints() {
       const points = [];
       if (currentMapPinFilter === 'all' || currentMapPinFilter === 'roteiro') {
         (appState.days || []).forEach(day => {
+          if (currentMapRegionFilter !== 'all' && day.phase !== currentMapRegionFilter) return;
           (day.items || []).forEach(item => {
-            if (item.lat && item.lng && item.lat > 20) {
-              points.push({
-                title: item.title,
-                subtitle: `📅 Dia ${day.dateStr} às ${item.time}`,
-                location: item.location || item.title,
-                lat: item.lat,
-                lng: item.lng,
-                color: '#4f46e5',
-                type: 'roteiro'
-              });
+            // Skip departure flight in Brazil (-29.99) unless fallback needed, keep all Florida points
+            let lat = Number(item.lat);
+            let lng = Number(item.lng);
+            if (!lat || !lng || lat < 20) {
+              // Provide sensible fallback coordinates in Orlando or Miami if item had no coords
+              if (item.title && item.title.toLowerCase().includes('porto alegre')) return;
+              lat = day.phase === 'miami' ? 25.7907 : 28.3772;
+              lng = day.phase === 'miami' ? -80.2100 : -81.5194;
             }
+            const meta = CATEGORY_META[item.category] || CATEGORY_META.passeio;
+            points.push({
+              title: item.title,
+              subtitle: `📅 Dia ${day.dateStr} (${day.weekday.split('-')[0]}) às ${item.time || '--:--'}`,
+              location: item.location || item.title,
+              notes: item.notes || '',
+              image: item.image || getAutoImage(item.title, item.category),
+              defaultImg: meta.defaultImg,
+              icon: meta.icon,
+              lat,
+              lng,
+              color: day.phase === 'miami' ? '#059669' : '#4f46e5',
+              type: 'roteiro',
+              region: day.phase
+            });
           });
         });
       }
       if (currentMapPinFilter === 'all' || currentMapPinFilter === 'salvos') {
         (appState.savedPlaces || []).forEach(sp => {
-          if (sp.lat && sp.lng) {
-            points.push({
-              title: sp.title,
-              subtitle: `🔖 Salvo (${sp.list === 'favoritos' ? 'Favorito' : 'Quero Visitar'})`,
-              location: sp.location || sp.title,
-              lat: sp.lat,
-              lng: sp.lng,
-              color: '#d97706',
-              type: 'salvos'
-            });
+          const spRegion = (sp.city || '').toLowerCase().includes('miami') ? 'miami' : 'orlando';
+          if (currentMapRegionFilter !== 'all' && spRegion !== currentMapRegionFilter) return;
+          let lat = Number(sp.lat);
+          let lng = Number(sp.lng);
+          if (!lat || !lng) {
+            lat = spRegion === 'miami' ? 25.7867 : 28.3852;
+            lng = spRegion === 'miami' ? -80.2300 : -81.5100;
           }
+          points.push({
+            title: sp.title,
+            subtitle: `🔖 Lugar Salvo • ${sp.list === 'favoritos' ? '⭐ Favorito' : '📌 Quero Visitar'} (${sp.city || 'Flórida'})`,
+            location: sp.location || sp.title,
+            notes: sp.notes || '',
+            image: sp.image || getAutoImage(sp.title, 'restaurante', sp.tags || []),
+            defaultImg: CATEGORY_META.restaurante.defaultImg,
+            icon: sp.list === 'favoritos' ? '⭐' : '🔖',
+            lat,
+            lng,
+            color: '#d97706',
+            type: 'salvos',
+            region: spRegion
+          });
         });
       }
+
+      // Evita que pinos no mesmo endereço fiquem exatamente um em cima do outro
+      const seenCoords = {};
+      points.forEach(pt => {
+        const key = `${pt.lat.toFixed(4)},${pt.lng.toFixed(4)}`;
+        if (seenCoords[key]) {
+          const count = seenCoords[key];
+          const angle = count * 1.1;
+          pt.lat += Math.cos(angle) * 0.0018 * count;
+          pt.lng += Math.sin(angle) * 0.0018 * count;
+          seenCoords[key] = count + 1;
+        } else {
+          seenCoords[key] = 1;
+        }
+      });
+
       return points;
     }
 
-    function initOrUpdateMap() {
+    function initOrUpdateMap(shouldFitBounds = true) {
       const pts = collectMapPoints();
+      currentMapPointsList = pts;
       document.getElementById('map-places-count').textContent = pts.length;
 
-      // Render interactive list that updates the Google Maps Embed iframe on tap
-      const listEl = document.getElementById('map-places-list');
-      listEl.innerHTML = pts.map((p, idx) => {
-        const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location)}`;
-        const safeQuery = escapeHtml(p.location || p.title).replace(/'/g, "\\'");
-        return `
-          <div class="version-item" onclick="focusGoogleMapQuery('${safeQuery}', ${p.lat}, ${p.lng})" style="cursor:pointer;">
-            <div>
-              <div style="font-size:11px; font-weight:700; color:${p.color};">${escapeHtml(p.subtitle)}</div>
-              <div style="font-size:13px; font-weight:700;">${escapeHtml(p.title)}</div>
-              <div style="font-size:11px; color:var(--muted);">${escapeHtml(p.location)}</div>
-            </div>
-            <a href="${gmapsLink}" target="_blank" onclick="event.stopPropagation()" class="chip" style="text-decoration:none; color:var(--primary); font-weight:700;">📍 Abrir App</a>
-          </div>
-        `;
-      }).join('');
+      const selectedCardEl = document.getElementById('selected-map-place-card');
+      if (selectedMapPlaceIndex === null && selectedCardEl) {
+        selectedCardEl.classList.add('hidden');
+      }
 
-      // Also initialize the multi-pin map using Google Maps Official Road Tiles!
+      // Renderiza a lista abaixo com FOTO ao lado e botão posicionado com SÍMBOLO do Google Maps
+      const listEl = document.getElementById('map-places-list');
+      if (pts.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center; padding:18px; color:var(--muted); font-size:13px;">Nenhum local encontrado para este filtro.</div>`;
+      } else {
+        listEl.innerHTML = pts.map((p, idx) => {
+          const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location || p.title)}`;
+          const isSelected = selectedMapPlaceIndex === idx;
+          return `
+            <div id="map-list-card-${idx}" class="map-place-card ${isSelected ? 'selected' : ''}">
+              <div class="map-place-top" onclick="selectMapPlace(${idx}, true)">
+                <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" class="map-place-thumb" loading="lazy" onerror="this.src='${p.defaultImg}'">
+                <div style="flex:1; min-width:0;">
+                  <div style="font-size:11px; font-weight:800; color:${p.color}; margin-bottom:2px;">${escapeHtml(p.subtitle)}</div>
+                  <div style="font-size:14px; font-weight:800; color:var(--text); line-height:1.25;">${escapeHtml(p.title)}</div>
+                  <div style="font-size:12px; color:var(--muted); margin-top:3px;">📍 ${escapeHtml(p.location)}</div>
+                  ${p.notes ? `<div style="font-size:12px; color:var(--muted); margin-top:4px; line-height:1.35;">${escapeHtml(p.notes)}</div>` : ''}
+                </div>
+              </div>
+              <div class="map-place-actions">
+                <button type="button" onclick="selectMapPlace(${idx}, true)" class="chip" style="font-size:12px; padding:7px 12px; color:var(--primary); border-color:var(--primary);">
+                  🎯 Ver Pino no Mapa
+                </button>
+                <a href="${gmapsLink}" target="_blank" class="btn-gmaps">
+                  ${GMAPS_LOGO_SVG}
+                  <span>Abrir no Google Maps</span>
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Inicializa o Mapa com blocos oficiais do Google Maps e todos os pinos do filtro
       const mapEl = document.getElementById('map-view');
       if (!mapEl || typeof L === 'undefined') return;
 
       if (!leafletMap) {
-        leafletMap = L.map('map-view').setView([28.3852, -81.51], 11);
-        // Official Google Maps Road Tiles instead of OpenStreetMap
+        leafletMap = L.map('map-view').setView([28.3852, -81.51], 10);
         L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
           maxZoom: 20,
           attribution: 'Map data © Google'
@@ -1829,67 +1980,102 @@
 
       leafletMap.invalidateSize();
       leafletMarkersGroup.clearLayers();
+      currentMapMarkers = [];
 
       const bounds = [];
-      pts.forEach(p => {
+      pts.forEach((p, idx) => {
         bounds.push([p.lat, p.lng]);
-        const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location)}`;
-        const marker = L.circleMarker([p.lat, p.lng], {
-          radius: 9,
-          fillColor: p.color,
-          color: '#ffffff',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.95
+        const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location || p.title)}`;
+
+        const pinIcon = L.divIcon({
+          className: '',
+          html: `<div class="custom-gmap-pin" style="background:${p.color};"><span>${p.icon}</span></div>`,
+          iconSize: [34, 34],
+          iconAnchor: [17, 34],
+          popupAnchor: [0, -32]
         });
+
+        const marker = L.marker([p.lat, p.lng], { icon: pinIcon });
         marker.bindPopup(`
-          <div style="font-family:sans-serif; min-width:170px;">
-            <div style="font-size:11px; font-weight:700; color:${p.color};">${escapeHtml(p.subtitle)}</div>
-            <div style="font-size:13px; font-weight:800; margin:3px 0;">${escapeHtml(p.title)}</div>
-            <div style="font-size:11px; color:#64748b; margin-bottom:6px;">${escapeHtml(p.location)}</div>
-            <a href="${gmapsLink}" target="_blank" style="display:inline-block; background:#4f46e5; color:#fff; text-decoration:none; padding:4px 9px; border-radius:6px; font-size:11px; font-weight:700;">📍 Abrir no Google Maps</a>
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; width:220px;">
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+              <img src="${escapeHtml(p.image)}" onerror="this.src='${p.defaultImg}'" style="width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0;">
+              <div style="min-width:0;">
+                <div style="font-size:10px; font-weight:800; color:${p.color};">${escapeHtml(p.subtitle)}</div>
+                <div style="font-size:13px; font-weight:800; color:#0f172a; line-height:1.2; margin-top:2px;">${escapeHtml(p.title)}</div>
+              </div>
+            </div>
+            <div style="font-size:11px; color:#475569; margin-bottom:6px;">📍 ${escapeHtml(p.location)}</div>
+            ${p.notes ? `<div style="font-size:11px; color:#64748b; margin-bottom:8px; line-height:1.3;">${escapeHtml(p.notes)}</div>` : ''}
+            <a href="${gmapsLink}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:6px; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; text-decoration:none; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:800;">
+              ${GMAPS_LOGO_SVG}
+              <span>Abrir no Google Maps</span>
+            </a>
           </div>
         `);
+
+        marker.on('click', () => {
+          selectMapPlace(idx, false);
+        });
+
         leafletMarkersGroup.addLayer(marker);
+        currentMapMarkers.push(marker);
       });
 
-      if (bounds.length > 0) {
-        leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
+      if (shouldFitBounds && bounds.length > 0) {
+        leafletMap.fitBounds(bounds, { padding: [36, 36], maxZoom: 13 });
       }
     }
 
-    function focusGoogleMapQuery(query, lat, lng) {
-      const iframe = document.getElementById('gmaps-iframe');
-      const multiWrap = document.getElementById('multi-pins-wrap');
-      if (multiWrap) multiWrap.classList.add('hidden');
-      if (iframe) {
-        iframe.parentElement.classList.remove('hidden');
-        iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=15&output=embed&iwloc=near`;
-      }
-    }
+    function selectMapPlace(idx, shouldScrollToMap) {
+      const p = currentMapPointsList[idx];
+      if (!p) return;
+      selectedMapPlaceIndex = idx;
 
-    function focusMapRegion(region) {
-      const iframe = document.getElementById('gmaps-iframe');
-      const multiWrap = document.getElementById('multi-pins-wrap');
-      if (region === 'orlando') {
-        if (multiWrap) multiWrap.classList.add('hidden');
-        if (iframe) {
-          iframe.parentElement.classList.remove('hidden');
-          iframe.src = 'https://maps.google.com/maps?q=Celebration+Suites+Kissimmee+Orlando+FL&t=m&z=11&output=embed';
-        }
-      } else if (region === 'miami') {
-        if (multiWrap) multiWrap.classList.add('hidden');
-        if (iframe) {
-          iframe.parentElement.classList.remove('hidden');
-          iframe.src = 'https://maps.google.com/maps?q=Miami+Beach+FL&t=m&z=11&output=embed';
-        }
-      } else {
-        // Show all pins plotted together on Google Maps tiles
-        if (iframe) iframe.parentElement.classList.add('hidden');
-        if (multiWrap) {
-          multiWrap.classList.remove('hidden');
-          setTimeout(() => initOrUpdateMap(), 60);
-        }
+      // Destaca na lista abaixo
+      document.querySelectorAll('.map-place-card').forEach((el, i) => {
+        el.classList.toggle('selected', i === idx);
+      });
+
+      // Mostra card de informações do pino selecionado logo abaixo do mapa
+      const selectedCardEl = document.getElementById('selected-map-place-card');
+      const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location || p.title)}`;
+      if (selectedCardEl) {
+        selectedCardEl.classList.remove('hidden');
+        selectedCardEl.innerHTML = `
+          <div class="map-place-card selected" style="margin-bottom:0; background:var(--primary-light);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:11px; font-weight:800; color:var(--primary); text-transform:uppercase;">📌 Local Selecionado no Mapa</span>
+              <button type="button" onclick="document.getElementById('selected-map-place-card').classList.add('hidden')" style="border:none; background:none; color:var(--muted); font-size:16px; cursor:pointer;">✕</button>
+            </div>
+            <div class="map-place-top" style="cursor:default;">
+              <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" class="map-place-thumb" onerror="this.src='${p.defaultImg}'">
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:11px; font-weight:800; color:${p.color}; margin-bottom:2px;">${escapeHtml(p.subtitle)}</div>
+                <div style="font-size:15px; font-weight:800; color:var(--text);">${escapeHtml(p.title)}</div>
+                <div style="font-size:12px; color:var(--muted); margin-top:3px;">📍 ${escapeHtml(p.location)}</div>
+                ${p.notes ? `<div style="font-size:12px; color:var(--text); margin-top:4px;">${escapeHtml(p.notes)}</div>` : ''}
+              </div>
+            </div>
+            <div class="map-place-actions" style="justify-content:flex-end;">
+              <a href="${gmapsLink}" target="_blank" class="btn-gmaps" style="width:100%; padding:10px; font-size:13px;">
+                ${GMAPS_LOGO_SVG}
+                <span>Abrir no Google Maps</span>
+              </a>
+            </div>
+          </div>
+        `;
+      }
+
+      // Foca o pino no mapa e abre o balão de informações
+      if (leafletMap && currentMapMarkers[idx]) {
+        leafletMap.setView([p.lat, p.lng], 15, { animate: true });
+        currentMapMarkers[idx].openPopup();
+      }
+
+      if (shouldScrollToMap) {
+        const mapEl = document.getElementById('map-view');
+        if (mapEl) mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
 
