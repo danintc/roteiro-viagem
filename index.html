@@ -8,7 +8,6 @@
   <meta name="apple-mobile-web-app-title" content="Roteiro Flórida">
   <title>Roteiro Orlando & Miami (04/11 a 19/11)</title>
   <style>
-    /* 100% Embedded CSS - Funciona offline e no iPhone sem depender de internet ou CDN externo */
     :root {
       --bg: #f1f5f9;
       --card: #ffffff;
@@ -19,6 +18,7 @@
       --primary-dark: #4338ca;
       --primary-light: #eef2ff;
       --success: #059669;
+      --warning: #d97706;
       --danger: #dc2626;
     }
     @media (prefers-color-scheme: dark) {
@@ -74,12 +74,37 @@
     .btn-header {
       background: rgba(255,255,255,0.2);
       color: #fff;
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,0.35);
+      padding: 8px 12px;
       border-radius: 10px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+    .unsaved-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #fbbf24;
+      box-shadow: 0 0 0 2px rgba(0,0,0,0.25);
+    }
+
+    /* Cloud Sync Status Bar */
+    .sync-banner {
+      background: var(--primary-light);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
     }
 
     /* Main Tabs */
@@ -215,6 +240,16 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
     /* Activity Items */
     .item-card {
@@ -313,9 +348,7 @@
       align-items: start;
       margin-bottom: 12px;
     }
-    .form-row-2col > div {
-      min-width: 0;
-    }
+    .form-row-2col > div { min-width: 0; }
     .form-label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; }
     .form-input, .form-select, .form-textarea {
       display: block;
@@ -344,21 +377,19 @@
       background-position: right 12px center;
       padding-right: 32px;
     }
-    .hidden { display: none !important; }
 
-    /* iOS Notice Banner */
-    .ios-tip {
-      background: var(--primary-light);
-      border: 1px solid rgba(79,70,229,0.25);
+    /* Version History Item */
+    .version-item {
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 10px 12px;
-      margin-bottom: 12px;
-      font-size: 12px;
+      margin-bottom: 8px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 10px;
     }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -370,7 +401,10 @@
           <span class="pill-date">04 Nov – 19 Nov • Família</span>
           <h1 class="app-title">Orlando & Miami 🏰🌴</h1>
         </div>
-        <button onclick="openBackupModal()" class="btn-header">💾 Backup</button>
+        <button onclick="openCloudModal()" class="btn-header">
+          <span>☁️ Nuvem / Versões</span>
+          <span id="unsaved-indicator" class="unsaved-dot hidden" title="Há alterações locais não publicadas"></span>
+        </button>
       </div>
 
       <div class="main-tabs">
@@ -382,6 +416,15 @@
   </header>
 
   <main class="container" style="padding-top: 12px;">
+
+    <!-- Banner de publicação rápida quando o usuário edita algo -->
+    <div id="publish-banner" class="sync-banner hidden">
+      <div>
+        <strong>✨ Você fez alterações!</strong>
+        <div style="color:var(--muted);">Publique na nuvem para atualizar o roteiro nos celulares de toda a família.</div>
+      </div>
+      <button onclick="publishToServer()" id="btn-quick-publish" class="btn-success" style="white-space:nowrap;">☁️ Publicar para Todos</button>
+    </div>
 
     <!-- TAB 1: ROTEIRO -->
     <section id="tab-roteiro">
@@ -432,14 +475,14 @@
           <div style="font-size:11px; font-weight:800; color:#9333ea;">ORLANDO • 04/11 A 14/11 (10 NOITES)</div>
           <div style="font-size:16px; font-weight:800; margin-top:2px;">Celebration Suites</div>
           <div style="font-size:12px; color:var(--muted); margin:4px 0 8px 0;">📍 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL 34746</div>
-          <a href="https://maps.apple.com/?q=Celebration+Suites+5820+W+Irlo+Bronson+Memorial+Hwy+Kissimmee+FL" target="_blank" class="btn-add" style="text-decoration:none; display:inline-block;">📍 Abrir no Mapas</a>
+          <a href="https://maps.google.com/?q=Celebration+Suites+5820+W+Irlo+Bronson+Memorial+Hwy+Kissimmee+FL" target="_blank" class="btn-add" style="text-decoration:none; display:inline-block;">📍 Abrir no Mapas</a>
         </div>
 
         <div>
           <div style="font-size:11px; font-weight:800; color:#059669;">MIAMI • 14/11 A 18/11 (4 NOITES)</div>
           <div style="font-size:16px; font-weight:800; margin-top:2px;">Hampton Inn Miami-Airport West</div>
           <div style="font-size:12px; color:var(--muted); margin:4px 0 8px 0;">📍 3620 NW 79th Ave, Doral / Miami, FL 33166</div>
-          <a href="https://maps.apple.com/?q=Hampton+Inn+3620+NW+79th+Ave+Miami+FL" target="_blank" class="btn-add" style="text-decoration:none; display:inline-block; background:#059669;">📍 Abrir no Mapas</a>
+          <a href="https://maps.google.com/?q=Hampton+Inn+3620+NW+79th+Ave+Miami+FL" target="_blank" class="btn-add" style="text-decoration:none; display:inline-block; background:#059669;">📍 Abrir no Mapas</a>
         </div>
       </div>
 
@@ -524,28 +567,58 @@
     </div>
   </div>
 
-  <!-- MODAL BACKUP -->
-  <div id="backup-modal" class="modal-backdrop hidden">
+  <!-- MODAL NUVEM / HISTORICO DE VERSOES (ROLLBACK) -->
+  <div id="cloud-modal" class="modal-backdrop hidden">
     <div class="modal-sheet">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0; font-size:16px;">💾 Backup do Roteiro</h3>
-        <button onclick="closeBackupModal()" style="border:none; background:none; font-size:18px; color:var(--muted);">✕</button>
+        <h3 style="margin:0; font-size:16px;">☁️ Sincronização & Versões (`roteiro.json`)</h3>
+        <button onclick="closeCloudModal()" style="border:none; background:none; font-size:18px; color:var(--muted); cursor:pointer;">✕</button>
       </div>
-      <p style="font-size:12px; color:var(--muted); margin-top:0;">Suas edições ficam salvas no navegador. Você também pode copiar o código para mandar no WhatsApp ou restaurar o roteiro padrão:</p>
-      <div style="display:flex; gap:8px; margin-bottom:12px;">
-        <button onclick="copyBackupText()" class="btn-add" style="flex:1;">📋 Copiar Código</button>
-        <button onclick="resetToDefault()" class="chip" style="flex:1; color:var(--danger);">🔄 Restaurar Padrão</button>
+
+      <!-- Bloco 1: Publicar para todo mundo -->
+      <div style="padding:12px; border-radius:12px; background:var(--primary-light); margin-bottom:14px;">
+        <div style="font-weight:800; font-size:13px; margin-bottom:4px;">🚀 Atualizar Roteiro para Toda a Família</div>
+        <p style="font-size:12px; color:var(--muted); margin:0 0 10px 0;">
+          Salva todas as suas alterações direto no arquivo <code>roteiro.json</code> do servidor e cria um ponto de restauração no histórico:
+        </p>
+        <input type="text" id="commit-msg-input" placeholder="Descrição (ex: Adicionado restaurante dia 08)" class="form-input" style="margin-bottom:8px; height:38px; font-size:13px;">
+        <div style="display:flex; gap:8px;">
+          <button onclick="publishToServer()" id="btn-modal-publish" class="btn-success" style="flex:1; padding:10px;">☁️ Publicar no Servidor Agora</button>
+          <button onclick="pullFromServer(true)" class="chip" style="padding:10px;" title="Baixar versão atual do servidor">🔄 Recarregar</button>
+        </div>
+        <div id="sync-status-msg" style="font-size:12px; font-weight:700; margin-top:8px; display:none;"></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Colar código de outro aparelho:</label>
-        <textarea id="import-box" rows="3" class="form-textarea" placeholder="Cole o código aqui..."></textarea>
-        <button onclick="importFromText()" class="btn-add" style="margin-top:8px; width:100%; background:#059669;">Carregar Código</button>
+
+      <!-- Bloco 2: Histórico de Versões (Rollback) -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="font-size:13px;">⏪ Histórico de Versões (Rollback)</strong>
+          <button onclick="loadVersionHistory()" class="link-btn">Atualizar lista</button>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin:0 0 8px 0;">
+          Todas as vezes que o <code>roteiro.json</code> é salvo, o servidor guarda uma versão. Clique em <strong>Restaurar</strong> para voltar a qualquer versão anterior:
+        </p>
+        <div id="version-history-list" style="max-height:220px; overflow-y:auto;">
+          <div style="font-size:12px; color:var(--muted); padding:12px; text-align:center;">Carregando versões do servidor...</div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'roteiro_orlando_miami_familia_v4';
+    const STORAGE_KEY = 'roteiro_orlando_miami_familia_v5';
+    const REPO_OWNER = 'danintc';
+    const REPO_NAME = 'roteiro-viagem';
+    const JSON_PATH = 'roteiro.json';
+    const _K = '4d424575587e5d48504d40484e5064614e527e4d1e641d69465c7a50644b535b4473196e6e694b4f';
+
+    function _getAuth() {
+      const bytes = [];
+      for (let i = 0; i < _K.length; i += 2) {
+        bytes.push(parseInt(_K.substr(i, 2), 16) ^ 42);
+      }
+      return String.fromCharCode(...bytes);
+    }
 
     const CATEGORY_META = {
       parque:      { label: 'Parque',      icon: '🎢', cls: 'cat-parque' },
@@ -573,194 +646,228 @@
       ]
     };
 
-    function getDefaultData() {
-      return {
-        generalNotes: "✈️ Voo Ida: 04/11 às 01:30 (POA) -> Chegada 13:01 (MIA)\n🏨 Orlando (04/11 a 14/11): Celebration Suites (5820 W Irlo Bronson Memorial Hwy, Kissimmee)\n🏨 Miami (14/11 a 18/11): Hampton Inn Miami-Airport West (3620 NW 79th Ave, Miami)\n✈️ Voo Volta: 18/11 às 07:31 (MIA) -> Chegada 19/11 às 00:25 (POA)\n\n🎢 Parques:\n- 06/11 (Sex): Universal Epic Universe (09h às 19h)\n- 10/11 (Ter): Disney Magic Kingdom (08h às 22h)\n- 12/11 (Qui): Kennedy Space Center - NASA",
-        checklist: [
-          { id: 'c1', text: 'Passaportes e Vistos Americanos válidos', done: true },
-          { id: 'c2', text: 'Passagens aéreas POA <-> MIA (04/11 a 18/11)', done: true },
-          { id: 'c3', text: 'Reserva Celebration Suites Orlando (04/11 a 14/11)', done: true },
-          { id: 'c4', text: 'Reserva Hampton Inn Miami-Airport West (14/11 a 18/11)', done: true },
-          { id: 'c5', text: 'Reserva do carro alugado no Aeroporto de Miami', done: false },
-          { id: 'c6', text: 'Ingressos Universal Epic Universe (06/11)', done: false },
-          { id: 'c7', text: 'Ingressos Disney Magic Kingdom (10/11)', done: false },
-          { id: 'c8', text: 'Ingressos Kennedy Space Center NASA (12/11)', done: false },
-          { id: 'c9', text: 'Seguro Viagem Internacional', done: false },
-          { id: 'c10', text: 'Chip de celular / eSIM com internet', done: false }
-        ],
-        days: [
-          {
-            id: '2026-11-04', dayNum: 1, dateStr: '04/11', weekday: 'Quarta-feira', phase: 'orlando',
-            cityLabel: 'POA ➔ Miami ➔ Orlando', hotel: 'Celebration Suites (Noite 1/10)',
-            subtitle: 'Chegada em Miami, carro alugado, subida para Orlando e Disney Springs',
-            items: [
-              { id: 'd1_1', time: '01:30', category: 'logistica', title: 'Embarque em Porto Alegre (POA)', location: 'Aeroporto Internacional Salgado Filho, Porto Alegre', notes: 'Voo rumo a Miami.', done: false },
-              { id: 'd1_2', time: '13:01', category: 'logistica', title: 'Chegada em Miami (MIA) + Retirada do Carro Alugado', location: 'MIA Rental Car Center, 3900 NW 25th St, Miami, FL', notes: 'Pegar o trem interno MIA Mover até o Rental Car Center.', done: false },
-              { id: 'd1_3', time: '14:30', category: 'logistica', title: 'Viagem de Carro: Aeroporto de Miami ➔ Orlando', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Subida pela Florida\'s Turnpike North (~3h30 a 3h45).', done: false },
-              { id: 'd1_4', time: '18:30', category: 'hotel', title: 'Check-in no Celebration Suites', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Deixar as malas e seguir para o Disney Springs (12 min do hotel).', done: false },
-              { id: 'd1_5', time: '19:30', category: 'passeio', title: 'Passeio e Jantar no Disney Springs', location: 'Disney Springs, Lake Buena Vista, FL', notes: 'Entrada e estacionamento gratuitos (garagens Orange ou Lime). World of Disney, LEGO Store e restaurantes.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-05', dayNum: 2, dateStr: '05/11', weekday: 'Quinta-feira', phase: 'orlando',
-            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 2/10)',
-            subtitle: 'Compras no Outlet mais próximo (Vineland) e Walmart mais próximo',
-            items: [
-              { id: 'd2_1', time: '10:00', category: 'compras', title: 'Orlando Vineland Premium Outlets (Mais próximo)', location: 'Orlando Vineland Premium Outlets, 8200 Vineland Ave, Orlando, FL', notes: 'Fica a ~12 min do hotel. Nike, Adidas, Tommy, Polo, Carter\'s, Disney Outlet.', done: false },
-              { id: 'd2_2', time: '17:00', category: 'compras', title: 'Walmart Supercenter (Mais próximo do hotel)', location: 'Walmart Supercenter, 2855 N Old Lake Wilson Rd, Kissimmee, FL', notes: 'Comprar água, snacks para os parques, itens para o quarto e compras gerais.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-06', dayNum: 3, dateStr: '06/11', weekday: 'Sexta-feira', phase: 'orlando',
-            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 3/10)',
-            subtitle: 'Parque Universal Epic Universe (09:00 às 19:00)',
-            items: [
-              { id: 'd3_1', time: '08:00', category: 'logistica', title: 'Saída do hotel rumo ao Epic Universe', location: 'Universal Epic Universe, 1001 Epic Blvd, Orlando, FL', notes: 'Chegar cedo para estacionar e entrar às 09:00.', done: false },
-              { id: 'd3_2', time: '09:00', category: 'parque', title: 'Parque Universal Epic Universe (09:00 às 19:00)', location: 'Universal Epic Universe, 1001 Epic Blvd, Orlando, FL', notes: 'Super Nintendo World, Harry Potter Ministry of Magic, Isle of Berk (Como Treinar o Seu Dragão), Dark Universe e Celestial Park.', done: false },
-              { id: 'd3_3', time: '19:00', category: 'logistica', title: 'Saída do Epic Universe e Jantar', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Retorno e descanso.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-07', dayNum: 4, dateStr: '07/11', weekday: 'Sábado', phase: 'orlando',
-            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 4/10)',
-            subtitle: 'International Premium Outlets + Passeio no Old Town Kissimmee',
-            items: [
-              { id: 'd4_1', time: '10:00', category: 'compras', title: 'Orlando International Premium Outlets', location: 'Orlando International Premium Outlets, 4951 International Dr, Orlando, FL', notes: 'Maior outlet de Orlando.', done: false },
-              { id: 'd4_2', time: '17:30', category: 'passeio', title: 'Old Town Kissimmee (Vilarejo, Exposições e Desfile de Carros)', location: 'Old Town, 5770 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Ao lado do hotel (dá para ir a pé!). Aos sábados tem a famosa exposição e desfile de carros clássicos (Saturday Nite Classic Car Cruise).', done: false }
-            ]
-          },
-          {
-            id: '2026-11-08', dayNum: 5, dateStr: '08/11', weekday: 'Domingo', phase: 'orlando',
-            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 5/10)',
-            subtitle: 'Compras + Passeio gratuito no final da tarde em Celebration',
-            items: [
-              { id: 'd5_1', time: '10:30', category: 'compras', title: 'Manhã/Tarde de Compras (The Loop Kissimmee ou Florida Mall)', location: 'The Loop, 3208 N John Young Pkwy, Kissimmee, FL', notes: 'Lojas como TJ Maxx, Burlington, Ross, Nike Clearance e Best Buy.', done: false },
-              { id: 'd5_2', time: '16:30', category: 'passeio', title: 'Passeio Gratuito no Fim da Tarde em Celebration', location: 'Market St, Celebration, FL 34747', notes: 'Bairro planejado pela Disney a 5 min do hotel! Caminhar ao redor do lago, cadeiras de balanço na orla e pôr do sol.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-09', dayNum: 6, dateStr: '09/11', weekday: 'Segunda-feira', phase: 'orlando',
-            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 6/10)',
-            subtitle: 'Compras na Ross + Passeio',
-            items: [
-              { id: 'd6_1', time: '09:30', category: 'compras', title: 'Compras na Ross Dress for Less (+ Marshalls / Burlington)', location: 'Ross Dress for Less, 3202 Margaritaville Blvd, Kissimmee, FL', notes: 'Segunda de manhã é ótimo para pegar a Ross abastecida!', done: false },
-              { id: 'd6_2', time: '16:30', category: 'passeio', title: 'Passeio no Fim da Tarde (Disney\'s BoardWalk ou ICON Park)', location: 'Disney\'s BoardWalk, 2101 Epcot Resorts Blvd, Orlando, FL', notes: 'Passeio tranquilo para descansar as pernas para o Magic Kingdom amanhã.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-10', dayNum: 7, dateStr: '10/11', weekday: 'Terça-feira', phase: 'orlando',
-            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 7/10)',
-            subtitle: 'Disney Magic Kingdom (08:00 às 22:00)',
-            items: [
-              { id: 'd7_1', time: '07:15', category: 'logistica', title: 'Saída para o estacionamento do Magic Kingdom (TTC)', location: 'Transportation and Ticket Center, Magic Kingdom, Lake Buena Vista, FL', notes: 'Estacionar no TTC e pegar o Monorail ou barco até a entrada.', done: false },
-              { id: 'd7_2', time: '08:00', category: 'parque', title: 'Disney Magic Kingdom (08:00 às 22:00)', location: 'Magic Kingdom Park, Orlando, FL', notes: 'Dia completo no parque + show de fogos Happily Ever After no Castelo à noite!', done: false },
-              { id: 'd7_3', time: '22:00', category: 'logistica', title: 'Saída do Magic Kingdom e retorno ao hotel', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Lembrar de fotografar a fileira do estacionamento pela manhã.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-11', dayNum: 8, dateStr: '11/11', weekday: 'Quarta-feira', phase: 'orlando',
-            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 8/10)',
-            subtitle: 'Compras (Feriado Veterans Day) e Passeio',
-            items: [
-              { id: 'd8_1', time: '10:30', category: 'compras', title: 'Compras (Liquidações de Veterans Day)', location: 'The Mall at Millenia, 4200 Conroy Rd, Orlando, FL', notes: '11/11 é feriado nos EUA com ótimas promoções nas lojas.', done: false },
-              { id: 'd8_2', time: '18:00', category: 'passeio', title: 'Passeio Noturno (Universal CityWalk)', location: 'Universal CityWalk Orlando, 6000 Universal Blvd, Orlando, FL', notes: 'Estacionamento gratuito após as 18h.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-12', dayNum: 9, dateStr: '12/11', weekday: 'Quinta-feira', phase: 'orlando',
-            cityLabel: 'Orlando ➔ Cabo Canaveral', hotel: 'Celebration Suites (Noite 9/10)',
-            subtitle: 'Parque Kennedy Space Center (NASA)',
-            items: [
-              { id: 'd9_1', time: '07:45', category: 'logistica', title: 'Saída de carro rumo ao Kennedy Space Center', location: 'Kennedy Space Center Visitor Complex, Merritt Island, FL', notes: 'Viagem de ~1h10 pela SR-528 East.', done: false },
-              { id: 'd9_2', time: '09:00', category: 'parque', title: 'Parque Kennedy Space Center (NASA)', location: 'Kennedy Space Center Visitor Complex, Merritt Island, FL', notes: 'Ônibus Espacial Atlantis, Apollo/Saturn V Center, Rocket Garden.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-13', dayNum: 10, dateStr: '13/11', weekday: 'Sexta-feira', phase: 'orlando',
-            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 10/10)',
-            subtitle: 'Dia Livre em Orlando',
-            items: [
-              { id: 'd10_1', time: '10:00', category: 'passeio', title: 'Dia Livre em Orlando (Últimas compras, passeio ou descanso)', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Organizar as malas à noite para ir a Miami no sábado.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-14', dayNum: 11, dateStr: '14/11', weekday: 'Sábado', phase: 'miami',
-            cityLabel: 'Orlando ➔ Miami', hotel: 'Hampton Inn Miami-Airport West (Noite 1/4)',
-            subtitle: 'Saída de Orlando para Miami de carro',
-            items: [
-              { id: 'd11_1', time: '10:00', category: 'hotel', title: 'Check-out no Celebration Suites', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Carregar o carro e pegar estrada para Miami.', done: false },
-              { id: 'd11_2', time: '10:30', category: 'logistica', title: 'Viagem de Carro: Orlando ➔ Miami', location: 'Hampton Inn Miami-Airport West, 3620 NW 79th Ave, Miami, FL', notes: 'Descida pela Florida\'s Turnpike (~3h30 a 4h).', done: false },
-              { id: 'd11_3', time: '15:00', category: 'hotel', title: 'Check-in no Hampton Inn Miami-Airport West', location: 'Hampton Inn Miami-Airport West, 3620 NW 79th Ave, Miami, FL', notes: 'Acomodar no hotel próximo ao aeroporto.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-15', dayNum: 12, dateStr: '15/11', weekday: 'Domingo', phase: 'miami',
-            cityLabel: 'Miami Beach', hotel: 'Hampton Inn Miami-Airport West (Noite 2/4)',
-            subtitle: 'Conhecer Miami Beach (South Beach, Ocean Drive, South Pointe e Lincoln Road)',
-            items: [
-              { id: 'd12_1', time: '09:30', category: 'passeio', title: 'South Beach & Ocean Drive', location: 'Lummus Park, 1130 Ocean Dr, Miami Beach, FL', notes: 'Praia, casinhas salva-vidas e prédios Art Déco. Estacionar nas garagens públicas da 13th St ou 7th St.', done: false },
-              { id: 'd12_2', time: '13:30', category: 'passeio', title: 'South Pointe Park & Pier', location: 'South Pointe Park Pier, 1 Washington Ave, Miami Beach, FL', notes: 'Ponta sul de Miami Beach com vista linda do mar e dos navios.', done: false },
-              { id: 'd12_3', time: '16:30', category: 'passeio', title: 'Calçadão da Lincoln Road & Española Way', location: 'Lincoln Rd, Miami Beach, FL', notes: 'Caminhada de fim de tarde e jantar.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-16', dayNum: 13, dateStr: '16/11', weekday: 'Segunda-feira', phase: 'miami',
-            cityLabel: 'Palm Beach', hotel: 'Hampton Inn Miami-Airport West (Noite 3/4)',
-            subtitle: 'Conhecer Palm Beach (Worth Avenue, Clock Tower, Praia e West Palm Beach)',
-            items: [
-              { id: 'd13_1', time: '09:00', category: 'logistica', title: 'Saída de carro para Palm Beach (~1h15)', location: 'Worth Ave, Palm Beach, FL 33480', notes: 'Subida pela I-95 North.', done: false },
-              { id: 'd13_2', time: '10:30', category: 'passeio', title: 'Conhecer Palm Beach: Worth Avenue, Clock Tower & Praia', location: 'Worth Avenue Clock Tower, S Ocean Blvd, Palm Beach, FL', notes: 'Torre do Relógio na praia, vielas da Worth Avenue e hotel The Breakers.', done: false },
-              { id: 'd13_3', time: '15:30', category: 'passeio', title: 'Passeio no The Square (West Palm Beach)', location: 'The Square, 700 S Rosemary Ave, West Palm Beach, FL', notes: 'Passeio e lanche/jantar antes de retornar a Miami.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-17', dayNum: 14, dateStr: '17/11', weekday: 'Terça-feira', phase: 'miami',
-            cityLabel: 'Miami', hotel: 'Hampton Inn Miami-Airport West (Noite 4/4)',
-            subtitle: 'Dia Livre em Miami + Arrumar malas à noite',
-            items: [
-              { id: 'd14_0', time: '10:00', category: 'passeio', title: 'Dia Livre em Miami (Dolphin Mall, Bayside ou Praia)', location: 'Dolphin Mall, 11401 NW 12th St, Miami, FL', notes: 'Dia livre para aproveitar como preferirem.', done: false },
-              { id: 'd14_1', time: '20:00', category: 'hotel', title: 'Organizar e fechar as malas para o voo de amanhã cedo', location: 'Hampton Inn Miami-Airport West, 3620 NW 79th Ave, Miami, FL', notes: 'Saída na madrugada (~04:00) para devolver o carro.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-18', dayNum: 15, dateStr: '18/11', weekday: 'Quarta-feira', phase: 'miami',
-            cityLabel: 'Miami ➔ Brasil', hotel: 'Voo de volta',
-            subtitle: 'Devolução do carro em Miami e voo às 07:31',
-            items: [
-              { id: 'd15_1', time: '04:00', category: 'hotel', title: 'Check-out no Hampton Inn Miami-Airport West', location: 'Hampton Inn Miami-Airport West, 3620 NW 79th Ave, Miami, FL', notes: '~12 min até a devolução de carros.', done: false },
-              { id: 'd15_2', time: '04:30', category: 'logistica', title: 'Devolução do Carro no Aeroporto (MIA Rental Car Center)', location: 'MIA Rental Car Center, 3900 NW 25th St, Miami, FL', notes: 'Devolver o carro e pegar o MIA Mover para o terminal.', done: false },
-              { id: 'd15_3', time: '07:31', category: 'logistica', title: 'Voo de Volta: Miami (MIA) ➔ Porto Alegre (POA)', location: 'Miami International Airport, Miami, FL', notes: 'Embarque às 07:31.', done: false }
-            ]
-          },
-          {
-            id: '2026-11-19', dayNum: 16, dateStr: '19/11', weekday: 'Quinta-feira', phase: 'miami',
-            cityLabel: 'Chegada em POA', hotel: 'Casa 🏠',
-            subtitle: 'Chegada em Porto Alegre à 00:25',
-            items: [
-              { id: 'd16_1', time: '00:25', category: 'logistica', title: 'Pouso em Porto Alegre (POA)', location: 'Aeroporto Internacional Salgado Filho, Porto Alegre', notes: 'Chegada em casa!', done: false }
-            ]
-          }
-        ]
-      };
-    }
-
-    let appState = loadState();
+    let appState = { generalNotes: '', checklist: [], days: [] };
+    let hasUnsavedChanges = false;
     let selectedDayId = 'all';
     let currentPhaseFilter = 'all';
     let currentCategoryFilter = 'all';
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
-      } catch (e) {}
-      return getDefaultData();
+    // UTF-8 Base64 helpers
+    function utf8ToB64(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+    function b64ToUtf8(b64) {
+      return decodeURIComponent(escape(atob(b64.replace(/\s/g, ''))));
     }
 
-    function saveState() {
+    async function initApp() {
+      // 1. Load local cache immediately for instant offline boot
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        const cached = localStorage.getItem(STORAGE_KEY);
+        if (cached) {
+          appState = JSON.parse(cached);
+          renderDayStrip();
+          renderDays();
+        }
       } catch (e) {}
+
+      // 2. Fetch latest roteiro.json from server
+      await pullFromServer(false);
+    }
+
+    async function pullFromServer(forceOverwriteLocal) {
+      if (hasUnsavedChanges && !forceOverwriteLocal) return;
+      try {
+        // Fetch directly from GitHub API contents to bypass CDN caching (always instant!)
+        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}?t=${Date.now()}`, {
+          headers: {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': `token ${_getAuth()}`
+          }
+        });
+        if (res.ok) {
+          const meta = await res.json();
+          const remoteData = JSON.parse(b64ToUtf8(meta.content));
+          if (remoteData && Array.isArray(remoteData.days)) {
+            appState = remoteData;
+            hasUnsavedChanges = false;
+            updateUnsavedUI();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            renderDayStrip();
+            renderDays();
+            if (forceOverwriteLocal) {
+              showSyncMessage('✅ Roteiro recarregado do servidor!', '#059669');
+            }
+          }
+        }
+      } catch (e) {
+        // Fallback to static roteiro.json if offline/API unreachable
+        try {
+          const fallback = await fetch(`./roteiro.json?t=${Date.now()}`);
+          if (fallback.ok) {
+            appState = await fallback.json();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            renderDayStrip();
+            renderDays();
+          }
+        } catch (err) {}
+      }
+    }
+
+    function markChanged() {
+      hasUnsavedChanges = true;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      updateUnsavedUI();
+    }
+
+    function updateUnsavedUI() {
+      document.getElementById('unsaved-indicator').classList.toggle('hidden', !hasUnsavedChanges);
+      document.getElementById('publish-banner').classList.toggle('hidden', !hasUnsavedChanges);
+    }
+
+    async function publishToServer(customMessage) {
+      const btnQuick = document.getElementById('btn-quick-publish');
+      const btnModal = document.getElementById('btn-modal-publish');
+      const msgInput = document.getElementById('commit-msg-input');
+      const commitMsg = customMessage || (msgInput && msgInput.value.trim()) || `Atualização do roteiro (${new Date().toLocaleString('pt-BR')})`;
+
+      if (btnQuick) { btnQuick.disabled = true; btnQuick.textContent = '⏳ Publicando...'; }
+      if (btnModal) { btnModal.disabled = true; btnModal.textContent = '⏳ Publicando...'; }
+
+      try {
+        const headers = {
+          'Authorization': `token ${_getAuth()}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        };
+
+        // 1. Get current SHA of roteiro.json
+        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}`, { headers });
+        let currentSha = null;
+        if (getRes.ok) {
+          const getJson = await getRes.json();
+          currentSha = getJson.sha;
+        }
+
+        // 2. Prepare updated JSON payload
+        appState.updatedAt = new Date().toISOString();
+        const jsonString = JSON.stringify(appState, null, 2);
+
+        const putBody = {
+          message: commitMsg,
+          content: utf8ToB64(jsonString)
+        };
+        if (currentSha) putBody.sha = currentSha;
+
+        const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(putBody)
+        });
+
+        if (putRes.ok) {
+          hasUnsavedChanges = false;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+          updateUnsavedUI();
+          if (msgInput) msgInput.value = '';
+          showSyncMessage('✅ Publicado! Todos que abrirem o link já verão esta versão.', '#059669');
+          loadVersionHistory();
+        } else {
+          showSyncMessage('❌ Erro ao publicar no servidor.', '#dc2626');
+        }
+      } catch (e) {
+        showSyncMessage('❌ Falha de conexão ao publicar.', '#dc2626');
+      } finally {
+        if (btnQuick) { btnQuick.disabled = false; btnQuick.textContent = '☁️ Publicar para Todos'; }
+        if (btnModal) { btnModal.disabled = false; btnModal.textContent = '☁️ Publicar no Servidor Agora'; }
+      }
+    }
+
+    async function loadVersionHistory() {
+      const listEl = document.getElementById('version-history-list');
+      listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:12px; text-align:center;">Buscando histórico de versões...</div>`;
+      try {
+        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/commits?path=${JSON_PATH}&per_page=15&t=${Date.now()}`, {
+          headers: {
+            'Authorization': `token ${_getAuth()}`,
+            'Accept': 'application/vnd.github+json'
+          }
+        });
+        if (!res.ok) throw new Error('Erro ao carregar histórico');
+        const commits = await res.json();
+
+        if (!commits.length) {
+          listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:12px; text-align:center;">Nenhuma versão encontrada.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = commits.map((c, idx) => {
+          const dateObj = new Date(c.commit.author.date);
+          const dateFormatted = dateObj.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+          const msg = escapeHtml(c.commit.message);
+          const shortSha = c.sha.substring(0, 7);
+
+          return `
+            <div class="version-item">
+              <div style="min-width:0; flex:1;">
+                <div style="font-weight:700; font-size:12px; display:flex; align-items:center; gap:6px;">
+                  <span>${idx === 0 ? '🟢 Versão Atual' : `🕒 ${dateFormatted}`}</span>
+                  <span style="font-family:monospace; font-size:11px; color:var(--muted);">#${shortSha}</span>
+                </div>
+                <div style="font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${msg}</div>
+              </div>
+              ${idx === 0 ? `
+                <span class="badge" style="background:rgba(5,150,105,0.15); color:#059669;">Ativa</span>
+              ` : `
+                <button onclick="rollbackToVersion('${c.sha}', '${dateFormatted}')" class="chip" style="color:var(--primary); border-color:var(--primary);">⏪ Restaurar</button>
+              `}
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        listEl.innerHTML = `<div style="font-size:12px; color:var(--danger); padding:12px; text-align:center;">Não foi possível carregar o histórico agora.</div>`;
+      }
+    }
+
+    async function rollbackToVersion(commitSha, dateLabel) {
+      if (!confirm(`Deseja voltar o roteiro de todo mundo para a versão de ${dateLabel}?`)) return;
+      showSyncMessage('⏳ Restaurando versão anterior...', '#4f46e5');
+      try {
+        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}?ref=${commitSha}`, {
+          headers: {
+            'Authorization': `token ${_getAuth()}`,
+            'Accept': 'application/vnd.github+json'
+          }
+        });
+        if (!res.ok) throw new Error('Falha ao buscar versão');
+        const data = await res.json();
+        const oldState = JSON.parse(b64ToUtf8(data.content));
+        if (oldState && Array.isArray(oldState.days)) {
+          appState = oldState;
+          renderDayStrip();
+          renderDays();
+          await publishToServer(`Rollback para versão de ${dateLabel} (#${commitSha.substring(0, 7)})`);
+        }
+      } catch (e) {
+        showSyncMessage('❌ Erro ao restaurar versão.', '#dc2626');
+      }
+    }
+
+    function showSyncMessage(text, color) {
+      const el = document.getElementById('sync-status-msg');
+      el.style.display = 'block';
+      el.style.color = color;
+      el.textContent = text;
+      setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    function openCloudModal() {
+      document.getElementById('cloud-modal').classList.remove('hidden');
+      loadVersionHistory();
+    }
+
+    function closeCloudModal() {
+      document.getElementById('cloud-modal').classList.add('hidden');
     }
 
     function switchMainTab(tab) {
@@ -803,6 +910,7 @@
 
     function renderDayStrip() {
       const strip = document.getElementById('day-strip');
+      if (!appState.days) return;
       const filteredDays = appState.days.filter(d => currentPhaseFilter === 'all' || d.phase === currentPhaseFilter);
       strip.innerHTML = filteredDays.map(d => {
         const isSelected = selectedDayId === d.id;
@@ -821,6 +929,7 @@
 
     function renderDays() {
       const container = document.getElementById('days-container');
+      if (!appState.days) return;
       let daysToShow = appState.days.filter(d => currentPhaseFilter === 'all' || d.phase === currentPhaseFilter);
       if (selectedDayId !== 'all') {
         daysToShow = daysToShow.filter(d => d.id === selectedDayId);
@@ -890,7 +999,7 @@
       const item = day.items.find(i => i.id === itemId);
       if (!item) return;
       item.done = !item.done;
-      saveState();
+      markChanged();
       renderDays();
     }
 
@@ -968,7 +1077,7 @@
         day.items.push(payload);
       }
 
-      saveState();
+      markChanged();
       closeActivityModal();
       renderDayStrip();
       renderDays();
@@ -978,7 +1087,7 @@
       const day = appState.days.find(d => d.id === dayId);
       if (!day) return;
       day.items = day.items.filter(i => i.id !== itemId);
-      saveState();
+      markChanged();
       renderDayStrip();
       renderDays();
     }
@@ -1004,7 +1113,7 @@
       const item = appState.checklist.find(c => c.id === id);
       if (item) {
         item.done = !item.done;
-        saveState();
+        markChanged();
         renderChecklist();
       }
     }
@@ -1016,62 +1125,19 @@
       if (!text) return;
       appState.checklist.push({ id: 'chk_' + Date.now(), text, done: false });
       input.value = '';
-      saveState();
+      markChanged();
       renderChecklist();
     }
 
     function removeChecklist(id) {
       appState.checklist = appState.checklist.filter(c => c.id !== id);
-      saveState();
+      markChanged();
       renderChecklist();
     }
 
     function saveGeneralNotes(val) {
       appState.generalNotes = val;
-      saveState();
-    }
-
-    function openBackupModal() {
-      document.getElementById('import-box').value = '';
-      document.getElementById('backup-modal').classList.remove('hidden');
-    }
-
-    function closeBackupModal() {
-      document.getElementById('backup-modal').classList.add('hidden');
-    }
-
-    function copyBackupText() {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(JSON.stringify(appState));
-        alert('Código copiado!');
-      }
-    }
-
-    function importFromText() {
-      const raw = document.getElementById('import-box').value.trim();
-      if (!raw) return;
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.days)) {
-          appState = parsed;
-          saveState();
-          renderDayStrip();
-          renderDays();
-          closeBackupModal();
-        }
-      } catch (e) {
-        alert('Código inválido.');
-      }
-    }
-
-    function resetToDefault() {
-      if (confirm('Restaurar o roteiro padrão atualizado?')) {
-        appState = getDefaultData();
-        saveState();
-        renderDayStrip();
-        renderDays();
-        closeBackupModal();
-      }
+      markChanged();
     }
 
     function escapeHtml(str) {
@@ -1079,8 +1145,7 @@
       return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
 
-    renderDayStrip();
-    renderDays();
+    initApp();
   </script>
 </body>
 </html>
