@@ -887,19 +887,47 @@
       logistica:   { label: 'Logística',   icon: '✈️', cls: 'cat-logistica',   defaultImg: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80' }
     };
 
-    // Smart automatic photo selector based on place title or tags
+    // Real place photo resolver + live Wikipedia/Wikimedia facade search for new places
     function getAutoImage(title = '', category = 'passeio', tags = []) {
       const t = (title + ' ' + tags.join(' ')).toLowerCase();
-      if (t.includes('magic kingdom') || t.includes('disney')) return 'https://images.unsplash.com/photo-1524008279394-3aed4643b30b?auto=format&fit=crop&w=600&q=80';
-      if (t.includes('universal') || t.includes('epic') || t.includes('citywalk')) return 'https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?auto=format&fit=crop&w=600&q=80';
-      if (t.includes('kennedy') || t.includes('nasa') || t.includes('space')) return 'https://images.unsplash.com/photo-1517976487468-f20514c44f53?auto=format&fit=crop&w=600&q=80';
-      if (t.includes('walmart') || t.includes('target') || t.includes('mercado')) return 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
-      if (t.includes('outlet') || t.includes('mall') || t.includes('ross') || t.includes('shopping')) return 'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?auto=format&fit=crop&w=600&q=80';
-      if (t.includes('cookie') || t.includes('doce') || t.includes('sorvete') || t.includes('cheesecake')) return 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=600&q=80';
-      if (t.includes('cafe') || t.includes('cafeteria') || t.includes('bakery')) return 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80';
-      if (t.includes('burger') || t.includes('shake') || t.includes('five guys') || t.includes('hamburguer')) return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80';
-      if (t.includes('beach') || t.includes('praia') || t.includes('ocean')) return 'https://images.unsplash.com/photo-1533106497176-45ae19e68ba2?auto=format&fit=crop&w=600&q=80';
+      if (t.includes('magic kingdom') || t.includes('cinderela')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Cinderella_Castle%2C_Magic_Kingdom_%282026%29.jpg/960px-Cinderella_Castle%2C_Magic_Kingdom_%282026%29.jpg';
+      if (t.includes('disney springs')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Disney_Springs_Ariel_View.jpg/960px-Disney_Springs_Ariel_View.jpg';
+      if (t.includes('epic universe')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/Chronos_Tower_Front_Epic_Universe.jpg/960px-Chronos_Tower_Front_Epic_Universe.jpg';
+      if (t.includes('universal') || t.includes('citywalk')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Universal_Orlando_Resort.jpg/960px-Universal_Orlando_Resort.jpg';
+      if (t.includes('kennedy') || t.includes('nasa') || t.includes('atlantis')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/STS132_Atlantis_undocking2_%28cropped%29.jpg/960px-STS132_Atlantis_undocking2_%28cropped%29.jpg';
+      if (t.includes('ross')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Ross_Store_01.jpg/960px-Ross_Store_01.jpg';
+      if (t.includes('millenia')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Millenia_Mall_02.JPG/960px-Millenia_Mall_02.JPG';
+      if (t.includes('dolphin mall')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/2013-0811-DolphinMall.JPG/960px-2013-0811-DolphinMall.JPG';
+      if (t.includes('bayside')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Bayside%2C_Miami%2C_Florida_June_2021_-_03.jpg/960px-Bayside%2C_Miami%2C_Florida_June_2021_-_03.jpg';
+      if (t.includes('outlet') || t.includes('vineland')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Orlando_Premium_Outlets_-_panoramio_%285%29.jpg/960px-Orlando_Premium_Outlets_-_panoramio_%285%29.jpg';
+      if (t.includes('old town')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Old_Town_Kissimmee_-_panoramio.jpg/960px-Old_Town_Kissimmee_-_panoramio.jpg';
+      if (t.includes('boardwalk')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/BoardwalkInn.JPG/960px-BoardwalkInn.JPG';
+      if (t.includes('cheesecake factory')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/A_Cheesecake_Factory_restaurant_at_The_Summit_mall_in_Birmingham%2C_Alabama_01.jpg/960px-A_Cheesecake_Factory_restaurant_at_The_Summit_mall_in_Birmingham%2C_Alabama_01.jpg';
+      if (t.includes('shake shack')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Shake_Shack_Madison_Square.jpg/960px-Shake_Shack_Madison_Square.jpg';
+      if (t.includes('five guys')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Five_Guys%2C_Merritt_Island.JPG/960px-Five_Guys%2C_Merritt_Island.JPG';
+      if (t.includes('olive garden')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/2021-08-18_19_54_47_The_exterior_front_entrance_of_the_Olive_Garden_in_the_Fair_Lakes_Shopping_Center_in_Fair_Lakes%2C_Fairfax_County%2C_Virginia_during_the_evening.jpg/960px-thumbnail.jpg';
+      if (t.includes('lincoln road')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Lincoln_Road.jpg/960px-Lincoln_Road.jpg';
+      if (t.includes('worth avenue') || t.includes('palm beach')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Worth_Avenue_and_Hibiscus_Avenue_Palm_Beach_FL-1.jpg/960px-Worth_Avenue_and_Hibiscus_Avenue_Palm_Beach_FL-1.jpg';
+      if (t.includes('south beach') || t.includes('ocean drive')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bf/Ocean_drive_day_2009j.JPG/960px-Ocean_drive_day_2009j.JPG';
       return (CATEGORY_META[category] || CATEGORY_META.passeio).defaultImg;
+    }
+
+    // Automatically queries real-world place photo by name when user adds a new place
+    async function fetchRealPlacePhoto(placeName) {
+      try {
+        const cleanName = placeName.split('(')[0].split('+')[0].trim();
+        const url = `https://en.wikipedia.org/w/api.php?origin=*&action=query&generator=search&gsrsearch=${encodeURIComponent(cleanName)}&gsrlimit=1&prop=pageimages&pithumbsize=600&format=json`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          const pages = data?.query?.pages;
+          if (pages) {
+            const firstPage = Object.values(pages)[0];
+            if (firstPage?.thumbnail?.source) return firstPage.thumbnail.source;
+          }
+        }
+      } catch (e) {}
+      return null;
     }
 
     const QUICK_PRESETS = {
@@ -1410,7 +1438,7 @@
       input.value = current.join(', ');
     }
 
-    function saveBucketPlace(e) {
+    async function saveBucketPlace(e) {
       e.preventDefault();
       if (!appState.savedPlaces) appState.savedPlaces = [];
       const id = document.getElementById('sp-id').value;
@@ -1419,8 +1447,13 @@
       const city = document.getElementById('sp-city').value;
       const tags = document.getElementById('sp-tags').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
       const location = document.getElementById('sp-location').value.trim();
-      const customImg = document.getElementById('sp-image').value.trim();
+      let customImg = document.getElementById('sp-image').value.trim();
       const notes = document.getElementById('sp-notes').value.trim();
+
+      if (!customImg) {
+        const realPhoto = await fetchRealPlacePhoto(title);
+        if (realPhoto) customImg = realPhoto;
+      }
 
       const defaultCoords = city === 'Miami' ? { lat: 25.7867, lng: -80.23 } : { lat: 28.37, lng: -81.51 };
 
@@ -1700,7 +1733,7 @@
       document.getElementById('activity-modal').classList.add('hidden');
     }
 
-    function saveActivity(event) {
+    async function saveActivity(event) {
       event.preventDefault();
       const dayId = document.getElementById('act-day-id').value;
       const itemId = document.getElementById('act-item-id').value;
@@ -1709,7 +1742,11 @@
 
       const title = document.getElementById('act-title').value.trim();
       const category = document.getElementById('act-category').value;
-      const customImg = document.getElementById('act-image').value.trim();
+      let customImg = document.getElementById('act-image').value.trim();
+      if (!customImg) {
+        const realPhoto = await fetchRealPlacePhoto(title);
+        if (realPhoto) customImg = realPhoto;
+      }
       const baseCoords = day.phase === 'miami' ? { lat: 25.79, lng: -80.22 } : { lat: 28.37, lng: -81.51 };
 
       const payload = {
