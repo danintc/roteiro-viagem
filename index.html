@@ -475,6 +475,87 @@
       justify-content: space-between;
       gap: 10px;
     }
+    /* Caixa de Aviso Própria do App (Substitui alertas nativos do iOS) */
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 350;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .dialog-box {
+      background: var(--card);
+      width: 100%;
+      max-width: 360px;
+      border-radius: 22px;
+      padding: 22px 20px 18px 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      text-align: center;
+      animation: dialogPop 0.18s ease-out;
+    }
+    @keyframes dialogPop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .dialog-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 12px;
+    }
+    .dialog-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin: 0 0 8px 0;
+      color: var(--text);
+    }
+    .dialog-msg {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin: 0 0 18px 0;
+    }
+    .dialog-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .dialog-btn {
+      flex: 1;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      border: none;
+    }
+    .dialog-btn-cancel {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .dialog-btn-confirm {
+      background: var(--primary);
+      color: #ffffff;
+    }
+    .dialog-btn-success {
+      background: #059669;
+      color: #ffffff;
+    }
+    .dialog-btn-danger {
+      background: #dc2626;
+      color: #ffffff;
+    }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -514,7 +595,7 @@
         <strong style="font-size:14px; color:#d97706;">⚠️ Informações não salvas</strong>
         <div style="color:var(--text); font-size:12px; margin-top:2px;">Toque no botão ao lado para salvar suas alterações para toda a família.</div>
       </div>
-      <button onclick="publishToServer()" id="btn-quick-publish" class="btn-success" style="white-space:nowrap; font-size:13px; padding:10px 16px;">💾 Salvar Agora</button>
+      <button onclick="requestSaveToServer()" id="btn-quick-publish" class="btn-success" style="white-space:nowrap; font-size:13px; padding:10px 16px;">💾 Salvar Agora</button>
     </div>
 
     <!-- TAB 1: ROTEIRO DIÁRIO (Com fotos nos cards) -->
@@ -843,7 +924,7 @@
         </p>
         <input type="text" id="commit-msg-input" placeholder="O que você mudou? (Opcional, ex: Jantar dia 08)" class="form-input" style="margin-bottom:10px; height:42px; font-size:14px;">
         <div style="display:flex; gap:8px;">
-          <button onclick="publishToServer()" id="btn-modal-publish" class="btn-success" style="flex:1; padding:12px; font-size:14px;">💾 Salvar Alterações</button>
+          <button onclick="requestSaveToServer()" id="btn-modal-publish" class="btn-success" style="flex:1; padding:12px; font-size:14px;">💾 Salvar Alterações</button>
         </div>
         <div id="sync-status-msg" style="font-size:13px; font-weight:700; margin-top:10px; display:none;"></div>
       </div>
@@ -861,8 +942,21 @@
     </div>
   </div>
 
+  <!-- CAIXA DE AVISO E CONFIRMAÇÃO PRÓPRIA DO APP (Substitui avisos nativos do iOS) -->
+  <div id="app-dialog-modal" class="dialog-backdrop hidden">
+    <div class="dialog-box">
+      <div id="app-dialog-icon" class="dialog-icon">💾</div>
+      <h3 id="app-dialog-title" class="dialog-title">Confirmar ação</h3>
+      <p id="app-dialog-msg" class="dialog-msg">Deseja continuar?</p>
+      <div class="dialog-actions">
+        <button type="button" id="app-dialog-cancel" class="dialog-btn dialog-btn-cancel">Cancelar</button>
+        <button type="button" id="app-dialog-confirm" class="dialog-btn dialog-btn-confirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const APP_BUILD_ID = 2026101905;
+    const APP_BUILD_ID = 2026101906;
     const STORAGE_KEY = 'roteiro_orlando_miami_familia_v7';
     const REPO_OWNER = 'danintc';
     const REPO_NAME = 'roteiro-dados-privados';
@@ -1076,6 +1170,79 @@
       }
     }
 
+    // ================= CAIXA DE AVISO E CONFIRMAÇÃO PRÓPRIA DO APP =================
+    function showAppConfirm({ icon = '💾', title = 'Confirmar', message = '', confirmText = 'Confirmar', cancelText = 'Cancelar', btnType = 'confirm' }) {
+      return new Promise(resolve => {
+        const modal = document.getElementById('app-dialog-modal');
+        const iconEl = document.getElementById('app-dialog-icon');
+        const titleEl = document.getElementById('app-dialog-title');
+        const msgEl = document.getElementById('app-dialog-msg');
+        const btnCancel = document.getElementById('app-dialog-cancel');
+        const btnConfirm = document.getElementById('app-dialog-confirm');
+
+        iconEl.textContent = icon;
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        btnCancel.textContent = cancelText;
+        btnCancel.classList.remove('hidden');
+        btnConfirm.textContent = confirmText;
+
+        btnConfirm.className = 'dialog-btn ' + (
+          btnType === 'success' ? 'dialog-btn-success' :
+          btnType === 'danger' ? 'dialog-btn-danger' : 'dialog-btn-confirm'
+        );
+
+        const cleanup = (result) => {
+          modal.classList.add('hidden');
+          btnCancel.onclick = null;
+          btnConfirm.onclick = null;
+          resolve(result);
+        };
+
+        btnCancel.onclick = () => cleanup(false);
+        btnConfirm.onclick = () => cleanup(true);
+        modal.classList.remove('hidden');
+      });
+    }
+
+    function showAppAlert({ icon = '✅', title = 'Aviso', message = '', buttonText = 'Entendi' }) {
+      return new Promise(resolve => {
+        const modal = document.getElementById('app-dialog-modal');
+        const iconEl = document.getElementById('app-dialog-icon');
+        const titleEl = document.getElementById('app-dialog-title');
+        const msgEl = document.getElementById('app-dialog-msg');
+        const btnCancel = document.getElementById('app-dialog-cancel');
+        const btnConfirm = document.getElementById('app-dialog-confirm');
+
+        iconEl.textContent = icon;
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        btnCancel.classList.add('hidden');
+        btnConfirm.textContent = buttonText;
+        btnConfirm.className = 'dialog-btn dialog-btn-confirm';
+
+        btnConfirm.onclick = () => {
+          modal.classList.add('hidden');
+          btnConfirm.onclick = null;
+          resolve();
+        };
+        modal.classList.remove('hidden');
+      });
+    }
+
+    async function requestSaveToServer() {
+      const ok = await showAppConfirm({
+        icon: '💾',
+        title: 'Salvar alterações no roteiro?',
+        message: 'As mudanças que você fez serão salvas agora e atualizadas no celular de toda a família.',
+        confirmText: 'Sim, salvar agora',
+        cancelText: 'Ainda não',
+        btnType: 'success'
+      });
+      if (!ok) return;
+      await publishToServer();
+    }
+
     async function publishToServer(customMessage) {
       const btnQuick = document.getElementById('btn-quick-publish');
       const btnModal = document.getElementById('btn-modal-publish');
@@ -1114,8 +1281,22 @@
           if (msgInput) msgInput.value = '';
           showSyncMessage('✅ Tudo salvo com sucesso para toda a família!', '#059669');
           loadVersionHistory();
+          if (!customMessage) {
+            await showAppAlert({
+              icon: '✅',
+              title: 'Tudo Salvo!',
+              message: 'Suas alterações foram salvas com sucesso e já estão disponíveis para toda a família.',
+              buttonText: 'Perfeito'
+            });
+          }
         } else {
           showSyncMessage('❌ Não foi possível salvar agora. Tente novamente.', '#dc2626');
+          await showAppAlert({
+            icon: '⚠️',
+            title: 'Não foi possível salvar',
+            message: 'Verifique sua conexão com a internet e tente novamente em instantes.',
+            buttonText: 'Entendi'
+          });
         }
       } catch (e) {
         showSyncMessage('❌ Sem conexão com a internet no momento.', '#dc2626');
@@ -1153,7 +1334,15 @@
     }
 
     async function rollbackToVersion(commitSha, dateLabel) {
-      if (!confirm(`Deseja voltar o roteiro para a versão salva em ${dateLabel}?`)) return;
+      const ok = await showAppConfirm({
+        icon: '↩️',
+        title: 'Voltar para versão anterior?',
+        message: `Deseja voltar o roteiro para como ele estava salvo em ${dateLabel}? Essa versão ficará ativa para toda a família.`,
+        confirmText: 'Sim, voltar versão',
+        cancelText: 'Cancelar',
+        btnType: 'confirm'
+      });
+      if (!ok) return;
       try {
         const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}?ref=${commitSha}`, {
           headers: { 'Authorization': `token ${_getAuth()}`, 'Accept': 'application/vnd.github+json' }
@@ -1163,8 +1352,15 @@
         if (oldState && Array.isArray(oldState.days)) {
           appState = oldState;
           if (!appState.savedPlaces) appState.savedPlaces = [];
+          lastRenderedHash = JSON.stringify(appState);
           renderAll();
           await publishToServer(`Voltou para a versão de ${dateLabel}`);
+          await showAppAlert({
+            icon: '✅',
+            title: 'Versão restaurada!',
+            message: `O roteiro voltou para a versão salva em ${dateLabel}.`,
+            buttonText: 'Ótimo, entendi'
+          });
         }
       } catch (e) {}
     }
@@ -1486,8 +1682,17 @@
       renderSavedPlaces();
     }
 
-    function deleteSavedPlace(id) {
-      if (!confirm('Remover este lugar da lista de salvos?')) return;
+    async function deleteSavedPlace(id) {
+      const p = (appState.savedPlaces || []).find(x => x.id === id);
+      const ok = await showAppConfirm({
+        icon: '🗑️',
+        title: 'Remover lugar salvo?',
+        message: `Deseja remover "${p ? p.title : 'este lugar'}" da lista de lugares salvos?`,
+        confirmText: 'Sim, remover',
+        cancelText: 'Cancelar',
+        btnType: 'danger'
+      });
+      if (!ok) return;
       appState.savedPlaces = (appState.savedPlaces || []).filter(x => x.id !== id);
       markChanged();
       renderSavedPlaces();
@@ -1500,7 +1705,7 @@
       document.getElementById('schedule-saved-modal').classList.remove('hidden');
     }
 
-    function confirmScheduleSavedPlace(e) {
+    async function confirmScheduleSavedPlace(e) {
       e.preventDefault();
       const placeId = document.getElementById('sched-sp-id').value;
       const dayId = document.getElementById('sched-day-select').value;
@@ -1532,7 +1737,12 @@
       document.getElementById('schedule-saved-modal').classList.add('hidden');
       renderDayStrip();
       renderDays();
-      alert(`✅ "${p.title}" foi adicionado ao Dia ${day.dateStr}!`);
+      await showAppAlert({
+        icon: '📅',
+        title: 'Adicionado ao Roteiro!',
+        message: `"${p.title}" foi incluído na programação do Dia ${day.dateStr} às ${time}. Lembre-se de tocar em Salvar quando terminar suas edições!`,
+        buttonText: 'Ótimo, entendi'
+      });
     }
 
     // ================= INTERACTIVE MAP (WANDERLOG STYLE) =================
@@ -1780,9 +1990,19 @@
       renderDays();
     }
 
-    function deleteActivity(dayId, itemId) {
+    async function deleteActivity(dayId, itemId) {
       const day = appState.days.find(d => d.id === dayId);
       if (!day) return;
+      const item = day.items.find(i => i.id === itemId);
+      const ok = await showAppConfirm({
+        icon: '🗑️',
+        title: 'Excluir atividade?',
+        message: `Deseja remover "${item ? item.title : 'esta atividade'}" do Dia ${day.dateStr}?`,
+        confirmText: 'Sim, excluir',
+        cancelText: 'Cancelar',
+        btnType: 'danger'
+      });
+      if (!ok) return;
       day.items = day.items.filter(i => i.id !== itemId);
       markChanged();
       renderDayStrip();
@@ -1827,7 +2047,17 @@
       renderChecklist();
     }
 
-    function removeChecklist(id) {
+    async function removeChecklist(id) {
+      const item = (appState.checklist || []).find(c => c.id === id);
+      const ok = await showAppConfirm({
+        icon: '🗑️',
+        title: 'Remover item do checklist?',
+        message: `Deseja remover "${item ? item.text : 'este item'}" da lista?`,
+        confirmText: 'Sim, remover',
+        cancelText: 'Cancelar',
+        btnType: 'danger'
+      });
+      if (!ok) return;
       appState.checklist = appState.checklist.filter(c => c.id !== id);
       markChanged();
       renderChecklist();
