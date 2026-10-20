@@ -767,8 +767,8 @@
         <h2 style="margin:0 0 12px 0; font-size:16px;">✈️ Voos Confirmados</h2>
         <div style="padding:12px; border-radius:12px; background:var(--primary-light); margin-bottom:10px;">
           <div style="font-weight:800; color:var(--primary); font-size:12px;">IDA • QUARTA, 04/11</div>
-          <div style="font-size:15px; font-weight:800; margin-top:4px;">01:30 Porto Alegre (POA) ➔ 13:01 Miami (MIA)</div>
-          <div style="font-size:12px; color:var(--muted); margin-top:4px;">🚗 Retirada do carro alugado no aeroporto de Miami + subida para Orlando + Disney Springs à noite.</div>
+          <div style="font-size:15px; font-weight:800; margin-top:4px;">01:30 Porto Alegre (POA) ➔ Orlando (MCO)</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:4px;">🚗 Retirada do carro alugado no próprio Aeroporto de Orlando (MCO) + Check-in no Celebration Suites + Disney Springs à noite.</div>
         </div>
         <div style="padding:12px; border-radius:12px; background:var(--primary-light);">
           <div style="font-weight:800; color:var(--primary); font-size:12px;">VOLTA • QUARTA, 18/11</div>
@@ -1074,6 +1074,8 @@
       if (t.includes('lincoln road')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Lincoln_Road.jpg/960px-Lincoln_Road.jpg';
       if (t.includes('worth avenue') || t.includes('palm beach')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Worth_Avenue_and_Hibiscus_Avenue_Palm_Beach_FL-1.jpg/960px-Worth_Avenue_and_Hibiscus_Avenue_Palm_Beach_FL-1.jpg';
       if (t.includes('south beach') || t.includes('ocean drive')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bf/Ocean_drive_day_2009j.JPG/960px-Ocean_drive_day_2009j.JPG';
+      if (t.includes('kaseya') || t.includes('miami heat') || t.includes('rockets') || t.includes('nba')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Kaseya_Center_Downtown_Miami_FL%2C_5_April_2024.jpg/960px-Kaseya_Center_Downtown_Miami_FL%2C_5_April_2024.jpg';
+      if (t.includes('aeroporto de orlando') || t.includes('mco')) return 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/%27Lando_%2821071002804%29.jpg/960px-%27Lando_%2821071002804%29.jpg';
       return (CATEGORY_META[category] || CATEGORY_META.passeio).defaultImg;
     }
 
