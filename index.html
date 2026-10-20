@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Roteiro Flórida">
+  <title>Roteiro Orlando & Miami (04/11 a 19/11)</title>
+  <style>
+    /* 100% Embedded CSS - Funciona offline e no iPhone sem depender de internet ou CDN externo */
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --primary-light: #eef2ff;
+      --success: #059669;
+      --danger: #dc2626;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --border: #334155;
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-light: rgba(99, 102, 241, 0.15);
+      }
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      padding: 0 0 90px 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .container { max-width: 680px; margin: 0 auto; padding: 0 12px; }
+    
+    /* Header - Com recuo automático para o relógio/bateria do iPhone (Safe Area) */
+    .app-header {
+      background: linear-gradient(135deg, #2563eb 0%, #4f46e5 55%, #7c3aed 100%);
+      color: #fff;
+      padding-top: calc(env(safe-area-inset-top, 44px) + 12px);
+      padding-right: 14px;
+      padding-bottom: 14px;
+      padding-left: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .pill-date {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(255,255,255,0.22);
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 4px;
+    }
+    .app-title { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .btn-header {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Main Tabs */
+    .main-tabs {
+      display: flex;
+      gap: 6px;
+      margin-top: 12px;
+      background: rgba(0,0,0,0.22);
+      padding: 4px;
+      border-radius: 12px;
+    }
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.88);
+      padding: 8px 6px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #ffffff;
+      color: #3730a3;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    }
+
+    /* Filter Bar */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 12px 0 8px 0;
+    }
+    .scroll-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .scroll-strip::-webkit-scrollbar { display: none; }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .chip.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    /* Day Strip */
+    .day-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 6px 0 10px 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .day-strip::-webkit-scrollbar { display: none; }
+    .day-pill {
+      min-width: 78px;
+      flex-shrink: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .day-pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .day-pill-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 13px; }
+    .day-pill-sub { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .day-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge-primary { background: var(--primary); color: #fff; }
+    .badge-orlando { background: rgba(147, 51, 234, 0.14); color: #9333ea; }
+    .badge-miami { background: rgba(16, 185, 129, 0.14); color: #059669; }
+    .day-subtitle { font-size: 13px; font-weight: 600; margin: 6px 0 2px 0; }
+    .day-hotel { font-size: 12px; color: var(--muted); margin: 0; }
+
+    .btn-add {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Activity Items */
+    .item-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .item-card.done { opacity: 0.55; }
+    .check-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--muted);
+      background: transparent;
+      color: #fff;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+      padding: 0;
+    }
+    .check-btn.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .item-body { flex: 1; min-width: 0; }
+    .item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .time-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(100,116,139,0.14);
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+    .cat-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+    .cat-parque { background: rgba(147, 51, 234, 0.15); color: #9333ea; }
+    .cat-compras { background: rgba(217, 119, 6, 0.15); color: #d97706; }
+    .cat-restaurante { background: rgba(225, 29, 72, 0.15); color: #e11d48; }
+    .cat-passeio { background: rgba(5, 150, 105, 0.15); color: #059669; }
+    .cat-hotel { background: rgba(2, 132, 199, 0.15); color: #0284c7; }
+    .cat-logistica { background: rgba(37, 99, 235, 0.15); color: #2563eb; }
+
+    .item-title { font-size: 14px; font-weight: 700; margin: 5px 0 3px 0; }
+    .item-notes { font-size: 12px; color: var(--muted); margin: 0; }
+    .item-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding-top: 6px; }
+    .link-btn {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .link-muted { color: var(--muted); }
+    .link-danger { color: var(--danger); }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-sheet {
+      background: var(--card);
+      width: 100%;
+      max-width: 540px;
+      border-radius: 20px 20px 0 0;
+      padding: 18px 16px calc(env(safe-area-inset-bottom, 20px) + 20px) 16px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .form-group { margin-bottom: 12px; }
+    .form-row-2col {
+      display: grid;
+      grid-template-columns: 115px 1fr;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .form-row-2col > div {
+      min-width: 0;
+    }
+    .form-label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; }
+    .form-input, .form-select, .form-textarea {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      margin: 0;
+    }
+    .form-input, .form-select {
+      height: 44px;
+      line-height: 22px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    .hidden { display: none !important; }
+
+    /* iOS Notice Banner */
+    .ios-tip {
+      background: var(--primary-light);
+      border: 1px solid rgba(79,70,229,0.25);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="container">
+      <div class="header-top">
+        <div>
+          <span class="pill-date">04 Nov – 19 Nov • Família</span>
+          <h1 class="app-title">Orlando & Miami 🏰🌴</h1>
+        </div>
+        <button onclick="openBackupModal()" class="btn-header">💾 Backup</button>
+      </div>
+
+      <div class="main-tabs">
+        <button onclick="switchMainTab('roteiro')" id="tab-btn-roteiro" class="tab-btn active">📅 Roteiro</button>
+        <button onclick="switchMainTab('info')" id="tab-btn-info" class="tab-btn">🏨 Voos & Hotéis</button>
+        <button onclick="switchMainTab('checklist')" id="tab-btn-checklist" class="tab-btn">✅ Checklist</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 12px;">
+
+    <!-- TAB 1: ROTEIRO -->
+    <section id="tab-roteiro">
+      <div class="filter-row">
+        <div class="scroll-strip">
+          <button onclick="filterPhase('all')" id="phase-all" class="chip active">Todos (16 dias)</button>
+          <button onclick="filterPhase('orlando')" id="phase-orlando" class="chip">🏰 Orlando (04–14)</button>
+          <button onclick="filterPhase('miami')" id="phase-miami" class="chip">🌴 Miami (14–19)</button>
+        </div>
+        <button onclick="expandAllDays()" class="link-btn" style="white-space:nowrap;">Ver todos</button>
+      </div>
+
+      <!-- Day Selector -->
+      <div id="day-strip" class="day-strip"></div>
+
+      <!-- Category Filter -->
+      <div class="scroll-strip" style="margin-bottom: 12px;">
+        <button onclick="setCategoryFilter('all')" id="cat-all" class="chip active">Tudo</button>
+        <button onclick="setCategoryFilter('parque')" id="cat-parque" class="chip">🎢 Parques</button>
+        <button onclick="setCategoryFilter('compras')" id="cat-compras" class="chip">🛍️ Compras</button>
+        <button onclick="setCategoryFilter('passeio')" id="cat-passeio" class="chip">🌴 Passeios</button>
+        <button onclick="setCategoryFilter('restaurante')" id="cat-restaurante" class="chip">🍔 Restaurantes</button>
+        <button onclick="setCategoryFilter('logistica')" id="cat-logistica" class="chip">✈️ Voos/Carro</button>
+      </div>
+
+      <div id="days-container"></div>
+    </section>
+
+    <!-- TAB 2: VOOS & HOTEIS -->
+    <section id="tab-info" class="hidden">
+      <div class="card">
+        <h2 style="margin:0 0 12px 0; font-size:16px;">✈️ Voos Confirmados</h2>
+        <div style="padding:12px; border-radius:12px; background:var(--primary-light); margin-bottom:10px;">
+          <div style="font-weight:800; color:var(--primary); font-size:12px;">IDA • QUARTA, 04/11</div>
+          <div style="font-size:15px; font-weight:800; margin-top:4px;">01:30 Porto Alegre (POA) ➔ 13:01 Miami (MIA)</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:4px;">🚗 Retirada do carro alugado no aeroporto de Miami + subida para Orlando + Disney Springs à noite.</div>
+        </div>
+        <div style="padding:12px; border-radius:12px; background:var(--primary-light);">
+          <div style="font-weight:800; color:var(--primary); font-size:12px;">VOLTA • QUARTA, 18/11</div>
+          <div style="font-size:15px; font-weight:800; margin-top:4px;">07:31 Miami (MIA) ➔ 00:25 POA (dia 19/11)</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:4px;">⚠️ Devolver o carro alugado no aeroporto de Miami por volta das 04:30 da manhã do dia 18/11.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 12px 0; font-size:16px;">🏨 Hospedagens</h2>
+        <div style="padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid var(--border);">
+          <div style="font-size:11px; font-weight:800; color:#9333ea;">ORLANDO • 04/11 A 14/11 (10 NOITES)</div>
+          <div style="font-size:16px; font-weight:800; margin-top:2px;">Celebration Suites</div>
+          <div style="font-size:12px; color:var(--muted); margin:4px 0 8px 0;">📍 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL 34746</div>
+          <a href="https://maps.apple.com/?q=Celebration+Suites+5820+W+Irlo+Bronson+Memorial+Hwy+Kissimmee+FL" target="_blank" class="btn-add" style="text-decoration:none; display:inline-block;">📍 Abrir no Mapas</a>
+        </div>
+
+        <div>
+          <div style="font-size:11px; font-weight:800; color:#059669;">MIAMI • 14/11 A 18/11 (4 NOITES)</div>
+          <div style="font-size:16px; font-weight:800; margin-top:2px;">Hampton Inn Miami-Airport West</div>
+          <div style="font-size:12px; color:var(--muted); margin:4px 0 8px 0;">📍 3620 NW 79th Ave, Doral / Miami, FL 33166</div>
+          <a href="https://maps.apple.com/?q=Hampton+Inn+3620+NW+79th+Ave+Miami+FL" target="_blank" class="btn-add" style="text-decoration:none; display:inline-block; background:#059669;">📍 Abrir no Mapas</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 8px 0; font-size:16px;">📝 Anotações e Reservas</h2>
+        <textarea id="general-notes" rows="6" oninput="saveGeneralNotes(this.value)" class="form-textarea" placeholder="Anote aqui localizadores de voo, reserva do carro, ingressos..."></textarea>
+      </div>
+    </section>
+
+    <!-- TAB 3: CHECKLIST -->
+    <section id="tab-checklist" class="hidden">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="margin:0; font-size:16px;">✅ Checklist da Viagem</h2>
+          <span id="checklist-progress" class="badge badge-primary">0/0</span>
+        </div>
+        <form onsubmit="addChecklistItem(event)" style="display:flex; gap:8px; margin-bottom:12px;">
+          <input type="text" id="new-check-input" placeholder="Novo item..." class="form-input">
+          <button type="submit" class="btn-add">+ Adicionar</button>
+        </form>
+        <div id="checklist-container"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL ADICIONAR / EDITAR -->
+  <div id="activity-modal" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 id="modal-title" style="margin:0; font-size:16px;">Adicionar Programação</h3>
+        <button onclick="closeActivityModal()" style="border:none; background:none; font-size:18px; color:var(--muted); cursor:pointer;">✕</button>
+      </div>
+
+      <form onsubmit="saveActivity(event)">
+        <input type="hidden" id="act-day-id">
+        <input type="hidden" id="act-item-id">
+
+        <div class="form-group">
+          <label class="form-label">⚡ Sugestões Rápidas (Toque para preencher):</label>
+          <div id="quick-presets" class="scroll-strip"></div>
+        </div>
+
+        <div class="form-row-2col">
+          <div>
+            <label class="form-label">Horário</label>
+            <input type="time" id="act-time" required class="form-input">
+          </div>
+          <div>
+            <label class="form-label">Categoria</label>
+            <select id="act-category" class="form-select">
+              <option value="parque">🎢 Parque</option>
+              <option value="compras">🛍️ Compras / Outlet</option>
+              <option value="passeio">🌴 Passeio / Praia</option>
+              <option value="restaurante">🍔 Restaurante</option>
+              <option value="hotel">🏨 Hotel / Descanso</option>
+              <option value="logistica">✈️ Voo / Carro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nome do Lugar ou Atividade *</label>
+          <input type="text" id="act-title" required placeholder="Ex: Magic Kingdom, Ross, Olive Garden..." class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Endereço / Local para GPS</label>
+          <input type="text" id="act-location" placeholder="Ex: Magic Kingdom Orlando" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observações / Dicas</label>
+          <textarea id="act-notes" rows="2" class="form-textarea"></textarea>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button type="button" onclick="closeActivityModal()" class="chip" style="flex:1; padding:10px;">Cancelar</button>
+          <button type="submit" class="btn-add" style="flex:1; padding:10px;">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL BACKUP -->
+  <div id="backup-modal" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:16px;">💾 Backup do Roteiro</h3>
+        <button onclick="closeBackupModal()" style="border:none; background:none; font-size:18px; color:var(--muted);">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin-top:0;">Suas edições ficam salvas no navegador. Você também pode copiar o código para mandar no WhatsApp ou restaurar o roteiro padrão:</p>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <button onclick="copyBackupText()" class="btn-add" style="flex:1;">📋 Copiar Código</button>
+        <button onclick="resetToDefault()" class="chip" style="flex:1; color:var(--danger);">🔄 Restaurar Padrão</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Colar código de outro aparelho:</label>
+        <textarea id="import-box" rows="3" class="form-textarea" placeholder="Cole o código aqui..."></textarea>
+        <button onclick="importFromText()" class="btn-add" style="margin-top:8px; width:100%; background:#059669;">Carregar Código</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'roteiro_orlando_miami_familia_v4';
+
+    const CATEGORY_META = {
+      parque:      { label: 'Parque',      icon: '🎢', cls: 'cat-parque' },
+      compras:     { label: 'Compras',     icon: '🛍️', cls: 'cat-compras' },
+      restaurante: { label: 'Restaurante', icon: '🍔', cls: 'cat-restaurante' },
+      passeio:     { label: 'Passeio',     icon: '🌴', cls: 'cat-passeio' },
+      hotel:       { label: 'Hotel',       icon: '🏨', cls: 'cat-hotel' },
+      logistica:   { label: 'Logística',   icon: '✈️', cls: 'cat-logistica' }
+    };
+
+    const QUICK_PRESETS = {
+      orlando: [
+        { title: 'Universal CityWalk (Passeio noturno)', category: 'passeio', time: '18:00', location: 'Universal CityWalk Orlando, FL', notes: 'Estacionamento gratuito após as 18h. Ótimo para jantar e fotos.' },
+        { title: 'ICON Park (Roda-Gigante)', category: 'passeio', time: '17:00', location: 'ICON Park, 8375 International Dr, Orlando, FL', notes: 'Entrada e estacionamento gratuitos.' },
+        { title: 'Disney\'s BoardWalk', category: 'passeio', time: '17:30', location: 'Disney\'s BoardWalk, 2101 Epcot Resorts Blvd, Orlando, FL', notes: 'Calçadão charmoso à beira do lago da Disney.' },
+        { title: 'Florida Mall', category: 'compras', time: '10:00', location: 'The Florida Mall, 8001 S Orange Blossom Trl, Orlando, FL', notes: 'Apple, M&M\'s World, Primark, Zara.' },
+        { title: 'The Loop Kissimmee (Ross, TJ Maxx, Nike)', category: 'compras', time: '10:00', location: 'The Loop, 3208 N John Young Pkwy, Kissimmee, FL', notes: 'Centro de compras aberto em Kissimmee.' },
+        { title: 'Olive Garden Kissimmee', category: 'restaurante', time: '19:30', location: 'Olive Garden, 5021 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Pertinho do Celebration Suites.' }
+      ],
+      miami: [
+        { title: 'Dolphin Mall (10 min do hotel)', category: 'compras', time: '10:00', location: 'Dolphin Mall, 11401 NW 12th St, Miami, FL', notes: 'Grande outlet/shopping super próximo ao Hampton Inn Miami Airport West.' },
+        { title: 'Bayside Marketplace & Passeio de Barco', category: 'passeio', time: '15:30', location: 'Bayside Marketplace, 401 Biscayne Blvd, Miami, FL', notes: 'Shopping aberto à beira da baía em Downtown Miami.' },
+        { title: 'Wynwood Walls', category: 'passeio', time: '14:00', location: 'Wynwood Walls, 2516 NW 2nd Ave, Miami, FL', notes: 'Murais coloridos e galerias.' },
+        { title: 'Sawgrass Mills Outlet', category: 'compras', time: '10:00', location: 'Sawgrass Mills, 12801 W Sunrise Blvd, Sunrise, FL', notes: 'Maior outlet da Flórida.' }
+      ]
+    };
+
+    function getDefaultData() {
+      return {
+        generalNotes: "✈️ Voo Ida: 04/11 às 01:30 (POA) -> Chegada 13:01 (MIA)\n🏨 Orlando (04/11 a 14/11): Celebration Suites (5820 W Irlo Bronson Memorial Hwy, Kissimmee)\n🏨 Miami (14/11 a 18/11): Hampton Inn Miami-Airport West (3620 NW 79th Ave, Miami)\n✈️ Voo Volta: 18/11 às 07:31 (MIA) -> Chegada 19/11 às 00:25 (POA)\n\n🎢 Parques:\n- 06/11 (Sex): Universal Epic Universe (09h às 19h)\n- 10/11 (Ter): Disney Magic Kingdom (08h às 22h)\n- 12/11 (Qui): Kennedy Space Center - NASA",
+        checklist: [
+          { id: 'c1', text: 'Passaportes e Vistos Americanos válidos', done: true },
+          { id: 'c2', text: 'Passagens aéreas POA <-> MIA (04/11 a 18/11)', done: true },
+          { id: 'c3', text: 'Reserva Celebration Suites Orlando (04/11 a 14/11)', done: true },
+          { id: 'c4', text: 'Reserva Hampton Inn Miami-Airport West (14/11 a 18/11)', done: true },
+          { id: 'c5', text: 'Reserva do carro alugado no Aeroporto de Miami', done: false },
+          { id: 'c6', text: 'Ingressos Universal Epic Universe (06/11)', done: false },
+          { id: 'c7', text: 'Ingressos Disney Magic Kingdom (10/11)', done: false },
+          { id: 'c8', text: 'Ingressos Kennedy Space Center NASA (12/11)', done: false },
+          { id: 'c9', text: 'Seguro Viagem Internacional', done: false },
+          { id: 'c10', text: 'Chip de celular / eSIM com internet', done: false }
+        ],
+        days: [
+          {
+            id: '2026-11-04', dayNum: 1, dateStr: '04/11', weekday: 'Quarta-feira', phase: 'orlando',
+            cityLabel: 'POA ➔ Miami ➔ Orlando', hotel: 'Celebration Suites (Noite 1/10)',
+            subtitle: 'Chegada em Miami, carro alugado, subida para Orlando e Disney Springs',
+            items: [
+              { id: 'd1_1', time: '01:30', category: 'logistica', title: 'Embarque em Porto Alegre (POA)', location: 'Aeroporto Internacional Salgado Filho, Porto Alegre', notes: 'Voo rumo a Miami.', done: false },
+              { id: 'd1_2', time: '13:01', category: 'logistica', title: 'Chegada em Miami (MIA) + Retirada do Carro Alugado', location: 'MIA Rental Car Center, 3900 NW 25th St, Miami, FL', notes: 'Pegar o trem interno MIA Mover até o Rental Car Center.', done: false },
+              { id: 'd1_3', time: '14:30', category: 'logistica', title: 'Viagem de Carro: Aeroporto de Miami ➔ Orlando', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Subida pela Florida\'s Turnpike North (~3h30 a 3h45).', done: false },
+              { id: 'd1_4', time: '18:30', category: 'hotel', title: 'Check-in no Celebration Suites', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Deixar as malas e seguir para o Disney Springs (12 min do hotel).', done: false },
+              { id: 'd1_5', time: '19:30', category: 'passeio', title: 'Passeio e Jantar no Disney Springs', location: 'Disney Springs, Lake Buena Vista, FL', notes: 'Entrada e estacionamento gratuitos (garagens Orange ou Lime). World of Disney, LEGO Store e restaurantes.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-05', dayNum: 2, dateStr: '05/11', weekday: 'Quinta-feira', phase: 'orlando',
+            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 2/10)',
+            subtitle: 'Compras no Outlet mais próximo (Vineland) e Walmart mais próximo',
+            items: [
+              { id: 'd2_1', time: '10:00', category: 'compras', title: 'Orlando Vineland Premium Outlets (Mais próximo)', location: 'Orlando Vineland Premium Outlets, 8200 Vineland Ave, Orlando, FL', notes: 'Fica a ~12 min do hotel. Nike, Adidas, Tommy, Polo, Carter\'s, Disney Outlet.', done: false },
+              { id: 'd2_2', time: '17:00', category: 'compras', title: 'Walmart Supercenter (Mais próximo do hotel)', location: 'Walmart Supercenter, 2855 N Old Lake Wilson Rd, Kissimmee, FL', notes: 'Comprar água, snacks para os parques, itens para o quarto e compras gerais.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-06', dayNum: 3, dateStr: '06/11', weekday: 'Sexta-feira', phase: 'orlando',
+            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 3/10)',
+            subtitle: 'Parque Universal Epic Universe (09:00 às 19:00)',
+            items: [
+              { id: 'd3_1', time: '08:00', category: 'logistica', title: 'Saída do hotel rumo ao Epic Universe', location: 'Universal Epic Universe, 1001 Epic Blvd, Orlando, FL', notes: 'Chegar cedo para estacionar e entrar às 09:00.', done: false },
+              { id: 'd3_2', time: '09:00', category: 'parque', title: 'Parque Universal Epic Universe (09:00 às 19:00)', location: 'Universal Epic Universe, 1001 Epic Blvd, Orlando, FL', notes: 'Super Nintendo World, Harry Potter Ministry of Magic, Isle of Berk (Como Treinar o Seu Dragão), Dark Universe e Celestial Park.', done: false },
+              { id: 'd3_3', time: '19:00', category: 'logistica', title: 'Saída do Epic Universe e Jantar', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Retorno e descanso.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-07', dayNum: 4, dateStr: '07/11', weekday: 'Sábado', phase: 'orlando',
+            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 4/10)',
+            subtitle: 'International Premium Outlets + Passeio no Old Town Kissimmee',
+            items: [
+              { id: 'd4_1', time: '10:00', category: 'compras', title: 'Orlando International Premium Outlets', location: 'Orlando International Premium Outlets, 4951 International Dr, Orlando, FL', notes: 'Maior outlet de Orlando.', done: false },
+              { id: 'd4_2', time: '17:30', category: 'passeio', title: 'Old Town Kissimmee (Vilarejo, Exposições e Desfile de Carros)', location: 'Old Town, 5770 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Ao lado do hotel (dá para ir a pé!). Aos sábados tem a famosa exposição e desfile de carros clássicos (Saturday Nite Classic Car Cruise).', done: false }
+            ]
+          },
+          {
+            id: '2026-11-08', dayNum: 5, dateStr: '08/11', weekday: 'Domingo', phase: 'orlando',
+            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 5/10)',
+            subtitle: 'Compras + Passeio gratuito no final da tarde em Celebration',
+            items: [
+              { id: 'd5_1', time: '10:30', category: 'compras', title: 'Manhã/Tarde de Compras (The Loop Kissimmee ou Florida Mall)', location: 'The Loop, 3208 N John Young Pkwy, Kissimmee, FL', notes: 'Lojas como TJ Maxx, Burlington, Ross, Nike Clearance e Best Buy.', done: false },
+              { id: 'd5_2', time: '16:30', category: 'passeio', title: 'Passeio Gratuito no Fim da Tarde em Celebration', location: 'Market St, Celebration, FL 34747', notes: 'Bairro planejado pela Disney a 5 min do hotel! Caminhar ao redor do lago, cadeiras de balanço na orla e pôr do sol.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-09', dayNum: 6, dateStr: '09/11', weekday: 'Segunda-feira', phase: 'orlando',
+            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 6/10)',
+            subtitle: 'Compras na Ross + Passeio',
+            items: [
+              { id: 'd6_1', time: '09:30', category: 'compras', title: 'Compras na Ross Dress for Less (+ Marshalls / Burlington)', location: 'Ross Dress for Less, 3202 Margaritaville Blvd, Kissimmee, FL', notes: 'Segunda de manhã é ótimo para pegar a Ross abastecida!', done: false },
+              { id: 'd6_2', time: '16:30', category: 'passeio', title: 'Passeio no Fim da Tarde (Disney\'s BoardWalk ou ICON Park)', location: 'Disney\'s BoardWalk, 2101 Epcot Resorts Blvd, Orlando, FL', notes: 'Passeio tranquilo para descansar as pernas para o Magic Kingdom amanhã.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-10', dayNum: 7, dateStr: '10/11', weekday: 'Terça-feira', phase: 'orlando',
+            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 7/10)',
+            subtitle: 'Disney Magic Kingdom (08:00 às 22:00)',
+            items: [
+              { id: 'd7_1', time: '07:15', category: 'logistica', title: 'Saída para o estacionamento do Magic Kingdom (TTC)', location: 'Transportation and Ticket Center, Magic Kingdom, Lake Buena Vista, FL', notes: 'Estacionar no TTC e pegar o Monorail ou barco até a entrada.', done: false },
+              { id: 'd7_2', time: '08:00', category: 'parque', title: 'Disney Magic Kingdom (08:00 às 22:00)', location: 'Magic Kingdom Park, Orlando, FL', notes: 'Dia completo no parque + show de fogos Happily Ever After no Castelo à noite!', done: false },
+              { id: 'd7_3', time: '22:00', category: 'logistica', title: 'Saída do Magic Kingdom e retorno ao hotel', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Lembrar de fotografar a fileira do estacionamento pela manhã.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-11', dayNum: 8, dateStr: '11/11', weekday: 'Quarta-feira', phase: 'orlando',
+            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 8/10)',
+            subtitle: 'Compras (Feriado Veterans Day) e Passeio',
+            items: [
+              { id: 'd8_1', time: '10:30', category: 'compras', title: 'Compras (Liquidações de Veterans Day)', location: 'The Mall at Millenia, 4200 Conroy Rd, Orlando, FL', notes: '11/11 é feriado nos EUA com ótimas promoções nas lojas.', done: false },
+              { id: 'd8_2', time: '18:00', category: 'passeio', title: 'Passeio Noturno (Universal CityWalk)', location: 'Universal CityWalk Orlando, 6000 Universal Blvd, Orlando, FL', notes: 'Estacionamento gratuito após as 18h.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-12', dayNum: 9, dateStr: '12/11', weekday: 'Quinta-feira', phase: 'orlando',
+            cityLabel: 'Orlando ➔ Cabo Canaveral', hotel: 'Celebration Suites (Noite 9/10)',
+            subtitle: 'Parque Kennedy Space Center (NASA)',
+            items: [
+              { id: 'd9_1', time: '07:45', category: 'logistica', title: 'Saída de carro rumo ao Kennedy Space Center', location: 'Kennedy Space Center Visitor Complex, Merritt Island, FL', notes: 'Viagem de ~1h10 pela SR-528 East.', done: false },
+              { id: 'd9_2', time: '09:00', category: 'parque', title: 'Parque Kennedy Space Center (NASA)', location: 'Kennedy Space Center Visitor Complex, Merritt Island, FL', notes: 'Ônibus Espacial Atlantis, Apollo/Saturn V Center, Rocket Garden.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-13', dayNum: 10, dateStr: '13/11', weekday: 'Sexta-feira', phase: 'orlando',
+            cityLabel: 'Orlando', hotel: 'Celebration Suites (Noite 10/10)',
+            subtitle: 'Dia Livre em Orlando',
+            items: [
+              { id: 'd10_1', time: '10:00', category: 'passeio', title: 'Dia Livre em Orlando (Últimas compras, passeio ou descanso)', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Organizar as malas à noite para ir a Miami no sábado.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-14', dayNum: 11, dateStr: '14/11', weekday: 'Sábado', phase: 'miami',
+            cityLabel: 'Orlando ➔ Miami', hotel: 'Hampton Inn Miami-Airport West (Noite 1/4)',
+            subtitle: 'Saída de Orlando para Miami de carro',
+            items: [
+              { id: 'd11_1', time: '10:00', category: 'hotel', title: 'Check-out no Celebration Suites', location: 'Celebration Suites, 5820 W Irlo Bronson Memorial Hwy, Kissimmee, FL', notes: 'Carregar o carro e pegar estrada para Miami.', done: false },
+              { id: 'd11_2', time: '10:30', category: 'logistica', title: 'Viagem de Carro: Orlando ➔ Miami', location: 'Hampton Inn Miami-Airport West, 3620 NW 79th Ave, Miami, FL', notes: 'Descida pela Florida\'s Turnpike (~3h30 a 4h).', done: false },
+              { id: 'd11_3', time: '15:00', category: 'hotel', title: 'Check-in no Hampton Inn Miami-Airport West', location: 'Hampton Inn Miami-Airport West, 3620 NW 79th Ave, Miami, FL', notes: 'Acomodar no hotel próximo ao aeroporto.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-15', dayNum: 12, dateStr: '15/11', weekday: 'Domingo', phase: 'miami',
+            cityLabel: 'Miami Beach', hotel: 'Hampton Inn Miami-Airport West (Noite 2/4)',
+            subtitle: 'Conhecer Miami Beach (South Beach, Ocean Drive, South Pointe e Lincoln Road)',
+            items: [
+              { id: 'd12_1', time: '09:30', category: 'passeio', title: 'South Beach & Ocean Drive', location: 'Lummus Park, 1130 Ocean Dr, Miami Beach, FL', notes: 'Praia, casinhas salva-vidas e prédios Art Déco. Estacionar nas garagens públicas da 13th St ou 7th St.', done: false },
+              { id: 'd12_2', time: '13:30', category: 'passeio', title: 'South Pointe Park & Pier', location: 'South Pointe Park Pier, 1 Washington Ave, Miami Beach, FL', notes: 'Ponta sul de Miami Beach com vista linda do mar e dos navios.', done: false },
+              { id: 'd12_3', time: '16:30', category: 'passeio', title: 'Calçadão da Lincoln Road & Española Way', location: 'Lincoln Rd, Miami Beach, FL', notes: 'Caminhada de fim de tarde e jantar.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-16', dayNum: 13, dateStr: '16/11', weekday: 'Segunda-feira', phase: 'miami',
+            cityLabel: 'Palm Beach', hotel: 'Hampton Inn Miami-Airport West (Noite 3/4)',
+            subtitle: 'Conhecer Palm Beach (Worth Avenue, Clock Tower, Praia e West Palm Beach)',
+            items: [
+              { id: 'd13_1', time: '09:00', category: 'logistica', title: 'Saída de carro para Palm Beach (~1h15)', location: 'Worth Ave, Palm Beach, FL 33480', notes: 'Subida pela I-95 North.', done: false },
+              { id: 'd13_2', time: '10:30', category: 'passeio', title: 'Conhecer Palm Beach: Worth Avenue, Clock Tower & Praia', location: 'Worth Avenue Clock Tower, S Ocean Blvd, Palm Beach, FL', notes: 'Torre do Relógio na praia, vielas da Worth Avenue e hotel The Breakers.', done: false },
+              { id: 'd13_3', time: '15:30', category: 'passeio', title: 'Passeio no The Square (West Palm Beach)', location: 'The Square, 700 S Rosemary Ave, West Palm Beach, FL', notes: 'Passeio e lanche/jantar antes de retornar a Miami.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-17', dayNum: 14, dateStr: '17/11', weekday: 'Terça-feira', phase: 'miami',
+            cityLabel: 'Miami', hotel: 'Hampton Inn Miami-Airport West (Noite 4/4)',
+            subtitle: 'Dia Livre em Miami + Arrumar malas à noite',
+            items: [
+              { id: 'd14_0', time: '10:00', category: 'passeio', title: 'Dia Livre em Miami (Dolphin Mall, Bayside ou Praia)', location: 'Dolphin Mall, 11401 NW 12th St, Miami, FL', notes: 'Dia livre para aproveitar como preferirem.', done: false },
+              { id: 'd14_1', time: '20:00', category: 'hotel', title: 'Organizar e fechar as malas para o voo de amanhã cedo', location: 'Hampton Inn Miami-Airport West, 3620 NW 79th Ave, Miami, FL', notes: 'Saída na madrugada (~04:00) para devolver o carro.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-18', dayNum: 15, dateStr: '18/11', weekday: 'Quarta-feira', phase: 'miami',
+            cityLabel: 'Miami ➔ Brasil', hotel: 'Voo de volta',
+            subtitle: 'Devolução do carro em Miami e voo às 07:31',
+            items: [
+              { id: 'd15_1', time: '04:00', category: 'hotel', title: 'Check-out no Hampton Inn Miami-Airport West', location: 'Hampton Inn Miami-Airport West, 3620 NW 79th Ave, Miami, FL', notes: '~12 min até a devolução de carros.', done: false },
+              { id: 'd15_2', time: '04:30', category: 'logistica', title: 'Devolução do Carro no Aeroporto (MIA Rental Car Center)', location: 'MIA Rental Car Center, 3900 NW 25th St, Miami, FL', notes: 'Devolver o carro e pegar o MIA Mover para o terminal.', done: false },
+              { id: 'd15_3', time: '07:31', category: 'logistica', title: 'Voo de Volta: Miami (MIA) ➔ Porto Alegre (POA)', location: 'Miami International Airport, Miami, FL', notes: 'Embarque às 07:31.', done: false }
+            ]
+          },
+          {
+            id: '2026-11-19', dayNum: 16, dateStr: '19/11', weekday: 'Quinta-feira', phase: 'miami',
+            cityLabel: 'Chegada em POA', hotel: 'Casa 🏠',
+            subtitle: 'Chegada em Porto Alegre à 00:25',
+            items: [
+              { id: 'd16_1', time: '00:25', category: 'logistica', title: 'Pouso em Porto Alegre (POA)', location: 'Aeroporto Internacional Salgado Filho, Porto Alegre', notes: 'Chegada em casa!', done: false }
+            ]
+          }
+        ]
+      };
+    }
+
+    let appState = loadState();
+    let selectedDayId = 'all';
+    let currentPhaseFilter = 'all';
+    let currentCategoryFilter = 'all';
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return getDefaultData();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {}
+    }
+
+    function switchMainTab(tab) {
+      ['roteiro', 'info', 'checklist'].forEach(t => {
+        document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+        document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
+      });
+      if (tab === 'checklist') renderChecklist();
+      if (tab === 'info') document.getElementById('general-notes').value = appState.generalNotes || '';
+    }
+
+    function filterPhase(phase) {
+      currentPhaseFilter = phase;
+      selectedDayId = 'all';
+      ['all', 'orlando', 'miami'].forEach(p => {
+        document.getElementById('phase-' + p).classList.toggle('active', p === phase);
+      });
+      renderDayStrip();
+      renderDays();
+    }
+
+    function setCategoryFilter(cat) {
+      currentCategoryFilter = cat;
+      ['all', 'parque', 'compras', 'passeio', 'restaurante', 'logistica'].forEach(c => {
+        const btn = document.getElementById('cat-' + c);
+        if (btn) btn.classList.toggle('active', c === cat);
+      });
+      renderDays();
+    }
+
+    function selectDay(dayId) {
+      selectedDayId = (selectedDayId === dayId) ? 'all' : dayId;
+      renderDayStrip();
+      renderDays();
+    }
+
+    function expandAllDays() {
+      filterPhase('all');
+    }
+
+    function renderDayStrip() {
+      const strip = document.getElementById('day-strip');
+      const filteredDays = appState.days.filter(d => currentPhaseFilter === 'all' || d.phase === currentPhaseFilter);
+      strip.innerHTML = filteredDays.map(d => {
+        const isSelected = selectedDayId === d.id;
+        return `
+          <button onclick="selectDay('${d.id}')" class="day-pill ${isSelected ? 'active' : ''}">
+            <div class="day-pill-top">
+              <span>${d.dateStr}</span>
+              <span>${d.phase === 'orlando' ? '🏰' : '🌴'}</span>
+            </div>
+            <div class="day-pill-sub">${d.weekday.split('-')[0]}</div>
+            <div class="day-pill-sub" style="font-weight:700; margin-top:4px;">${d.items.length} ${d.items.length === 1 ? 'item' : 'itens'}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderDays() {
+      const container = document.getElementById('days-container');
+      let daysToShow = appState.days.filter(d => currentPhaseFilter === 'all' || d.phase === currentPhaseFilter);
+      if (selectedDayId !== 'all') {
+        daysToShow = daysToShow.filter(d => d.id === selectedDayId);
+      }
+
+      container.innerHTML = daysToShow.map(day => {
+        const sortedItems = [...day.items].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+        const visibleItems = sortedItems.filter(item => currentCategoryFilter === 'all' || item.category === currentCategoryFilter);
+
+        return `
+          <div class="card">
+            <div class="day-header">
+              <div>
+                <div class="day-badges">
+                  <span class="badge badge-primary">Dia ${day.dayNum} • ${day.dateStr}</span>
+                  <strong style="font-size:13px;">${day.weekday}</strong>
+                  <span class="badge ${day.phase === 'orlando' ? 'badge-orlando' : 'badge-miami'}">${day.cityLabel}</span>
+                </div>
+                <p class="day-subtitle">${escapeHtml(day.subtitle || '')}</p>
+                <p class="day-hotel">🏨 ${day.hotel}</p>
+              </div>
+              <button onclick="openActivityModal('${day.id}')" class="btn-add">＋ Adicionar</button>
+            </div>
+
+            <div>
+              ${visibleItems.length === 0 ? `
+                <div style="text-align:center; padding:16px; color:var(--muted); font-size:12px;">
+                  Nenhuma atividade neste filtro. Toque em "+ Adicionar".
+                </div>
+              ` : visibleItems.map(item => renderActivityItem(day.id, item)).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderActivityItem(dayId, item) {
+      const meta = CATEGORY_META[item.category] || CATEGORY_META.passeio;
+      const query = encodeURIComponent(item.location || (item.title + ' Florida'));
+      const mapsUrl = `https://maps.google.com/?q=${query}`;
+
+      return `
+        <div class="item-card ${item.done ? 'done' : ''}">
+          <button onclick="toggleItemDone('${dayId}', '${item.id}')" class="check-btn ${item.done ? 'checked' : ''}">
+            ${item.done ? '✓' : ''}
+          </button>
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="time-pill">${item.time || '--:--'}</span>
+              <span class="cat-pill ${meta.cls}">${meta.icon} ${meta.label}</span>
+            </div>
+            <div class="item-title" style="${item.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(item.title)}</div>
+            ${item.notes ? `<p class="item-notes">${escapeHtml(item.notes)}</p>` : ''}
+            <div class="item-actions">
+              <a href="${mapsUrl}" target="_blank" class="link-btn">📍 Abrir no GPS</a>
+              <button onclick="openActivityModal('${dayId}', '${item.id}')" class="link-btn link-muted">✏️ Editar</button>
+              <button onclick="deleteActivity('${dayId}', '${item.id}')" class="link-btn link-danger">🗑️ Excluir</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleItemDone(dayId, itemId) {
+      const day = appState.days.find(d => d.id === dayId);
+      if (!day) return;
+      const item = day.items.find(i => i.id === itemId);
+      if (!item) return;
+      item.done = !item.done;
+      saveState();
+      renderDays();
+    }
+
+    function openActivityModal(dayId, itemId = null) {
+      const day = appState.days.find(d => d.id === dayId);
+      if (!day) return;
+
+      document.getElementById('act-day-id').value = dayId;
+      document.getElementById('act-item-id').value = itemId || '';
+
+      const presetsList = QUICK_PRESETS[day.phase] || QUICK_PRESETS.orlando;
+      document.getElementById('quick-presets').innerHTML = presetsList.map((p, idx) => `
+        <button type="button" onclick="applyPreset('${day.phase}', ${idx})" class="chip">
+          ${CATEGORY_META[p.category].icon} ${p.title}
+        </button>
+      `).join('');
+
+      if (itemId) {
+        const item = day.items.find(i => i.id === itemId);
+        document.getElementById('modal-title').textContent = `Editar • Dia ${day.dateStr}`;
+        document.getElementById('act-time').value = item.time || '09:00';
+        document.getElementById('act-category').value = item.category || 'passeio';
+        document.getElementById('act-title').value = item.title || '';
+        document.getElementById('act-location').value = item.location || '';
+        document.getElementById('act-notes').value = item.notes || '';
+      } else {
+        document.getElementById('modal-title').textContent = `Adicionar em ${day.dateStr}`;
+        document.getElementById('act-time').value = '10:00';
+        document.getElementById('act-category').value = 'passeio';
+        document.getElementById('act-title').value = '';
+        document.getElementById('act-location').value = '';
+        document.getElementById('act-notes').value = '';
+      }
+      document.getElementById('activity-modal').classList.remove('hidden');
+    }
+
+    function applyPreset(phase, index) {
+      const preset = (QUICK_PRESETS[phase] || QUICK_PRESETS.orlando)[index];
+      if (!preset) return;
+      document.getElementById('act-time').value = preset.time;
+      document.getElementById('act-category').value = preset.category;
+      document.getElementById('act-title').value = preset.title;
+      document.getElementById('act-location').value = preset.location;
+      document.getElementById('act-notes').value = preset.notes;
+    }
+
+    function closeActivityModal() {
+      document.getElementById('activity-modal').classList.add('hidden');
+    }
+
+    function saveActivity(event) {
+      event.preventDefault();
+      const dayId = document.getElementById('act-day-id').value;
+      const itemId = document.getElementById('act-item-id').value;
+      const day = appState.days.find(d => d.id === dayId);
+      if (!day) return;
+
+      const payload = {
+        id: itemId || ('id_' + Date.now()),
+        time: document.getElementById('act-time').value,
+        category: document.getElementById('act-category').value,
+        title: document.getElementById('act-title').value.trim(),
+        location: document.getElementById('act-location').value.trim(),
+        notes: document.getElementById('act-notes').value.trim(),
+        done: false
+      };
+
+      if (itemId) {
+        const idx = day.items.findIndex(i => i.id === itemId);
+        if (idx !== -1) {
+          payload.done = day.items[idx].done;
+          day.items[idx] = payload;
+        }
+      } else {
+        day.items.push(payload);
+      }
+
+      saveState();
+      closeActivityModal();
+      renderDayStrip();
+      renderDays();
+    }
+
+    function deleteActivity(dayId, itemId) {
+      const day = appState.days.find(d => d.id === dayId);
+      if (!day) return;
+      day.items = day.items.filter(i => i.id !== itemId);
+      saveState();
+      renderDayStrip();
+      renderDays();
+    }
+
+    function renderChecklist() {
+      const container = document.getElementById('checklist-container');
+      const total = appState.checklist.length;
+      const doneCount = appState.checklist.filter(c => c.done).length;
+      document.getElementById('checklist-progress').textContent = `${doneCount}/${total}`;
+
+      container.innerHTML = appState.checklist.map(item => `
+        <div class="item-card ${item.done ? 'done' : ''}" style="align-items:center;">
+          <button onclick="toggleChecklist('${item.id}')" class="check-btn ${item.done ? 'checked' : ''}" style="margin:0;">
+            ${item.done ? '✓' : ''}
+          </button>
+          <span style="flex:1; font-weight:600; ${item.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(item.text)}</span>
+          <button onclick="removeChecklist('${item.id}')" class="link-btn link-danger">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function toggleChecklist(id) {
+      const item = appState.checklist.find(c => c.id === id);
+      if (item) {
+        item.done = !item.done;
+        saveState();
+        renderChecklist();
+      }
+    }
+
+    function addChecklistItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('new-check-input');
+      const text = input.value.trim();
+      if (!text) return;
+      appState.checklist.push({ id: 'chk_' + Date.now(), text, done: false });
+      input.value = '';
+      saveState();
+      renderChecklist();
+    }
+
+    function removeChecklist(id) {
+      appState.checklist = appState.checklist.filter(c => c.id !== id);
+      saveState();
+      renderChecklist();
+    }
+
+    function saveGeneralNotes(val) {
+      appState.generalNotes = val;
+      saveState();
+    }
+
+    function openBackupModal() {
+      document.getElementById('import-box').value = '';
+      document.getElementById('backup-modal').classList.remove('hidden');
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backup-modal').classList.add('hidden');
+    }
+
+    function copyBackupText() {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(JSON.stringify(appState));
+        alert('Código copiado!');
+      }
+    }
+
+    function importFromText() {
+      const raw = document.getElementById('import-box').value.trim();
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.days)) {
+          appState = parsed;
+          saveState();
+          renderDayStrip();
+          renderDays();
+          closeBackupModal();
+        }
+      } catch (e) {
+        alert('Código inválido.');
+      }
+    }
+
+    function resetToDefault() {
+      if (confirm('Restaurar o roteiro padrão atualizado?')) {
+        appState = getDefaultData();
+        saveState();
+        renderDayStrip();
+        renderDays();
+        closeBackupModal();
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    renderDayStrip();
+    renderDays();
+  </script>
+</body>
+</html>
