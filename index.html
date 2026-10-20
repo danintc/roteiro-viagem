@@ -848,9 +848,11 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'roteiro_orlando_miami_familia_v6';
+    const APP_BUILD_ID = 2026101904;
+    const STORAGE_KEY = 'roteiro_orlando_miami_familia_v7';
     const REPO_OWNER = 'danintc';
-    const REPO_NAME = 'roteiro-viagem';
+    const REPO_NAME = 'roteiro-dados-privados';
+    const PUBLIC_APP_REPO = 'roteiro-viagem';
     const JSON_PATH = 'roteiro.json';
     const _K = '4d424575587e5d48504d40484e5064614e527e4d1e641d69465c7a50644b535b4473196e6e694b4f';
 
@@ -926,7 +928,37 @@
           renderAll();
         }
       } catch (e) {}
+
       await pullFromServer(false);
+      await checkAppInterfaceUpdate();
+
+      // Auto-sync whenever the user switches back to the app on iPhone
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          pullFromServer(false);
+          checkAppInterfaceUpdate();
+        }
+      });
+    }
+
+    // Checks if index.html on the server has a newer APP_BUILD_ID and hot-reloads without needing to re-add to Home Screen
+    async function checkAppInterfaceUpdate() {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${PUBLIC_APP_REPO}/contents/index.html?t=${Date.now()}`, {
+          headers: {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': `token ${_getAuth()}`
+          }
+        });
+        if (res.ok) {
+          const meta = await res.json();
+          const remoteHtml = b64ToUtf8(meta.content);
+          const match = remoteHtml.match(/const APP_BUILD_ID = (\d+);/);
+          if (match && parseInt(match[1], 10) > APP_BUILD_ID) {
+            window.location.replace(window.location.pathname + '?v=' + match[1]);
+          }
+        }
+      } catch (e) {}
     }
 
     function renderAll() {
@@ -955,20 +987,10 @@
             updateUnsavedUI();
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
             renderAll();
-            if (forceOverwriteLocal) showSyncMessage('✅ Roteiro recarregado do servidor!', '#059669');
+            if (forceOverwriteLocal) showSyncMessage('✅ Roteiro privado sincronizado!', '#059669');
           }
         }
-      } catch (e) {
-        try {
-          const fallback = await fetch(`./roteiro.json?t=${Date.now()}`);
-          if (fallback.ok) {
-            appState = await fallback.json();
-            if (!appState.savedPlaces) appState.savedPlaces = [];
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-            renderAll();
-          }
-        } catch (err) {}
-      }
+      } catch (e) {}
     }
 
     function markChanged() {
