@@ -486,10 +486,13 @@
         <div>
           <span class="pill-date">04 Nov – 19 Nov • Família</span>
           <h1 class="app-title">Orlando & Miami 🏰🌴</h1>
+          <div id="header-save-status" style="font-size:12px; margin-top:3px; opacity:0.95; font-weight:600;">
+            ✅ Roteiro salvo
+          </div>
         </div>
-        <button onclick="openCloudModal()" class="btn-header">
-          <span>☁️ Nuvem</span>
-          <span id="unsaved-indicator" class="unsaved-dot hidden" title="Há alterações não publicadas"></span>
+        <button onclick="openCloudModal()" id="btn-top-save" class="btn-header" style="padding: 9px 14px; font-size: 13px;">
+          <span id="btn-top-save-label">💾 Salvar</span>
+          <span id="unsaved-indicator" class="unsaved-dot hidden" title="Informações não salvas"></span>
         </button>
       </div>
 
@@ -505,13 +508,13 @@
 
   <main class="container" style="padding-top: 12px;">
 
-    <!-- Banner de publicação rápida -->
-    <div id="publish-banner" class="sync-banner hidden">
+    <!-- Aviso grande e claro quando houver informações não salvas -->
+    <div id="publish-banner" class="sync-banner hidden" style="background: rgba(245, 158, 11, 0.16); border-color: #f59e0b;">
       <div>
-        <strong>✨ Você fez alterações!</strong>
-        <div style="color:var(--muted);">Publique para atualizar o roteiro nos celulares de toda a família.</div>
+        <strong style="font-size:14px; color:#d97706;">⚠️ Informações não salvas</strong>
+        <div style="color:var(--text); font-size:12px; margin-top:2px;">Toque no botão ao lado para salvar suas alterações para toda a família.</div>
       </div>
-      <button onclick="publishToServer()" id="btn-quick-publish" class="btn-success" style="white-space:nowrap;">☁️ Publicar</button>
+      <button onclick="publishToServer()" id="btn-quick-publish" class="btn-success" style="white-space:nowrap; font-size:13px; padding:10px 16px;">💾 Salvar Agora</button>
     </div>
 
     <!-- TAB 1: ROTEIRO DIÁRIO (Com fotos nos cards) -->
@@ -816,39 +819,42 @@
     </div>
   </div>
 
-  <!-- MODAL NUVEM / HISTORICO DE VERSOES (ROLLBACK) -->
+  <!-- MODAL SALVAR E VERSOES SALVAS (SIMPLES E ACESSÍVEL) -->
   <div id="cloud-modal" class="modal-backdrop hidden">
     <div class="modal-sheet">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0; font-size:16px;">☁️ Sincronização & Versões (`roteiro.json`)</h3>
-        <button onclick="closeCloudModal()" style="border:none; background:none; font-size:18px; color:var(--muted); cursor:pointer;">✕</button>
+        <h3 style="margin:0; font-size:17px;">💾 Salvar Roteiro da Família</h3>
+        <button onclick="closeCloudModal()" style="border:none; background:none; font-size:20px; color:var(--muted); cursor:pointer;">✕</button>
       </div>
 
-      <div style="padding:12px; border-radius:12px; background:var(--primary-light); margin-bottom:14px;">
-        <div style="font-weight:800; font-size:13px; margin-bottom:4px;">🚀 Atualizar Roteiro para Toda a Família</div>
-        <p style="font-size:12px; color:var(--muted); margin:0 0 10px 0;">
-          Salva todas as alterações direto no arquivo <code>roteiro.json</code> do servidor e cria um ponto de restauração:
+      <!-- Status atual bem claro -->
+      <div id="modal-save-status-box" style="padding:12px; border-radius:12px; background:var(--primary-light); margin-bottom:14px;">
+        <div id="modal-status-title" style="font-weight:800; font-size:14px; margin-bottom:4px;">✅ Tudo salvo!</div>
+        <p id="modal-status-desc" style="font-size:13px; color:var(--muted); margin:0 0 12px 0;">
+          Quando você clica em Salvar, o roteiro fica atualizado no celular de toda a família.
         </p>
-        <input type="text" id="commit-msg-input" placeholder="Descrição (ex: Adicionado lugares salvos)" class="form-input" style="margin-bottom:8px; height:38px; font-size:13px;">
+        <input type="text" id="commit-msg-input" placeholder="O que você mudou? (Opcional, ex: Jantar dia 08)" class="form-input" style="margin-bottom:10px; height:42px; font-size:14px;">
         <div style="display:flex; gap:8px;">
-          <button onclick="publishToServer()" id="btn-modal-publish" class="btn-success" style="flex:1; padding:10px;">☁️ Publicar no Servidor Agora</button>
-          <button onclick="pullFromServer(true)" class="chip" style="padding:10px;">🔄 Recarregar</button>
+          <button onclick="publishToServer()" id="btn-modal-publish" class="btn-success" style="flex:1; padding:12px; font-size:14px;">💾 Salvar Alterações</button>
         </div>
-        <div id="sync-status-msg" style="font-size:12px; font-weight:700; margin-top:8px; display:none;"></div>
+        <div id="sync-status-msg" style="font-size:13px; font-weight:700; margin-top:10px; display:none;"></div>
       </div>
 
       <div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <strong style="font-size:13px;">⏪ Histórico de Versões (Rollback)</strong>
-          <button onclick="loadVersionHistory()" class="link-btn">Atualizar lista</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong style="font-size:14px;">🕒 Versões Salvas Anteriormente</strong>
+          <button onclick="loadVersionHistory()" class="link-btn">Atualizar</button>
         </div>
-        <div id="version-history-list" style="max-height:220px; overflow-y:auto;"></div>
+        <p style="font-size:12px; color:var(--muted); margin:0 0 10px 0;">
+          Se quiser desfazer alguma mudança, basta tocar em <strong>Voltar para esta</strong> na data desejada:
+        </p>
+        <div id="version-history-list" style="max-height:230px; overflow-y:auto;"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const APP_BUILD_ID = 2026101904;
+    const APP_BUILD_ID = 2026101905;
     const STORAGE_KEY = 'roteiro_orlando_miami_familia_v7';
     const REPO_OWNER = 'danintc';
     const REPO_NAME = 'roteiro-dados-privados';
@@ -999,19 +1005,69 @@
       updateUnsavedUI();
     }
 
+    function formatSavedDate(isoStr) {
+      if (!isoStr) return '';
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return '';
+        return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      } catch (e) { return ''; }
+    }
+
     function updateUnsavedUI() {
       document.getElementById('unsaved-indicator').classList.toggle('hidden', !hasUnsavedChanges);
       document.getElementById('publish-banner').classList.toggle('hidden', !hasUnsavedChanges);
+
+      const headerStatus = document.getElementById('header-save-status');
+      const topBtn = document.getElementById('btn-top-save');
+      const modalTitle = document.getElementById('modal-status-title');
+      const modalBox = document.getElementById('modal-save-status-box');
+
+      const savedDateStr = formatSavedDate(appState.updatedAt);
+
+      if (hasUnsavedChanges) {
+        if (headerStatus) {
+          headerStatus.innerHTML = '⚠️ <strong>Informações não salvas</strong> — toque em Salvar';
+          headerStatus.style.color = '#fde68a';
+        }
+        if (topBtn) {
+          topBtn.style.background = '#f59e0b';
+          topBtn.style.borderColor = '#fbbf24';
+        }
+        if (modalTitle) {
+          modalTitle.innerHTML = '⚠️ Você tem informações não salvas';
+          modalTitle.style.color = '#d97706';
+        }
+        if (modalBox) {
+          modalBox.style.background = 'rgba(245, 158, 11, 0.14)';
+        }
+      } else {
+        if (headerStatus) {
+          headerStatus.innerHTML = savedDateStr ? `✅ Versão salva em ${savedDateStr}` : '✅ Roteiro salvo';
+          headerStatus.style.color = '#ffffff';
+        }
+        if (topBtn) {
+          topBtn.style.background = 'rgba(255,255,255,0.2)';
+          topBtn.style.borderColor = 'rgba(255,255,255,0.35)';
+        }
+        if (modalTitle) {
+          modalTitle.innerHTML = savedDateStr ? `✅ Versão salva em ${savedDateStr}` : '✅ Tudo salvo!';
+          modalTitle.style.color = '#059669';
+        }
+        if (modalBox) {
+          modalBox.style.background = 'var(--primary-light)';
+        }
+      }
     }
 
     async function publishToServer(customMessage) {
       const btnQuick = document.getElementById('btn-quick-publish');
       const btnModal = document.getElementById('btn-modal-publish');
       const msgInput = document.getElementById('commit-msg-input');
-      const commitMsg = customMessage || (msgInput && msgInput.value.trim()) || `Atualização do roteiro (${new Date().toLocaleString('pt-BR')})`;
+      const commitMsg = customMessage || (msgInput && msgInput.value.trim()) || `Alteração salva em ${new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`;
 
-      if (btnQuick) { btnQuick.disabled = true; btnQuick.textContent = '⏳...'; }
-      if (btnModal) { btnModal.disabled = true; btnModal.textContent = '⏳ Publicando...'; }
+      if (btnQuick) { btnQuick.disabled = true; btnQuick.textContent = '⏳ Salvando...'; }
+      if (btnModal) { btnModal.disabled = true; btnModal.textContent = '⏳ Salvando...'; }
 
       try {
         const headers = {
@@ -1040,22 +1096,22 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
           updateUnsavedUI();
           if (msgInput) msgInput.value = '';
-          showSyncMessage('✅ Publicado para toda a família!', '#059669');
+          showSyncMessage('✅ Tudo salvo com sucesso para toda a família!', '#059669');
           loadVersionHistory();
         } else {
-          showSyncMessage('❌ Erro ao publicar no servidor.', '#dc2626');
+          showSyncMessage('❌ Não foi possível salvar agora. Tente novamente.', '#dc2626');
         }
       } catch (e) {
-        showSyncMessage('❌ Falha de conexão ao publicar.', '#dc2626');
+        showSyncMessage('❌ Sem conexão com a internet no momento.', '#dc2626');
       } finally {
-        if (btnQuick) { btnQuick.disabled = false; btnQuick.textContent = '☁️ Publicar'; }
-        if (btnModal) { btnModal.disabled = false; btnModal.textContent = '☁️ Publicar no Servidor Agora'; }
+        if (btnQuick) { btnQuick.disabled = false; btnQuick.textContent = '💾 Salvar Agora'; }
+        if (btnModal) { btnModal.disabled = false; btnModal.textContent = '💾 Salvar Alterações'; }
       }
     }
 
     async function loadVersionHistory() {
       const listEl = document.getElementById('version-history-list');
-      listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:12px; text-align:center;">Buscando versões...</div>`;
+      listEl.innerHTML = `<div style="font-size:13px; color:var(--muted); padding:12px; text-align:center;">Carregando versões salvas...</div>`;
       try {
         const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/commits?path=${JSON_PATH}&per_page=15&t=${Date.now()}`, {
           headers: { 'Authorization': `token ${_getAuth()}`, 'Accept': 'application/vnd.github+json' }
@@ -1065,24 +1121,23 @@
           const dateObj = new Date(c.commit.author.date);
           const dateFormatted = dateObj.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
           const msg = escapeHtml(c.commit.message);
-          const shortSha = c.sha.substring(0, 7);
           return `
             <div class="version-item">
               <div style="min-width:0; flex:1;">
-                <div style="font-weight:700; font-size:12px;">${idx === 0 ? '🟢 Atual' : `🕒 ${dateFormatted}`} <span style="font-family:monospace; color:var(--muted);">#${shortSha}</span></div>
-                <div style="font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${msg}</div>
+                <div style="font-weight:700; font-size:13px;">${idx === 0 ? `🟢 Versão Salva Atual (${dateFormatted})` : `📅 Salvo em ${dateFormatted}`}</div>
+                <div style="font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">${msg}</div>
               </div>
-              ${idx === 0 ? `<span class="badge" style="background:rgba(5,150,105,0.15); color:#059669;">Ativa</span>` : `<button onclick="rollbackToVersion('${c.sha}', '${dateFormatted}')" class="chip" style="color:var(--primary); border-color:var(--primary);">⏪ Restaurar</button>`}
+              ${idx === 0 ? `<span class="badge" style="background:rgba(5,150,105,0.15); color:#059669;">Em uso</span>` : `<button onclick="rollbackToVersion('${c.sha}', '${dateFormatted}')" class="chip" style="color:var(--primary); border-color:var(--primary); font-weight:700;">↩️ Voltar para esta</button>`}
             </div>
           `;
         }).join('');
       } catch (e) {
-        listEl.innerHTML = `<div style="font-size:12px; color:var(--danger); padding:12px;">Erro ao carregar histórico.</div>`;
+        listEl.innerHTML = `<div style="font-size:13px; color:var(--danger); padding:12px;">Não foi possível carregar as versões anteriores.</div>`;
       }
     }
 
     async function rollbackToVersion(commitSha, dateLabel) {
-      if (!confirm(`Voltar o roteiro para a versão de ${dateLabel}?`)) return;
+      if (!confirm(`Deseja voltar o roteiro para a versão salva em ${dateLabel}?`)) return;
       try {
         const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${JSON_PATH}?ref=${commitSha}`, {
           headers: { 'Authorization': `token ${_getAuth()}`, 'Accept': 'application/vnd.github+json' }
@@ -1093,7 +1148,7 @@
           appState = oldState;
           if (!appState.savedPlaces) appState.savedPlaces = [];
           renderAll();
-          await publishToServer(`Rollback para versão de ${dateLabel} (#${commitSha.substring(0, 7)})`);
+          await publishToServer(`Voltou para a versão de ${dateLabel}`);
         }
       } catch (e) {}
     }
