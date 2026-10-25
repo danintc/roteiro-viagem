@@ -7,134 +7,184 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Roteiro Flórida">
   <title>Roteiro Orlando & Miami (04/11 a 19/11)</title>
+  <!-- Tipografia Editorial Impeccable: Fraunces (Display) + Plus Jakarta Sans (UI & Leitura) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Leaflet Interactive Map CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
-      --bg: #f1f5f9;
+      /* Impeccable Warm Editorial Palette (Alto contraste, leitura confortável ao sol) */
+      --bg: #f4f1ea;
+      --bg-inset: #eae5db;
       --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --primary: #4f46e5;
-      --primary-dark: #4338ca;
-      --primary-light: #eef2ff;
-      --success: #059669;
-      --warning: #d97706;
-      --danger: #dc2626;
+      --text: #14171a;
+      --muted: #4b5563;
+      --border: #dcd6ca;
+      --border-strong: #c5bdb0;
+      --primary: #1e3a5f;
+      --primary-dark: #152944;
+      --primary-light: #e8eef5;
+      --accent-gold: #c88a2b;
+      --orlando-bg: #1e3a5f;
+      --orlando-tint: #ebf1f8;
+      --orlando-text: #1e3a5f;
+      --miami-bg: #0f6b63;
+      --miami-tint: #e6f4f2;
+      --miami-text: #0f6b63;
+      --success: #0d7a52;
+      --warning: #b45309;
+      --danger: #b91c1c;
+      --shadow-sm: 0 2px 6px rgba(20, 23, 26, 0.05);
+      --shadow-md: 0 6px 18px rgba(20, 23, 26, 0.08);
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #0f172a;
-        --card: #1e293b;
-        --text: #f8fafc;
-        --muted: #94a3b8;
-        --border: #334155;
-        --primary: #6366f1;
-        --primary-dark: #4f46e5;
-        --primary-light: rgba(99, 102, 241, 0.15);
+        --bg: #0f1215;
+        --bg-inset: #161a1f;
+        --card: #1a1f26;
+        --text: #f3f4f6;
+        --muted: #9ca3af;
+        --border: #2c3440;
+        --border-strong: #3e4856;
+        --primary: #d4a853;
+        --primary-dark: #b88c38;
+        --primary-light: rgba(212, 168, 83, 0.14);
+        --accent-gold: #e0b663;
+        --orlando-bg: #254b7c;
+        --orlando-tint: rgba(59, 130, 246, 0.16);
+        --orlando-text: #93c5fd;
+        --miami-bg: #11786e;
+        --miami-tint: rgba(20, 184, 166, 0.16);
+        --miami-text: #5eead4;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
+        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
       }
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    ::selection { background: var(--accent-gold); color: #14171a; }
+    :focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 2px; }
     body {
       margin: 0;
-      padding: 0 0 90px 0;
+      padding: 0 0 96px 0;
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 14px;
-      line-height: 1.45;
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14.5px;
+      line-height: 1.5;
+      font-variant-numeric: tabular-nums;
+      caret-color: var(--primary);
     }
-    .container { max-width: 680px; margin: 0 auto; padding: 0 12px; }
+    .container { max-width: 680px; margin: 0 auto; padding: 0 14px; }
     
-    /* Header - Com suporte ao Notch / Dynamic Island do iPhone */
+    /* Header Editorial Impeccable - Sem gradiente clichê, com acabamento Lacquer & Gold */
     .app-header {
-      background: linear-gradient(135deg, #2563eb 0%, #4f46e5 55%, #7c3aed 100%);
-      color: #fff;
+      background: #12161b;
+      color: #f7f5f0;
       padding-top: calc(env(safe-area-inset-top, 44px) + 12px);
       padding-right: 14px;
-      padding-bottom: 12px;
+      padding-bottom: 14px;
       padding-left: 14px;
       position: sticky;
       top: 0;
       z-index: 40;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.14);
+      border-bottom: 2px solid rgba(200, 138, 43, 0.45);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
     }
-    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .pill-date {
       display: inline-block;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      background: rgba(255,255,255,0.22);
-      padding: 2px 10px;
+      letter-spacing: 0.06em;
+      color: #f3d082;
+      background: rgba(200, 138, 43, 0.18);
+      border: 1px solid rgba(200, 138, 43, 0.4);
+      padding: 3px 10px;
       border-radius: 999px;
       margin-bottom: 4px;
     }
-    .app-title { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
-    .btn-header {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.35);
-      padding: 7px 11px;
-      border-radius: 10px;
-      font-size: 12px;
+    .app-title {
+      margin: 0;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 22px;
       font-weight: 700;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      text-wrap: balance;
+    }
+    .btn-header {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      font-family: inherit;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
+      transition: transform 0.15s ease, background 0.15s ease;
     }
+    .btn-header:active { transform: scale(0.97); }
     .unsaved-dot {
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 999px;
       background: #fbbf24;
-      box-shadow: 0 0 0 2px rgba(0,0,0,0.25);
+      box-shadow: 0 0 0 2px rgba(0,0,0,0.35);
     }
 
     /* Main 4-Tab Bar */
     .main-tabs {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 4px;
-      margin-top: 12px;
-      background: rgba(0,0,0,0.24);
+      gap: 5px;
+      margin-top: 14px;
+      background: #1c222a;
       padding: 4px;
       border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .tab-btn {
       border: none;
       background: transparent;
-      color: rgba(255,255,255,0.9);
-      padding: 7px 4px;
+      color: rgba(255,255,255,0.78);
+      padding: 8px 4px;
       border-radius: 9px;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 700;
+      font-family: inherit;
       cursor: pointer;
       white-space: nowrap;
       text-align: center;
+      transition: background 0.15s ease, color 0.15s ease;
     }
     .tab-btn.active {
-      background: #ffffff;
-      color: #3730a3;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.14);
+      background: #f5f2eb;
+      color: #12161b;
+      font-weight: 800;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     }
 
     /* Cloud Sync Status Bar */
     .sync-banner {
-      background: var(--primary-light);
-      border: 1px solid rgba(99, 102, 241, 0.35);
-      border-radius: 12px;
-      padding: 10px 12px;
-      margin-bottom: 12px;
+      background: var(--card);
+      border: 2px solid var(--warning);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      font-size: 12px;
+      gap: 12px;
+      font-size: 13px;
+      box-shadow: var(--shadow-md);
     }
 
     /* Filter Bar */
@@ -143,7 +193,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin: 10px 0 8px 0;
+      margin: 12px 0 8px 0;
     }
     .scroll-strip {
       display: flex;
@@ -159,120 +209,281 @@
       border: 1px solid var(--border);
       background: var(--card);
       color: var(--text);
-      padding: 6px 12px;
+      padding: 7px 13px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 12.5px;
+      font-weight: 700;
+      font-family: inherit;
       white-space: nowrap;
       cursor: pointer;
+      transition: all 0.15s ease;
     }
     .chip.active {
       background: var(--primary);
       color: #fff;
       border-color: var(--primary);
     }
+    @media (prefers-color-scheme: dark) {
+      .chip.active { color: #12161b; }
+    }
 
-    /* Day Strip */
+    /* Day Strip (Seletor Rápido de Dias no Topo) */
     .day-strip {
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding: 4px 0 10px 0;
+      padding: 6px 0 12px 0;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
     .day-strip::-webkit-scrollbar { display: none; }
     .day-pill {
-      min-width: 78px;
+      min-width: 82px;
       flex-shrink: 0;
       background: var(--card);
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 14px;
-      padding: 8px 10px;
+      padding: 9px 11px;
       text-align: left;
+      font-family: inherit;
       cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease, border-color 0.15s ease;
     }
     .day-pill.active {
       background: var(--primary);
       color: #fff;
       border-color: var(--primary);
     }
-    .day-pill-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 13px; }
-    .day-pill-sub { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+    @media (prefers-color-scheme: dark) {
+      .day-pill.active { color: #12161b; }
+    }
+    .day-pill-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 13.5px; }
+    .day-pill-sub { font-size: 11px; opacity: 0.85; margin-top: 2px; }
 
-    /* Cards */
+    /* Cards Gerais (Abas Salvos, Mapa, Info) */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ================= BARRA DE SEPARAÇÃO DIÁRIA E ESTRUTURA DE DIAS (IMPECCABLE) ================= */
+    .day-section {
+      margin-bottom: 10px;
+    }
+    /* Barra de Separação Diária em destaque entre um dia e outro */
+    .day-separator-bar {
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
       margin-bottom: 14px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    .day-header {
+    .day-separator-top-strip {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
     }
-    .day-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .day-separator-top-strip.phase-orlando {
+      background: var(--orlando-bg);
+    }
+    .day-separator-top-strip.phase-miami {
+      background: var(--miami-bg);
+    }
+    .day-separator-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+    }
+    .day-date-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 66px;
+      height: 66px;
+      border-radius: 14px;
+      padding: 6px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .day-date-box.phase-orlando {
+      background: var(--orlando-tint);
+      color: var(--orlando-text);
+      border: 1px solid rgba(30, 58, 95, 0.2);
+    }
+    .day-date-box.phase-miami {
+      background: var(--miami-tint);
+      color: var(--miami-text);
+      border: 1px solid rgba(15, 107, 99, 0.22);
+    }
+    .day-date-num {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 21px;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+    .day-date-weekday {
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 3px;
+      opacity: 0.9;
+    }
+    .day-info-col {
+      flex: 1;
+      min-width: 0;
+    }
+    .day-subtitle {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text);
+      margin: 0 0 5px 0;
+      letter-spacing: -0.015em;
+    }
+    .day-hotel {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--bg);
+      padding: 3px 9px;
+      border-radius: 8px;
+      margin: 0;
+    }
+
+    /* Linha do Tempo dos Programas dentro de cada Dia */
+    .day-programs-timeline {
+      position: relative;
+      padding-left: 16px;
+      margin-left: 10px;
+      border-left: 2px solid var(--border-strong);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Divisor Visual Claro Entre um Dia e o Próximo na Lista */
+    .day-between-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 26px 0 22px 0;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .day-between-divider::before,
+    .day-between-divider::after {
+      content: "";
+      flex: 1;
+      height: 2px;
+      background: var(--border-strong);
+      border-radius: 2px;
+    }
+    .day-between-pill {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-strong);
+      color: var(--muted);
+      padding: 4px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
     .badge {
       display: inline-block;
-      padding: 3px 8px;
+      padding: 3px 9px;
       border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 11.5px;
+      font-weight: 800;
     }
     .badge-primary { background: var(--primary); color: #fff; }
-    .badge-orlando { background: rgba(147, 51, 234, 0.14); color: #9333ea; }
-    .badge-miami { background: rgba(16, 185, 129, 0.14); color: #059669; }
-    .day-subtitle { font-size: 13px; font-weight: 600; margin: 6px 0 2px 0; }
-    .day-hotel { font-size: 12px; color: var(--muted); margin: 0; }
+    .badge-orlando { background: var(--orlando-tint); color: var(--orlando-text); }
+    .badge-miami { background: var(--miami-tint); color: var(--miami-text); }
 
     .btn-add {
       background: var(--primary);
       color: #fff;
       border: none;
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 12px;
-      font-weight: 700;
+      border-radius: 11px;
+      padding: 9px 13px;
+      font-size: 12.5px;
+      font-weight: 800;
+      font-family: inherit;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
+      transition: transform 0.15s ease;
     }
+    @media (prefers-color-scheme: dark) {
+      .btn-add { color: #12161b; }
+    }
+    .btn-add:active { transform: scale(0.97); }
     .btn-success {
       background: var(--success);
       color: #fff;
       border: none;
-      border-radius: 10px;
-      padding: 9px 14px;
-      font-size: 12px;
-      font-weight: 700;
+      border-radius: 11px;
+      padding: 10px 15px;
+      font-size: 12.5px;
+      font-weight: 800;
+      font-family: inherit;
       cursor: pointer;
     }
 
-    /* Wanderlog-style Activity Cards with Thumbnail Image */
+    /* Cards de Programa / Atividade (Sem aninhamento confuso, com nó na linha do tempo) */
     .item-card {
+      position: relative;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
-      margin-top: 10px;
+      border-radius: 15px;
+      padding: 14px;
       display: flex;
       align-items: flex-start;
       gap: 12px;
       background: var(--card);
+      box-shadow: var(--shadow-sm);
     }
-    .item-card.done { opacity: 0.55; }
+    .day-programs-timeline .item-card::before {
+      content: "";
+      position: absolute;
+      left: -23px;
+      top: 22px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--border-strong);
+    }
+    .item-card.done { opacity: 0.58; background: var(--bg-inset); }
     .check-btn {
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      border: 2px solid var(--muted);
-      background: transparent;
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      border: 2px solid var(--border-strong);
+      background: var(--bg);
       color: #fff;
       font-weight: 800;
       display: flex;
@@ -289,42 +500,53 @@
     }
     .item-body { flex: 1; min-width: 0; }
     .item-thumb {
-      width: 76px;
-      height: 76px;
-      border-radius: 10px;
+      width: 82px;
+      height: 82px;
+      border-radius: 12px;
       object-fit: cover;
       flex-shrink: 0;
-      background: var(--border);
+      background: var(--bg-inset);
       border: 1px solid var(--border);
     }
     .item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
     .time-pill {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12px;
-      font-weight: 700;
-      background: rgba(100,116,139,0.14);
-      padding: 2px 7px;
-      border-radius: 5px;
+      font-size: 12.5px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      background: var(--bg-inset);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 6px;
     }
     .cat-pill {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       padding: 2px 8px;
-      border-radius: 5px;
+      border-radius: 6px;
     }
-    .cat-parque { background: rgba(147, 51, 234, 0.15); color: #9333ea; }
-    .cat-compras { background: rgba(217, 119, 6, 0.15); color: #d97706; }
-    .cat-restaurante { background: rgba(225, 29, 72, 0.15); color: #e11d48; }
-    .cat-passeio { background: rgba(5, 150, 105, 0.15); color: #059669; }
-    .cat-hotel { background: rgba(2, 132, 199, 0.15); color: #0284c7; }
-    .cat-logistica { background: rgba(37, 99, 235, 0.15); color: #2563eb; }
+    .cat-parque { background: rgba(147, 51, 234, 0.14); color: #7e22ce; }
+    .cat-compras { background: rgba(180, 83, 9, 0.14); color: #b45309; }
+    .cat-restaurante { background: rgba(190, 18, 60, 0.14); color: #be123c; }
+    .cat-passeio { background: rgba(15, 107, 99, 0.14); color: #0f6b63; }
+    .cat-hotel { background: rgba(30, 58, 95, 0.14); color: #1e3a5f; }
+    .cat-logistica { background: rgba(37, 99, 235, 0.14); color: #1d4ed8; }
+    @media (prefers-color-scheme: dark) {
+      .cat-parque { color: #d8b4fe; }
+      .cat-compras { color: #fcd34d; }
+      .cat-restaurante { color: #fda4af; }
+      .cat-passeio { color: #5eead4; }
+      .cat-hotel { color: #93c5fd; }
+      .cat-logistica { color: #93c5fd; }
+    }
 
-    .item-title { font-size: 14px; font-weight: 700; margin: 5px 0 3px 0; }
-    .item-notes { font-size: 12px; color: var(--muted); margin: 0; }
-    .item-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding-top: 4px; }
+    .item-title { font-size: 15px; font-weight: 800; margin: 6px 0 4px 0; line-height: 1.3; color: var(--text); }
+    .item-notes { font-size: 12.5px; color: var(--muted); margin: 0; line-height: 1.45; }
+    .item-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
     .link-btn {
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 12.5px;
+      font-weight: 700;
+      font-family: inherit;
       color: var(--primary);
       text-decoration: none;
       background: none;
@@ -1523,33 +1745,48 @@
         daysToShow = daysToShow.filter(d => d.id === selectedDayId);
       }
 
-      container.innerHTML = daysToShow.map(day => {
+      container.innerHTML = daysToShow.map((day, idx) => {
         const sortedItems = [...day.items].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
         const visibleItems = sortedItems.filter(item => currentCategoryFilter === 'all' || item.category === currentCategoryFilter);
+        const phaseClass = day.phase === 'orlando' ? 'phase-orlando' : 'phase-miami';
+        const nextDay = daysToShow[idx + 1];
 
         return `
-          <div class="card">
-            <div class="day-header">
-              <div>
-                <div class="day-badges">
-                  <span class="badge badge-primary">Dia ${day.dayNum} • ${day.dateStr}</span>
-                  <strong style="font-size:13px;">${day.weekday}</strong>
-                  <span class="badge ${day.phase === 'orlando' ? 'badge-orlando' : 'badge-miami'}">${day.cityLabel}</span>
-                </div>
-                <p class="day-subtitle">${escapeHtml(day.subtitle || '')}</p>
-                <p class="day-hotel">🏨 ${day.hotel}</p>
+          <article class="day-section" id="day-sec-${day.id}">
+            <!-- BARRA DE SEPARAÇÃO DIÁRIA -->
+            <div class="day-separator-bar">
+              <div class="day-separator-top-strip ${phaseClass}">
+                <span>📅 DIA ${String(day.dayNum).padStart(2, '0')} • ${day.weekday.toUpperCase()} (${day.dateStr})</span>
+                <span>${day.phase === 'orlando' ? '🏰' : '🌴'} ${escapeHtml(day.cityLabel)}</span>
               </div>
-              <button onclick="openActivityModal('${day.id}')" class="btn-add">＋ Adicionar</button>
+              <div class="day-separator-body">
+                <div class="day-date-box ${phaseClass}">
+                  <div class="day-date-num">${day.dateStr}</div>
+                  <div class="day-date-weekday">${day.weekday.split('-')[0].slice(0, 3)}</div>
+                </div>
+                <div class="day-info-col">
+                  <h3 class="day-subtitle">${escapeHtml(day.subtitle || '')}</h3>
+                  <p class="day-hotel">🏨 ${escapeHtml(day.hotel)}</p>
+                </div>
+                <button onclick="openActivityModal('${day.id}')" class="btn-add">＋ Adicionar</button>
+              </div>
             </div>
 
-            <div>
+            <!-- LISTA DE PROGRAMAS DO DIA EM LINHA DO TEMPO -->
+            <div class="day-programs-timeline">
               ${visibleItems.length === 0 ? `
-                <div style="text-align:center; padding:16px; color:var(--muted); font-size:12px;">
-                  Nenhuma atividade neste filtro. Toque em "+ Adicionar" ou escolha um item da aba "🔖 Salvos".
+                <div class="item-card" style="justify-content:center; text-align:center; padding:18px; color:var(--muted); font-size:13px;">
+                  Nenhuma atividade neste filtro para o Dia ${day.dateStr}. Toque em "＋ Adicionar" acima ou escolha um item da aba "🔖 Salvos".
                 </div>
               ` : visibleItems.map(item => renderActivityItem(day.id, item)).join('')}
             </div>
-          </div>
+
+            ${nextDay ? `
+              <div class="day-between-divider">
+                <span class="day-between-pill">Fim do Dia ${day.dateStr} • Próximo: Dia ${nextDay.dateStr} (${nextDay.weekday.split('-')[0]})</span>
+              </div>
+            ` : ''}
+          </article>
         `;
       }).join('');
     }
