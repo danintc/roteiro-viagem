@@ -272,144 +272,83 @@
       box-shadow: var(--shadow-sm);
     }
 
-    /* ================= BARRA DE SEPARAÇÃO DIÁRIA E ESTRUTURA DE DIAS (IMPECCABLE) ================= */
+    /* ================= BARRA DE SEPARAÇÃO DIÁRIA LIMPA (SEM REDUNDÂNCIA) ================= */
     .day-section {
-      margin-bottom: 10px;
+      margin-bottom: 28px;
     }
-    /* Barra de Separação Diária em destaque entre um dia e outro */
     .day-separator-bar {
-      background: var(--card);
-      border: 1px solid var(--border-strong);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: var(--shadow-md);
-      margin-bottom: 14px;
-    }
-    .day-separator-top-strip {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 14px;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
       color: #ffffff;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 12px;
     }
-    .day-separator-top-strip.phase-orlando {
+    .day-separator-bar.phase-orlando {
       background: var(--orlando-bg);
     }
-    .day-separator-top-strip.phase-miami {
+    .day-separator-bar.phase-miami {
       background: var(--miami-bg);
     }
-    .day-separator-body {
+    .day-bar-left {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px;
-    }
-    .day-date-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-width: 66px;
-      height: 66px;
-      border-radius: 14px;
-      padding: 6px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .day-date-box.phase-orlando {
-      background: var(--orlando-tint);
-      color: var(--orlando-text);
-      border: 1px solid rgba(30, 58, 95, 0.2);
-    }
-    .day-date-box.phase-miami {
-      background: var(--miami-tint);
-      color: var(--miami-text);
-      border: 1px solid rgba(15, 107, 99, 0.22);
-    }
-    .day-date-num {
-      font-family: "Fraunces", Georgia, serif;
-      font-size: 21px;
-      font-weight: 700;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-    }
-    .day-date-weekday {
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-top: 3px;
-      opacity: 0.9;
-    }
-    .day-info-col {
-      flex: 1;
+      flex-wrap: wrap;
+      gap: 8px;
       min-width: 0;
     }
-    .day-subtitle {
+    .day-bar-date {
       font-family: "Fraunces", Georgia, serif;
       font-size: 16px;
-      font-weight: 600;
-      line-height: 1.3;
-      color: var(--text);
-      margin: 0 0 5px 0;
-      letter-spacing: -0.015em;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
     }
-    .day-hotel {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+    .day-bar-meta {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.88);
+    }
+    .day-bar-city {
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .btn-add-inline {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-radius: 9px;
+      padding: 6px 11px;
       font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      background: var(--bg);
-      padding: 3px 9px;
-      border-radius: 8px;
-      margin: 0;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .btn-add-inline:active {
+      transform: scale(0.97);
+      background: rgba(255, 255, 255, 0.28);
     }
 
-    /* Linha do Tempo dos Programas dentro de cada Dia */
+    /* Lista de Programas do Dia */
     .day-programs-timeline {
       position: relative;
       padding-left: 16px;
-      margin-left: 10px;
+      margin-left: 8px;
       border-left: 2px solid var(--border-strong);
       display: flex;
       flex-direction: column;
-      gap: 12px;
-    }
-
-    /* Divisor Visual Claro Entre um Dia e o Próximo na Lista */
-    .day-between-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 26px 0 22px 0;
-      color: var(--muted);
-      font-size: 11.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    .day-between-divider::before,
-    .day-between-divider::after {
-      content: "";
-      flex: 1;
-      height: 2px;
-      background: var(--border-strong);
-      border-radius: 2px;
-    }
-    .day-between-pill {
-      background: var(--bg-inset);
-      border: 1px solid var(--border-strong);
-      color: var(--muted);
-      padding: 4px 12px;
-      border-radius: 999px;
-      white-space: nowrap;
+      gap: 10px;
     }
 
     .badge {
@@ -1745,47 +1684,31 @@
         daysToShow = daysToShow.filter(d => d.id === selectedDayId);
       }
 
-      container.innerHTML = daysToShow.map((day, idx) => {
+      container.innerHTML = daysToShow.map(day => {
         const sortedItems = [...day.items].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
         const visibleItems = sortedItems.filter(item => currentCategoryFilter === 'all' || item.category === currentCategoryFilter);
         const phaseClass = day.phase === 'orlando' ? 'phase-orlando' : 'phase-miami';
-        const nextDay = daysToShow[idx + 1];
 
         return `
           <article class="day-section" id="day-sec-${day.id}">
-            <!-- BARRA DE SEPARAÇÃO DIÁRIA -->
-            <div class="day-separator-bar">
-              <div class="day-separator-top-strip ${phaseClass}">
-                <span>📅 DIA ${String(day.dayNum).padStart(2, '0')} • ${day.weekday.toUpperCase()} (${day.dateStr})</span>
-                <span>${day.phase === 'orlando' ? '🏰' : '🌴'} ${escapeHtml(day.cityLabel)}</span>
+            <!-- BARRA ÚNICA DE SEPARAÇÃO DIÁRIA -->
+            <div class="day-separator-bar ${phaseClass}">
+              <div class="day-bar-left">
+                <span class="day-bar-date">${day.dateStr}</span>
+                <span class="day-bar-meta">• Dia ${String(day.dayNum).padStart(2, '0')} (${day.weekday})</span>
+                <span class="day-bar-city">${day.phase === 'orlando' ? '🏰' : '🌴'} ${escapeHtml(day.cityLabel)}</span>
               </div>
-              <div class="day-separator-body">
-                <div class="day-date-box ${phaseClass}">
-                  <div class="day-date-num">${day.dateStr}</div>
-                  <div class="day-date-weekday">${day.weekday.split('-')[0].slice(0, 3)}</div>
-                </div>
-                <div class="day-info-col">
-                  <h3 class="day-subtitle">${escapeHtml(day.subtitle || '')}</h3>
-                  <p class="day-hotel">🏨 ${escapeHtml(day.hotel)}</p>
-                </div>
-                <button onclick="openActivityModal('${day.id}')" class="btn-add">＋ Adicionar</button>
-              </div>
+              <button onclick="openActivityModal('${day.id}')" class="btn-add-inline">＋ Adicionar</button>
             </div>
 
-            <!-- LISTA DE PROGRAMAS DO DIA EM LINHA DO TEMPO -->
+            <!-- LISTA DE PROGRAMAS DO DIA -->
             <div class="day-programs-timeline">
               ${visibleItems.length === 0 ? `
                 <div class="item-card" style="justify-content:center; text-align:center; padding:18px; color:var(--muted); font-size:13px;">
-                  Nenhuma atividade neste filtro para o Dia ${day.dateStr}. Toque em "＋ Adicionar" acima ou escolha um item da aba "🔖 Salvos".
+                  Nenhuma atividade neste filtro para o Dia ${day.dateStr}. Toque em "＋ Adicionar" acima.
                 </div>
               ` : visibleItems.map(item => renderActivityItem(day.id, item)).join('')}
             </div>
-
-            ${nextDay ? `
-              <div class="day-between-divider">
-                <span class="day-between-pill">Fim do Dia ${day.dateStr} • Próximo: Dia ${nextDay.dateStr} (${nextDay.weekday.split('-')[0]})</span>
-              </div>
-            ` : ''}
           </article>
         `;
       }).join('');
