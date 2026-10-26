@@ -897,6 +897,103 @@
       font-size: 15px;
       line-height: 1;
     }
+    /* Badges de Distância Real & Status do GPS */
+    .dist-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #065f46;
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
+      padding: 1px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .dist-badge.dist-hotel {
+      color: #4338ca;
+      background: #e0e7ff;
+      border-color: #c7d2fe;
+    }
+    .gps-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .gps-status-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .gps-status-indicator {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #94a3b8;
+      flex-shrink: 0;
+    }
+    .gps-status-indicator.active {
+      background: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+    .gps-status-indicator.requesting {
+      background: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+    }
+    .gps-status-indicator.denied {
+      background: #ef4444;
+    }
+    .btn-gps-refresh {
+      border: none;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 11px;
+      padding: 5px 9px;
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-gps-refresh:active {
+      transform: scale(0.96);
+    }
+    .user-gps-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .user-gps-dot {
+      width: 18px;
+      height: 18px;
+      background: #2563eb;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.4), 0 2px 6px rgba(0,0,0,0.35);
+      animation: gps-pulse 2s infinite;
+    }
+    @keyframes gps-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(37,99,235,0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(37,99,235,0); }
+      100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+    }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -929,6 +1026,17 @@
   </header>
 
   <main class="container" style="padding-top: 12px;">
+
+    <!-- Barra de Status do GPS e Distâncias Reais -->
+    <div id="gps-status-bar" class="gps-status-bar">
+      <div class="gps-status-left">
+        <span class="gps-status-indicator" id="gps-status-indicator"></span>
+        <span id="gps-status-text">Detectando sua localização para calcular distâncias reais...</span>
+      </div>
+      <button type="button" onclick="requestUserLocation(true)" class="btn-gps-refresh" id="btn-gps-refresh">
+        📍 Atualizar GPS
+      </button>
+    </div>
 
     <!-- Aviso grande e claro quando houver informações não salvas -->
     <div id="publish-banner" class="sync-banner hidden" style="background: rgba(245, 158, 11, 0.16); border-color: #f59e0b;">
@@ -1010,6 +1118,7 @@
           <button onclick="setMapPinFilter('all')" id="mpin-all" class="chip active">📍 Todos os Locais</button>
           <button onclick="setMapPinFilter('roteiro')" id="mpin-roteiro" class="chip">📅 No Roteiro</button>
           <button onclick="setMapPinFilter('salvos')" id="mpin-salvos" class="chip">🔖 Lugares Salvos</button>
+          <button type="button" onclick="centerMapOnUser()" class="chip" style="color:#2563eb; border-color:#2563eb; font-weight:700;">🎯 Minha Localização</button>
         </div>
 
         <!-- Mapa Interativo com Todos os Pinos do Filtro (Google Maps Road Tiles) -->
@@ -1390,6 +1499,267 @@
       ]
     };
 
+    // ================= DISTÂNCIA REAL & GEOLOCALIZAÇÃO DO USUÁRIO (GPS) =================
+    let userRealLocation = null;
+    let userLocationMarker = null;
+    let isGpsWatching = false;
+
+    const HOTEL_LOCATIONS = {
+      orlando: { name: 'Celebration Suites', lat: 28.3325, lng: -81.5165 },
+      miami: { name: 'Hampton Inn Doral', lat: 25.8080, lng: -80.3275 }
+    };
+
+    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+      if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+      const R = 6371; // Raio da Terra em km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function getUserDistanceTo(destLat, destLng) {
+      if (!userRealLocation || destLat == null || destLng == null) return null;
+      const numLat = Number(destLat), numLng = Number(destLng);
+      if (isNaN(numLat) || isNaN(numLng) || (numLat === 0 && numLng === 0)) return null;
+      return calculateDistanceKm(userRealLocation.lat, userRealLocation.lng, numLat, numLng);
+    }
+
+    function formatDistanceText(km) {
+      if (km == null || isNaN(km)) return '';
+      if (km < 1) {
+        const meters = Math.max(10, Math.round(km * 1000));
+        return `${meters} m`;
+      }
+      if (km < 10) {
+        return `${km.toFixed(1).replace('.', ',')} km`;
+      }
+      if (km < 100) {
+        return `${km.toFixed(1).replace('.', ',')} km`;
+      }
+      return `${Math.round(km).toLocaleString('pt-BR')} km`;
+    }
+
+    function resolveItemCoords(item, phase = 'orlando') {
+      if (!item) return null;
+      let lat = Number(item.lat);
+      let lng = Number(item.lng);
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0 && lat > 20) {
+        return { lat, lng };
+      }
+      if (item.title) {
+        const tLower = item.title.toLowerCase();
+        const catMatch = FLORIDA_PLACES_CATALOG.find(p => tLower.includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(tLower));
+        if (catMatch && catMatch.lat && catMatch.lng) {
+          return { lat: catMatch.lat, lng: catMatch.lng };
+        }
+      }
+      if (phase === 'miami') return { lat: 25.7907, lng: -80.2100 };
+      return { lat: 28.3772, lng: -81.5194 };
+    }
+
+    function renderDistanceBadge(lat, lng, phase = null) {
+      if (lat == null || lng == null) return '';
+      const numLat = Number(lat), numLng = Number(lng);
+      if (isNaN(numLat) || isNaN(numLng) || (numLat === 0 && numLng === 0)) return '';
+
+      const badges = [];
+      const distFromUser = getUserDistanceTo(numLat, numLng);
+      if (distFromUser != null) {
+        badges.push(`<span class="dist-badge" title="Distância real em linha reta da sua posição GPS atual">📍 a ${formatDistanceText(distFromUser)} de você</span>`);
+      }
+
+      // Se o usuário ainda não ativou o GPS ou está longe (> 400km, ex: no Brasil), exibe também como referência a distância do hotel da cidade
+      if (distFromUser == null || distFromUser > 400) {
+        const hotelKey = (phase === 'miami' || numLat < 26.8) ? 'miami' : 'orlando';
+        const hotel = HOTEL_LOCATIONS[hotelKey];
+        if (hotel) {
+          const distFromHotel = calculateDistanceKm(hotel.lat, hotel.lng, numLat, numLng);
+          if (distFromHotel != null && distFromHotel < 200) {
+            badges.push(`<span class="dist-badge dist-hotel" title="Distância em relação ao hotel ${hotel.name}">🏨 a ${formatDistanceText(distFromHotel)} do hotel</span>`);
+          }
+        }
+      }
+
+      return badges.join(' ');
+    }
+
+    function initGeolocation() {
+      try {
+        const saved = sessionStorage.getItem('user_gps_coords');
+        if (saved) {
+          userRealLocation = JSON.parse(saved);
+          updateGpsUI('active');
+        }
+      } catch (e) {}
+
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          onGpsSuccess,
+          onGpsError,
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+        );
+      } else {
+        updateGpsUI('unsupported');
+      }
+    }
+
+    function requestUserLocation(userInitiated = false) {
+      if (!('geolocation' in navigator)) {
+        showAppAlert({
+          icon: '📍',
+          title: 'GPS não suportado',
+          message: 'Seu navegador não possui suporte a geolocalização.',
+          buttonText: 'OK'
+        });
+        return Promise.resolve();
+      }
+
+      updateGpsUI('requesting');
+
+      return new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            onGpsSuccess(pos);
+            if (userInitiated) {
+              showAppAlert({
+                icon: '📍',
+                title: 'GPS Localizado!',
+                message: `Localização detectada (~${Math.round(pos.coords.accuracy)}m de precisão). As distâncias reais foram calculadas em todos os pontos do roteiro e do mapa!`,
+                buttonText: 'Maravilha'
+              });
+            }
+            resolve(pos);
+          },
+          err => {
+            onGpsError(err);
+            if (userInitiated) {
+              showAppAlert({
+                icon: '📍',
+                title: 'Permissão de Localização',
+                message: 'Não foi possível obter sua localização. Permita o acesso à localização nas configurações do seu navegador para ver as distâncias exatas.',
+                buttonText: 'Entendi'
+              });
+            }
+            resolve(null);
+          },
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 10000 }
+        );
+      });
+    }
+
+    function onGpsSuccess(pos) {
+      userRealLocation = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+        timestamp: Date.now()
+      };
+      try {
+        sessionStorage.setItem('user_gps_coords', JSON.stringify(userRealLocation));
+      } catch (e) {}
+
+      updateGpsUI('active');
+      renderAllDistances();
+      updateUserMapMarker();
+
+      if (!isGpsWatching && navigator.geolocation.watchPosition) {
+        isGpsWatching = true;
+        navigator.geolocation.watchPosition(
+          newPos => {
+            userRealLocation = {
+              lat: newPos.coords.latitude,
+              lng: newPos.coords.longitude,
+              accuracy: newPos.coords.accuracy,
+              timestamp: Date.now()
+            };
+            updateGpsUI('active');
+            updateUserMapMarker();
+          },
+          null,
+          { enableHighAccuracy: true, maximumAge: 20000 }
+        );
+      }
+    }
+
+    function onGpsError(err) {
+      if (!userRealLocation) {
+        updateGpsUI('denied');
+      }
+    }
+
+    function updateGpsUI(status = null) {
+      const txt = document.getElementById('gps-status-text');
+      const ind = document.getElementById('gps-status-indicator');
+      const btn = document.getElementById('btn-gps-refresh');
+      if (!txt) return;
+
+      if (userRealLocation) {
+        const acc = Math.round(userRealLocation.accuracy || 20);
+        txt.innerHTML = `🟢 <strong>GPS Ativo:</strong> distâncias reais a partir da sua posição (~${acc}m)`;
+        if (ind) ind.className = 'gps-status-indicator active';
+        if (btn) btn.innerHTML = '🎯 Atualizar';
+      } else if (status === 'requesting') {
+        txt.innerHTML = `⏳ Obtendo sua localização via GPS...`;
+        if (ind) ind.className = 'gps-status-indicator requesting';
+      } else if (status === 'denied') {
+        txt.innerHTML = `📍 Toque para ativar o GPS e ver distâncias reais`;
+        if (ind) ind.className = 'gps-status-indicator denied';
+        if (btn) btn.innerHTML = '📍 Ativar GPS';
+      } else {
+        txt.innerHTML = `📍 Toque para ativar o GPS e ver distâncias reais`;
+        if (ind) ind.className = 'gps-status-indicator';
+        if (btn) btn.innerHTML = '📍 Ativar GPS';
+      }
+    }
+
+    function renderAllDistances() {
+      renderDays();
+      renderSavedPlaces();
+      if (leafletMap) {
+        initOrUpdateMap(false);
+      }
+    }
+
+    function updateUserMapMarker() {
+      if (!leafletMap || !userRealLocation) return;
+      const latLng = [userRealLocation.lat, userRealLocation.lng];
+      const userGpsIcon = L.divIcon({
+        className: 'user-gps-container',
+        html: '<div class="user-gps-dot" title="Sua localização atual"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+
+      if (!userLocationMarker) {
+        userLocationMarker = L.marker(latLng, { icon: userGpsIcon, zIndexOffset: 2000 }).addTo(leafletMap);
+        userLocationMarker.bindPopup('<div style="font-weight:700; font-size:13px; text-align:center; padding:4px;">📍 Você está aqui</div>');
+      } else {
+        userLocationMarker.setLatLng(latLng);
+      }
+    }
+
+    function centerMapOnUser() {
+      if (!userRealLocation) {
+        requestUserLocation(true).then(() => {
+          if (userRealLocation && leafletMap) {
+            leafletMap.setView([userRealLocation.lat, userRealLocation.lng], 14);
+            updateUserMapMarker();
+            if (userLocationMarker) userLocationMarker.openPopup();
+          }
+        });
+        return;
+      }
+      if (leafletMap) {
+        leafletMap.setView([userRealLocation.lat, userRealLocation.lng], 14);
+        updateUserMapMarker();
+        if (userLocationMarker) userLocationMarker.openPopup();
+      }
+    }
+
     let appState = { generalNotes: '', savedPlaces: [], checklist: [], days: [] };
     let hasUnsavedChanges = false;
     let selectedDayId = 'all';
@@ -1407,6 +1777,7 @@
     let lastRenderedHash = '';
 
     async function initApp() {
+      initGeolocation();
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached) {
@@ -1836,6 +2207,9 @@
       const query = encodeURIComponent(item.location || (item.title + ' Florida'));
       const mapsUrl = `https://maps.google.com/?q=${query}`;
       const imgUrl = item.image || getAutoImage(item.title, item.category);
+      const day = (appState.days || []).find(d => d.id === dayId);
+      const coords = resolveItemCoords(item, day ? day.phase : 'orlando');
+      const distBadge = coords ? renderDistanceBadge(coords.lat, coords.lng, day ? day.phase : null) : '';
 
       return `
         <div class="item-card ${item.done ? 'done' : ''}">
@@ -1843,9 +2217,10 @@
             ${item.done ? '✓' : ''}
           </button>
           <div class="item-body">
-            <div class="item-meta">
+            <div class="item-meta" style="flex-wrap:wrap; gap:4px; align-items:center;">
               <span class="time-pill">${item.time || '--:--'}</span>
               <span class="cat-pill ${meta.cls}">${meta.icon} ${meta.label}</span>
+              ${distBadge}
             </div>
             <div class="item-title" style="${item.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(item.title)}</div>
             ${item.notes ? `<p class="item-notes">${escapeHtml(item.notes)}</p>` : ''}
@@ -1918,6 +2293,7 @@
         const imgUrl = p.image || getAutoImage(p.title, 'restaurante', p.tags || []);
         const listLabel = p.list === 'favoritos' ? '⭐ Favorito' : '📌 Quero Visitar';
         const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(p.location || p.title)}`;
+        const distBadge = renderDistanceBadge(p.lat, p.lng, (p.city || '').toLowerCase().includes('miami') ? 'miami' : 'orlando');
 
         return `
           <div class="saved-card">
@@ -1927,8 +2303,9 @@
               <span class="saved-city-badge">${escapeHtml(p.city || 'Flórida')}</span>
             </div>
             <div class="saved-content">
-              <div style="margin-bottom:4px;">
-                ${(p.tags || []).map(t => `<span class="tag-pill">#${escapeHtml(t)}</span>`).join('')}
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; margin-bottom:4px;">
+                <div>${(p.tags || []).map(t => `<span class="tag-pill">#${escapeHtml(t)}</span>`).join('')}</div>
+                ${distBadge}
               </div>
               <div style="font-weight:800; font-size:15px; margin-bottom:4px;">${escapeHtml(p.title)}</div>
               ${p.location ? `<div style="font-size:11px; color:var(--muted); margin-bottom:6px;">📍 ${escapeHtml(p.location)}</div>` : ''}
@@ -2226,6 +2603,7 @@
         listEl.innerHTML = pts.map((p, idx) => {
           const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location || p.title)}`;
           const isSelected = selectedMapPlaceIndex === idx;
+          const distBadge = renderDistanceBadge(p.lat, p.lng, p.region);
           return `
             <div id="map-list-card-${idx}" class="map-place-card ${isSelected ? 'selected' : ''}">
               <div class="map-place-top" onclick="selectMapPlace(${idx}, true)">
@@ -2233,6 +2611,7 @@
                 <div style="flex:1; min-width:0;">
                   <div style="font-size:11px; font-weight:800; color:${p.color}; margin-bottom:2px;">${escapeHtml(p.subtitle)}</div>
                   <div style="font-size:14px; font-weight:800; color:var(--text); line-height:1.25;">${escapeHtml(p.title)}</div>
+                  ${distBadge ? `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:3px;">${distBadge}</div>` : ''}
                   <div style="font-size:12px; color:var(--muted); margin-top:3px;">📍 ${escapeHtml(p.location)}</div>
                   ${p.notes ? `<div style="font-size:12px; color:var(--muted); margin-top:4px; line-height:1.35;">${escapeHtml(p.notes)}</div>` : ''}
                 </div>
@@ -2272,6 +2651,7 @@
       pts.forEach((p, idx) => {
         bounds.push([p.lat, p.lng]);
         const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location || p.title)}`;
+        const distBadge = renderDistanceBadge(p.lat, p.lng, p.region);
 
         const pinIcon = L.divIcon({
           className: '',
@@ -2291,7 +2671,8 @@
                 <div style="font-size:13px; font-weight:800; color:#0f172a; line-height:1.2; margin-top:2px;">${escapeHtml(p.title)}</div>
               </div>
             </div>
-            <div style="font-size:11px; color:#475569; margin-bottom:6px;">📍 ${escapeHtml(p.location)}</div>
+            <div style="font-size:11px; color:#475569; margin-bottom:4px;">📍 ${escapeHtml(p.location)}</div>
+            ${distBadge ? `<div style="margin-bottom:6px;">${distBadge}</div>` : ''}
             ${p.notes ? `<div style="font-size:11px; color:#64748b; margin-bottom:8px; line-height:1.3;">${escapeHtml(p.notes)}</div>` : ''}
             <a href="${gmapsLink}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:6px; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; text-decoration:none; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:800;">
               ${GMAPS_LOGO_SVG}
@@ -2307,6 +2688,8 @@
         leafletMarkersGroup.addLayer(marker);
         currentMapMarkers.push(marker);
       });
+
+      updateUserMapMarker();
 
       if (shouldFitBounds && bounds.length > 0) {
         leafletMap.fitBounds(bounds, { padding: [36, 36], maxZoom: 13 });
@@ -2326,6 +2709,7 @@
       // Mostra card de informações do pino selecionado logo abaixo do mapa
       const selectedCardEl = document.getElementById('selected-map-place-card');
       const gmapsLink = `https://maps.google.com/?q=${encodeURIComponent(p.location || p.title)}`;
+      const distBadge = renderDistanceBadge(p.lat, p.lng, p.region);
       if (selectedCardEl) {
         selectedCardEl.classList.remove('hidden');
         selectedCardEl.innerHTML = `
@@ -2339,6 +2723,7 @@
               <div style="flex:1; min-width:0;">
                 <div style="font-size:11px; font-weight:800; color:${p.color}; margin-bottom:2px;">${escapeHtml(p.subtitle)}</div>
                 <div style="font-size:15px; font-weight:800; color:var(--text);">${escapeHtml(p.title)}</div>
+                ${distBadge ? `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:3px;">${distBadge}</div>` : ''}
                 <div style="font-size:12px; color:var(--muted); margin-top:3px;">📍 ${escapeHtml(p.location)}</div>
                 ${p.notes ? `<div style="font-size:12px; color:var(--text); margin-top:4px;">${escapeHtml(p.notes)}</div>` : ''}
               </div>
@@ -2677,6 +3062,21 @@
       }).slice(0, 8);
 
       currentAutocompleteResults = [...localMatches];
+      // Se a localização do usuário estiver ativa e próxima da Flórida (< 600km), ordena sugestões pela unidade mais próxima de você!
+      if (userRealLocation) {
+        const distToFlorida = calculateDistanceKm(userRealLocation.lat, userRealLocation.lng, 28.3, -81.5);
+        if (distToFlorida < 600) {
+          currentAutocompleteResults.sort((a, b) => {
+            const da = getUserDistanceTo(a.lat, a.lng);
+            const db = getUserDistanceTo(b.lat, b.lng);
+            if (da != null && db != null) return da - db;
+            if (da != null) return -1;
+            if (db != null) return 1;
+            return 0;
+          });
+        }
+      }
+
       renderAutocompleteDropdown(mode, currentAutocompleteResults, true);
 
       // 2. Busca ao vivo direto no Google Maps + ArcGIS POI em paralelo
@@ -2713,6 +3113,19 @@
         if (mySeq !== autocompleteSeq) return;
 
         currentAutocompleteResults = mergePlaceSuggestions(localMatches, gmapsItems, arcgisItems);
+        if (userRealLocation) {
+          const distToFlorida = calculateDistanceKm(userRealLocation.lat, userRealLocation.lng, 28.3, -81.5);
+          if (distToFlorida < 600) {
+            currentAutocompleteResults.sort((a, b) => {
+              const da = getUserDistanceTo(a.lat, a.lng);
+              const db = getUserDistanceTo(b.lat, b.lng);
+              if (da != null && db != null) return da - db;
+              if (da != null) return -1;
+              if (db != null) return 1;
+              return 0;
+            });
+          }
+        }
         renderAutocompleteDropdown(mode, currentAutocompleteResults, false);
       }, 220);
     }
@@ -2740,6 +3153,7 @@
           const ratingBadge = item.rating
             ? `<span class="autocomplete-gmaps-meta">⭐ ${escapeHtml(item.rating)}${item.gmapsCategory ? ' • ' + escapeHtml(item.gmapsCategory) : ''}</span>`
             : (item.gmapsCategory ? `<span class="autocomplete-gmaps-meta">${escapeHtml(item.gmapsCategory)}</span>` : '');
+          const distBadge = renderDistanceBadge(item.lat, item.lng, item.city && item.city.toLowerCase().includes('miami') ? 'miami' : 'orlando');
           return `
             <div class="autocomplete-item" onclick="selectPlaceSuggestion('${mode}', ${idx})">
               <div class="autocomplete-icon">
@@ -2747,9 +3161,10 @@
               </div>
               <div class="autocomplete-main">
                 <div class="autocomplete-title">${escapeHtml(item.name)}</div>
-                <div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
                   <span class="autocomplete-branch">${escapeHtml(item.branch)}</span>
                   ${ratingBadge}
+                  ${distBadge}
                 </div>
                 <div class="autocomplete-addr">📍 ${escapeHtml(item.address)}</div>
               </div>
