@@ -636,6 +636,93 @@
       justify-content: space-between;
       gap: 10px;
     }
+    /* Autocomplete de Lugares e Múltiplos Endereços */
+    .autocomplete-wrap {
+      position: relative;
+    }
+    .autocomplete-dropdown {
+      margin-top: 6px;
+      background: var(--card);
+      border: 2px solid var(--primary);
+      border-radius: 14px;
+      box-shadow: var(--shadow-md);
+      max-height: 250px;
+      overflow-y: auto;
+      z-index: 60;
+    }
+    .autocomplete-header {
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--primary);
+      background: var(--primary-light);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .autocomplete-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      transition: background 0.12s ease;
+    }
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+    .autocomplete-item:active,
+    .autocomplete-item:hover {
+      background: var(--primary-light);
+    }
+    .autocomplete-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--bg-inset);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .autocomplete-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .autocomplete-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.25;
+    }
+    .autocomplete-branch {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 1px 7px;
+      border-radius: 6px;
+      margin-top: 3px;
+    }
+    .autocomplete-addr {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+    .autofill-status {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--success);
+      margin-top: 5px;
+    }
     /* Caixa de Aviso Própria do App (Substitui alertas nativos do iOS) */
     .dialog-backdrop {
       position: fixed;
@@ -992,10 +1079,19 @@
       <form onsubmit="saveActivity(event)">
         <input type="hidden" id="act-day-id">
         <input type="hidden" id="act-item-id">
+        <input type="hidden" id="act-lat">
+        <input type="hidden" id="act-lng">
 
         <div class="form-group">
           <label class="form-label">⚡ Sugestões Rápidas (Toque para preencher):</label>
           <div id="quick-presets" class="scroll-strip"></div>
+        </div>
+
+        <div class="form-group autocomplete-wrap">
+          <label class="form-label">Nome do Lugar ou Atividade * <span style="font-weight:500; color:var(--muted);">(Digite para buscar endereço e dados)</span></label>
+          <input type="text" id="act-title" required autocomplete="off" oninput="handlePlaceAutocomplete('act', this.value)" placeholder="Ex: Ross, Olive Garden, Walmart, Magic Kingdom..." class="form-input">
+          <div id="act-autofill-msg" class="autofill-status hidden">✨ Endereço, categoria e foto preenchidos automaticamente!</div>
+          <div id="act-autocomplete-list" class="autocomplete-dropdown hidden"></div>
         </div>
 
         <div class="form-row-2col">
@@ -1017,13 +1113,8 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Nome do Lugar ou Atividade *</label>
-          <input type="text" id="act-title" required placeholder="Ex: Magic Kingdom, Ross, Olive Garden..." class="form-input">
-        </div>
-
-        <div class="form-group">
           <label class="form-label">Endereço / Local para GPS</label>
-          <input type="text" id="act-location" placeholder="Ex: Magic Kingdom Orlando" class="form-input">
+          <input type="text" id="act-location" placeholder="Preenchido ao escolher um local acima ou digite..." class="form-input">
         </div>
 
         <div class="form-group">
@@ -1054,10 +1145,14 @@
 
       <form onsubmit="saveBucketPlace(event)">
         <input type="hidden" id="sp-id">
+        <input type="hidden" id="sp-lat">
+        <input type="hidden" id="sp-lng">
 
-        <div class="form-group">
-          <label class="form-label">Nome do Lugar *</label>
-          <input type="text" id="sp-title" required placeholder="Ex: Cheesecake Factory, Crumbl Cookies, Apple Store..." class="form-input">
+        <div class="form-group autocomplete-wrap">
+          <label class="form-label">Nome do Lugar * <span style="font-weight:500; color:var(--muted);">(Digite para ver unidades e endereços)</span></label>
+          <input type="text" id="sp-title" required autocomplete="off" oninput="handlePlaceAutocomplete('sp', this.value)" placeholder="Ex: Cheesecake Factory, Ross, Shake Shack, Apple Store..." class="form-input">
+          <div id="sp-autofill-msg" class="autofill-status hidden">✨ Endereço, cidade, tags e foto preenchidos!</div>
+          <div id="sp-autocomplete-list" class="autocomplete-dropdown hidden"></div>
         </div>
 
         <div class="form-row-2col" style="grid-template-columns: 1fr 1fr;">
@@ -1833,6 +1928,8 @@
 
     function openSavedPlaceModal(placeId = null) {
       document.getElementById('sp-id').value = placeId || '';
+      document.getElementById('sp-autocomplete-list').classList.add('hidden');
+      document.getElementById('sp-autofill-msg').classList.add('hidden');
       if (placeId) {
         const p = (appState.savedPlaces || []).find(x => x.id === placeId);
         if (!p) return;
@@ -1844,6 +1941,8 @@
         document.getElementById('sp-location').value = p.location || '';
         document.getElementById('sp-image').value = p.image || '';
         document.getElementById('sp-notes').value = p.notes || '';
+        document.getElementById('sp-lat').value = p.lat || '';
+        document.getElementById('sp-lng').value = p.lng || '';
       } else {
         document.getElementById('saved-modal-title').textContent = '🔖 Salvar Lugar para Visitar';
         document.getElementById('sp-title').value = '';
@@ -1853,11 +1952,14 @@
         document.getElementById('sp-location').value = '';
         document.getElementById('sp-image').value = '';
         document.getElementById('sp-notes').value = '';
+        document.getElementById('sp-lat').value = '';
+        document.getElementById('sp-lng').value = '';
       }
       document.getElementById('saved-place-modal').classList.remove('hidden');
     }
 
     function closeSavedPlaceModal() {
+      document.getElementById('sp-autocomplete-list').classList.add('hidden');
       document.getElementById('saved-place-modal').classList.add('hidden');
     }
 
@@ -1879,6 +1981,8 @@
       const location = document.getElementById('sp-location').value.trim();
       let customImg = document.getElementById('sp-image').value.trim();
       const notes = document.getElementById('sp-notes').value.trim();
+      const customLat = parseFloat(document.getElementById('sp-lat').value);
+      const customLng = parseFloat(document.getElementById('sp-lng').value);
 
       if (!customImg) {
         const realPhoto = await fetchRealPlacePhoto(title);
@@ -1894,8 +1998,8 @@
         city,
         tags: tags.length ? tags : ['passeio'],
         location,
-        lat: defaultCoords.lat + (Math.random() - 0.5) * 0.04,
-        lng: defaultCoords.lng + (Math.random() - 0.5) * 0.04,
+        lat: !isNaN(customLat) ? customLat : (defaultCoords.lat + (Math.random() - 0.5) * 0.04),
+        lng: !isNaN(customLng) ? customLng : (defaultCoords.lng + (Math.random() - 0.5) * 0.04),
         image: customImg || getAutoImage(title, 'restaurante', tags),
         notes
       };
@@ -1903,8 +2007,8 @@
       if (id) {
         const idx = appState.savedPlaces.findIndex(x => x.id === id);
         if (idx !== -1) {
-          payload.lat = appState.savedPlaces[idx].lat || payload.lat;
-          payload.lng = appState.savedPlaces[idx].lng || payload.lng;
+          if (isNaN(customLat)) payload.lat = appState.savedPlaces[idx].lat || payload.lat;
+          if (isNaN(customLng)) payload.lng = appState.savedPlaces[idx].lng || payload.lng;
           appState.savedPlaces[idx] = payload;
         }
       } else {
@@ -2240,6 +2344,275 @@
       }
     }
 
+    // ================= AUTOCOMPLETE INTELIGENTE DE LUGARES E MÚLTIPLOS ENDEREÇOS =================
+    const FLORIDA_PLACES_CATALOG = [
+      // ROSS DRESS FOR LESS (Múltiplos endereços)
+      { name: 'Ross Dress for Less', branch: 'Kissimmee • Margaritaville (10 min do Celebration Suites)', address: '3202 Margaritaville Blvd, Kissimmee, FL 34747', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.3421, lng: -81.6114, notes: 'Ótima unidade da Ross em Kissimmee, ao lado da Crumbl Cookies e Marshalls.' },
+      { name: 'Ross Dress for Less', branch: 'Kissimmee • The Loop', address: '3208 N John Young Pkwy, Kissimmee, FL 34741', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.3442, lng: -81.4211, notes: 'Fica no centro comercial The Loop junto com TJ Maxx, Burlington e Nike.' },
+      { name: 'Ross Dress for Less', branch: 'Orlando • Perto do Outlet Vineland', address: '8109 Vineland Ave, Orlando, FL 32821', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.3841, lng: -81.4882, notes: 'Fica bem em frente ao Orlando Vineland Premium Outlets.' },
+      { name: 'Ross Dress for Less', branch: 'Orlando • International Drive', address: '5295 International Dr, Orlando, FL 32819', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.4671, lng: -81.4519, notes: 'Unidade da International Drive, pertinho do Outlet International.' },
+      { name: 'Ross Dress for Less', branch: 'Orlando • Millenia Plaza', address: '4661 Millenia Plaza Way, Orlando, FL 32839', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.4812, lng: -81.4384, notes: 'Unidade grande no complexo ao lado do Mall at Millenia.' },
+      { name: 'Ross Dress for Less', branch: 'Miami • Doral (8 min do Hampton Inn)', address: '10721 NW 41st St, Doral, FL 33178', city: 'Miami', category: 'compras', tags: ['shopping', 'outlet'], lat: 25.8121, lng: -80.3702, notes: 'Unidade em Doral super próxima ao hotel Hampton Inn Miami-Airport West.' },
+      { name: 'Ross Dress for Less', branch: 'Miami • Perto do Dolphin Mall', address: '11421 NW 12th St, Miami, FL 33172', city: 'Miami', category: 'compras', tags: ['shopping', 'outlet'], lat: 25.7855, lng: -80.3821, notes: 'Ao lado do Dolphin Mall.' },
+
+      // WALMART SUPERCENTER (Múltiplos endereços)
+      { name: 'Walmart Supercenter', branch: 'Kissimmee • Old Lake Wilson Rd (Mais próximo do hotel)', address: '2855 N Old Lake Wilson Rd, Kissimmee, FL 34747', city: 'Orlando', category: 'compras', tags: ['mercado', 'shopping'], lat: 28.3348, lng: -81.5891, notes: 'Walmart Supercenter 24h mais próximo do Celebration Suites e da Disney.' },
+      { name: 'Walmart Supercenter', branch: 'Kissimmee • Vineland Rd (535)', address: '3250 Vineland Rd, Kissimmee, FL 34746', city: 'Orlando', category: 'compras', tags: ['mercado', 'shopping'], lat: 28.3312, lng: -81.4751, notes: 'Grande Walmart Supercenter na 535, a ~8 min do hotel Celebration Suites.' },
+      { name: 'Walmart Supercenter', branch: 'Orlando • Turkey Lake Rd (Perto da Universal)', address: '8990 Turkey Lake Rd, Orlando, FL 32819', city: 'Orlando', category: 'compras', tags: ['mercado', 'shopping'], lat: 28.4351, lng: -81.4759, notes: 'Excelente opção na região da International Drive / Universal.' },
+      { name: 'Walmart Supercenter', branch: 'Miami • Doral (7 min do hotel Hampton Inn)', address: '8651 NW 13th Ter, Doral, FL 33126', city: 'Miami', category: 'compras', tags: ['mercado', 'shopping'], lat: 25.7852, lng: -80.3371, notes: 'Walmart Supercenter pertinho do hotel Hampton Inn Miami-Airport West.' },
+
+      // TARGET (Múltiplos endereços)
+      { name: 'Target', branch: 'Kissimmee • Rolling Oaks (10 min do Celebration Suites)', address: '3200 Rolling Oaks Blvd, Kissimmee, FL 34747', city: 'Orlando', category: 'compras', tags: ['mercado', 'shopping'], lat: 28.3449, lng: -81.6095, notes: 'Super Target completo em Kissimmee.' },
+      { name: 'Target', branch: 'Kissimmee • Irlo Bronson Hwy (Leste)', address: '4795 W Irlo Bronson Memorial Hwy, Kissimmee, FL 34746', city: 'Orlando', category: 'compras', tags: ['mercado', 'shopping'], lat: 28.3314, lng: -81.4718, notes: 'Na mesma avenida do Celebration Suites (US-192).' },
+      { name: 'Target', branch: 'Orlando • Millenia', address: '4750 Millenia Plaza Way, Orlando, FL 32839', city: 'Orlando', category: 'compras', tags: ['mercado', 'shopping'], lat: 28.4801, lng: -81.4398, notes: 'Super Target ao lado do Mall at Millenia.' },
+      { name: 'Target', branch: 'Miami • Flagler / Perto de Doral', address: '8350 S Dixie Hwy / 7795 SW 40th St, Miami, FL', city: 'Miami', category: 'compras', tags: ['mercado', 'shopping'], lat: 25.7332, lng: -80.3215, notes: 'Unidade ampla em Miami.' },
+
+      // OLIVE GARDEN (Múltiplos endereços)
+      { name: 'Olive Garden Italian Restaurant', branch: 'Kissimmee • Irlo Bronson Hwy (5 min do Celebration Suites)', address: '5021 W Irlo Bronson Memorial Hwy, Kissimmee, FL 34746', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'jantar'], lat: 28.3319, lng: -81.4882, notes: 'Unidade mais próxima do Celebration Suites! Massas, salada e breadsticks à vontade.' },
+      { name: 'Olive Garden Italian Restaurant', branch: 'Kissimmee • Rolling Oaks / Formosa Gardens', address: '8136 W Irlo Bronson Memorial Hwy, Kissimmee, FL 34747', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'jantar'], lat: 28.3463, lng: -81.6121, notes: 'Unidade a oeste na US-192, perto da Target e Ross de Margaritaville.' },
+      { name: 'Olive Garden Italian Restaurant', branch: 'Orlando • Lake Buena Vista (Perto do Disney Springs)', address: '12361 S Apopka Vineland Rd, Orlando, FL 32836', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'jantar'], lat: 28.3854, lng: -81.5055, notes: 'Pertinho do Disney Springs e do Outlet Vineland.' },
+      { name: 'Olive Garden Italian Restaurant', branch: 'Orlando • International Drive', address: '7653 International Dr, Orlando, FL 32819', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'jantar'], lat: 28.4529, lng: -81.4701, notes: 'Unidade no coração da International Drive.' },
+      { name: 'Olive Garden Italian Restaurant', branch: 'Orlando • Mall at Millenia', address: '4101 Conroy Rd, Orlando, FL 32839', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'jantar'], lat: 28.4883, lng: -81.4283, notes: 'Em frente ao Mall at Millenia.' },
+
+      // THE CHEESECAKE FACTORY (Múltiplos endereços)
+      { name: 'The Cheesecake Factory', branch: 'Orlando • The Mall at Millenia', address: '4200 Conroy Rd, Orlando, FL 32839', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'doces'], lat: 28.4851, lng: -81.4316, notes: 'Entrada principal do Mall at Millenia — pratos fartos e cheesecakes famosos.' },
+      { name: 'The Cheesecake Factory', branch: 'Orlando • Winter Park Village', address: '520 N Orlando Ave, Winter Park, FL 32789', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'doces'], lat: 28.6012, lng: -81.3645, notes: 'Unidade super tranquila em Winter Park.' },
+      { name: 'The Cheesecake Factory', branch: 'Miami • Dolphin Mall (10 min do Hampton Inn)', address: '11401 NW 12th St, Miami, FL 33172', city: 'Miami', category: 'restaurante', tags: ['restaurante', 'doces'], lat: 25.7869, lng: -80.3801, notes: 'Fica no Dolphin Mall, pertinho do hotel de Miami!' },
+      { name: 'The Cheesecake Factory', branch: 'Miami • Dadeland Mall', address: '7497 Dadeland Mall, Miami, FL 33156', city: 'Miami', category: 'restaurante', tags: ['restaurante', 'doces'], lat: 25.6895, lng: -80.3125, notes: 'Unidade do Dadeland Mall em Miami.' },
+
+      // SHAKE SHACK (Múltiplos endereços)
+      { name: 'Shake Shack', branch: 'Orlando • ICON Park (International Drive)', address: '8359 International Dr, Orlando, FL 32819', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'hamburguer'], lat: 28.4438, lng: -81.4697, notes: 'Ao pé da roda-gigante do ICON Park com estacionamento grátis.' },
+      { name: 'Shake Shack', branch: 'Orlando • Vineland Premium Outlets', address: '8200 Vineland Ave, Orlando, FL 32821', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'hamburguer'], lat: 28.3855, lng: -81.4912, notes: 'Dentro do Outlet Vineland.' },
+      { name: 'Shake Shack', branch: 'Orlando • Mall at Millenia', address: '4200 Conroy Rd, Orlando, FL 32839', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'hamburguer'], lat: 28.4855, lng: -81.4312, notes: 'Dentro do Mall at Millenia.' },
+      { name: 'Shake Shack', branch: 'Miami Beach • Lincoln Road', address: '1111 Lincoln Rd, Miami Beach, FL 33139', city: 'Miami', category: 'restaurante', tags: ['restaurante', 'hamburguer'], lat: 25.7905, lng: -80.1411, notes: 'No calçadão da Lincoln Road em South Beach.' },
+
+      // FIVE GUYS (Múltiplos endereços)
+      { name: 'Five Guys Burgers & Fries', branch: 'Kissimmee • Old Town (Ao lado do Celebration Suites)', address: '5735 W Irlo Bronson Memorial Hwy, Kissimmee, FL 34746', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'hamburguer'], lat: 28.3328, lng: -81.5152, notes: 'Dá para ir a pé do Celebration Suites! Hambúrguer artesanal e batata rústica.' },
+      { name: 'Five Guys Burgers & Fries', branch: 'Kissimmee • Rolling Oaks / Sunset Walk', address: '3200 Rolling Oaks Blvd, Kissimmee, FL 34747', city: 'Orlando', category: 'restaurante', tags: ['restaurante', 'hamburguer'], lat: 28.3445, lng: -81.6085, notes: 'No complexo da Target de Kissimmee.' },
+      { name: 'Five Guys Burgers & Fries', branch: 'Miami • Bayside Marketplace', address: '401 Biscayne Blvd, Miami, FL 33132', city: 'Miami', category: 'restaurante', tags: ['restaurante', 'hamburguer'], lat: 25.7785, lng: -80.1862, notes: 'No Bayside Marketplace em Downtown Miami.' },
+
+      // CRUMBL COOKIES, APPLE STORE, BEST BUY, DISNEY OUTLET
+      { name: 'Crumbl Cookies', branch: 'Kissimmee • Margaritaville / Sunset Walk', address: '3258 Margaritaville Blvd, Kissimmee, FL 34747', city: 'Orlando', category: 'restaurante', tags: ['cafeteria', 'doces'], lat: 28.3422, lng: -81.6105, notes: 'Cookies americanos quentinhos ao lado da Ross de Kissimmee.' },
+      { name: 'Crumbl Cookies', branch: 'Orlando • Millenia', address: '4672 Millenia Plaza Way, Orlando, FL 32839', city: 'Orlando', category: 'restaurante', tags: ['cafeteria', 'doces'], lat: 28.4810, lng: -81.4380, notes: 'No Millenia Plaza ao lado da Ross e HomeGoods.' },
+      { name: 'Apple Store', branch: 'Orlando • The Mall at Millenia', address: '4200 Conroy Rd, Orlando, FL 32839', city: 'Orlando', category: 'compras', tags: ['shopping', 'eletronicos'], lat: 28.4855, lng: -81.4312, notes: 'Loja oficial da Apple no Mall at Millenia.' },
+      { name: 'Apple Store', branch: 'Orlando • The Florida Mall', address: '8001 S Orange Blossom Trl, Orlando, FL 32809', city: 'Orlando', category: 'compras', tags: ['shopping', 'eletronicos'], lat: 28.4452, lng: -81.3955, notes: 'Loja oficial da Apple no Florida Mall.' },
+      { name: 'Apple Store', branch: 'Miami Beach • Lincoln Road', address: '1021 Lincoln Rd, Miami Beach, FL 33139', city: 'Miami', category: 'compras', tags: ['shopping', 'eletronicos'], lat: 25.7904, lng: -80.1395, notes: 'Loja arquitetônica da Apple no calçadão da Lincoln Road.' },
+      { name: 'Apple Store', branch: 'Miami • Brickell City Centre', address: '701 S Miami Ave, Miami, FL 33131', city: 'Miami', category: 'compras', tags: ['shopping', 'eletronicos'], lat: 25.7672, lng: -80.1936, notes: 'Loja oficial da Apple no Brickell City Centre.' },
+      { name: 'Best Buy', branch: 'Kissimmee • The Loop', address: '1620 W Osceola Pkwy, Kissimmee, FL 34741', city: 'Orlando', category: 'compras', tags: ['shopping', 'eletronicos'], lat: 28.3435, lng: -81.4182, notes: 'Eletrônicos no complexo The Loop em Kissimmee.' },
+      { name: 'Best Buy', branch: 'Orlando • Florida Mall', address: '8350 S Orange Blossom Trl, Orlando, FL 32809', city: 'Orlando', category: 'compras', tags: ['shopping', 'eletronicos'], lat: 28.4421, lng: -81.3978, notes: 'Em frente ao Florida Mall.' },
+      { name: 'Best Buy', branch: 'Miami • Doral (8 min do Hampton Inn)', address: '10760 NW 17th St, Doral, FL 33172', city: 'Miami', category: 'compras', tags: ['shopping', 'eletronicos'], lat: 25.7892, lng: -80.3712, notes: 'Pertinho do Dolphin Mall e do hotel Hampton Inn.' },
+      { name: 'Disney Character Warehouse', branch: 'Orlando • Outlet Vineland (Mais próximo)', address: '8200 Vineland Ave, Orlando, FL 32821', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.3855, lng: -81.4912, notes: 'Ponta de estoque oficial dos parques da Disney no Outlet Vineland.' },
+      { name: 'Disney Character Warehouse', branch: 'Orlando • Outlet International Drive', address: '4951 International Dr, Orlando, FL 32819', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.4741, lng: -81.4514, notes: 'Ponta de estoque oficial dos parques da Disney no Outlet International.' },
+
+      // PARQUES, OUTLETS, SHOPPINGS E ATRAÇÕES PRINCIPAIS
+      { name: 'Disney Magic Kingdom', branch: 'Orlando • Walt Disney World', address: 'Magic Kingdom Park, Orlando, FL 32836', city: 'Orlando', category: 'parque', tags: ['parque', 'passeio'], lat: 28.4177, lng: -81.5812, notes: 'Castelo da Cinderela e show de fogos Happily Ever After.' },
+      { name: 'Disney EPCOT', branch: 'Orlando • Walt Disney World', address: 'EPCOT, 200 Epcot Center Dr, Orlando, FL 32830', city: 'Orlando', category: 'parque', tags: ['parque', 'passeio'], lat: 28.3747, lng: -81.5494, notes: 'Guardiões da Galáxia, Remy e pavilhões dos países.' },
+      { name: 'Disney Hollywood Studios', branch: 'Orlando • Walt Disney World', address: 'Disney Hollywood Studios, Bay Lake, FL 32830', city: 'Orlando', category: 'parque', tags: ['parque', 'passeio'], lat: 28.3575, lng: -81.5583, notes: 'Star Wars Galaxy\'s Edge, Toy Story Land e Fantasmic.' },
+      { name: 'Disney Animal Kingdom', branch: 'Orlando • Walt Disney World', address: 'Disney Animal Kingdom, Orlando, FL 32830', city: 'Orlando', category: 'parque', tags: ['parque', 'passeio'], lat: 28.3597, lng: -81.5913, notes: 'Pandora (Avatar Flight of Passage) e Kilimanjaro Safaris.' },
+      { name: 'Universal Epic Universe', branch: 'Orlando • Novo Parque Universal', address: '1001 Epic Blvd, Orlando, FL 32819', city: 'Orlando', category: 'parque', tags: ['parque', 'passeio'], lat: 28.4404, lng: -81.4482, notes: 'Super Nintendo World, Harry Potter Ministry of Magic, Isle of Berk e Dark Universe.' },
+      { name: 'Universal Studios Florida & Islands of Adventure', branch: 'Orlando • Universal Orlando Resort', address: '6000 Universal Blvd, Orlando, FL 32819', city: 'Orlando', category: 'parque', tags: ['parque', 'passeio'], lat: 28.4743, lng: -81.4678, notes: 'Beco Diagonal, Hogsmeade, Hagrid e VelociCoaster.' },
+      { name: 'Disney Springs', branch: 'Orlando • Passeio & Jantar Gratuito', address: '1486 Buena Vista Dr, Lake Buena Vista, FL 32830', city: 'Orlando', category: 'passeio', tags: ['passeio', 'shopping', 'restaurante'], lat: 28.3702, lng: -81.5193, notes: 'Entrada e estacionamento gratuitos. World of Disney, LEGO Store e restaurantes.' },
+      { name: 'Universal CityWalk Orlando', branch: 'Orlando • Passeio Noturno', address: '6000 Universal Blvd, Orlando, FL 32819', city: 'Orlando', category: 'passeio', tags: ['passeio', 'restaurante'], lat: 28.4736, lng: -81.4663, notes: 'Estacionamento gratuito após as 18h. Toothsome Chocolate Emporium e Hard Rock.' },
+      { name: 'Kennedy Space Center (NASA)', branch: 'Cabo Canaveral • Merritt Island', address: 'Space Commerce Way, Merritt Island, FL 32953', city: 'Orlando', category: 'parque', tags: ['parque', 'passeio'], lat: 28.5234, lng: -80.6817, notes: 'Ônibus Espacial Atlantis, Apollo/Saturn V Center e foguetes reais.' },
+      { name: 'Orlando Vineland Premium Outlets', branch: 'Orlando • Mais próximo de Kissimmee', address: '8200 Vineland Ave, Orlando, FL 32821', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.3852, lng: -81.4915, notes: 'Fica a ~12 min do hotel Celebration Suites.' },
+      { name: 'Orlando International Premium Outlets', branch: 'Orlando • International Drive', address: '4951 International Dr, Orlando, FL 32819', city: 'Orlando', category: 'compras', tags: ['shopping', 'outlet'], lat: 28.4741, lng: -81.4514, notes: 'Maior outlet de Orlando no topo da International Drive.' },
+      { name: 'The Mall at Millenia', branch: 'Orlando • Shopping Coberto', address: '4200 Conroy Rd, Orlando, FL 32839', city: 'Orlando', category: 'compras', tags: ['shopping', 'restaurante'], lat: 28.4855, lng: -81.4312, notes: 'Apple Store, Cheesecake Factory, Macy\'s, Sephora.' },
+      { name: 'The Florida Mall', branch: 'Orlando • Shopping Coberto', address: '8001 S Orange Blossom Trl, Orlando, FL 32809', city: 'Orlando', category: 'compras', tags: ['shopping', 'restaurante'], lat: 28.4452, lng: -81.3955, notes: 'Apple Store, M&M\'s World, Crayola Experience, Primark, Zara.' },
+      { name: 'Dolphin Mall', branch: 'Miami • 10 min do Hampton Inn', address: '11401 NW 12th St, Miami, FL 33172', city: 'Miami', category: 'compras', tags: ['shopping', 'outlet'], lat: 25.7867, lng: -80.3802, notes: 'Maior shopping/outlet de Miami, pertinho do hotel.' },
+      { name: 'Sawgrass Mills Outlet', branch: 'Sunrise / Miami • Maior Outlet da Flórida', address: '12801 W Sunrise Blvd, Sunrise, FL 33323', city: 'Miami', category: 'compras', tags: ['shopping', 'outlet'], lat: 26.1519, lng: -80.3212, notes: 'Mais de 350 lojas e outlets a ~35 min de Miami.' },
+      { name: 'Bayside Marketplace', branch: 'Miami • Downtown & Marina', address: '401 Biscayne Blvd, Miami, FL 33132', city: 'Miami', category: 'passeio', tags: ['passeio', 'shopping', 'restaurante'], lat: 25.7785, lng: -80.1862, notes: 'Shopping aberto à beira da baía, ao lado do Kaseya Center.' },
+      { name: 'Kaseya Center (Arena do Miami Heat)', branch: 'Miami • Downtown (Biscayne Blvd)', address: '601 Biscayne Blvd, Miami, FL 33132', city: 'Miami', category: 'passeio', tags: ['passeio'], lat: 25.7814, lng: -80.1870, notes: 'Arena oficial do Miami Heat na NBA (colada ao Bayside Marketplace).' }
+    ];
+
+    let autocompleteTimer = null;
+    let currentAutocompleteResults = [];
+
+    function mapOsmToAppMeta(osmKey = '', osmVal = '', name = '') {
+      const k = (osmKey + ' ' + osmVal + ' ' + name).toLowerCase();
+      if (k.includes('theme_park') || k.includes('attraction') || k.includes('disney') || k.includes('universal') || k.includes('seaworld') || k.includes('kennedy')) {
+        return { category: 'parque', tags: ['parque', 'passeio'] };
+      }
+      if (k.includes('cafe') || k.includes('bakery') || k.includes('ice_cream') || k.includes('cookie') || k.includes('starbucks') || k.includes('dunkin')) {
+        return { category: 'restaurante', tags: ['cafeteria', 'doces'] };
+      }
+      if (k.includes('restaurant') || k.includes('fast_food') || k.includes('food') || k.includes('bar') || k.includes('steak') || k.includes('pizza') || k.includes('burger') || k.includes('grill')) {
+        return { category: 'restaurante', tags: ['restaurante'] };
+      }
+      if (k.includes('supermarket') || k.includes('walmart') || k.includes('target') || k.includes('publix') || k.includes('whole foods') || k.includes('costco')) {
+        return { category: 'compras', tags: ['mercado', 'shopping'] };
+      }
+      if (k.includes('shop') || k.includes('mall') || k.includes('clothes') || k.includes('department_store') || k.includes('outlet') || k.includes('ross') || k.includes('marshalls') || k.includes('burlington') || k.includes('tj maxx') || k.includes('best buy') || k.includes('apple') || k.includes('sephora') || k.includes('ulta')) {
+        return { category: 'compras', tags: ['shopping', 'outlet'] };
+      }
+      if (k.includes('hotel') || k.includes('motel') || k.includes('resort') || k.includes('inn') || k.includes('suites')) {
+        return { category: 'hotel', tags: ['hotel'] };
+      }
+      if (k.includes('aerodrome') || k.includes('airport') || k.includes('car_rental')) {
+        return { category: 'logistica', tags: ['logistica'] };
+      }
+      return { category: 'passeio', tags: ['passeio'] };
+    }
+
+    function handlePlaceAutocomplete(mode, rawQuery) {
+      const listEl = document.getElementById(mode === 'act' ? 'act-autocomplete-list' : 'sp-autocomplete-list');
+      const msgEl = document.getElementById(mode === 'act' ? 'act-autofill-msg' : 'sp-autofill-msg');
+      if (msgEl) msgEl.classList.add('hidden');
+
+      const q = (rawQuery || '').trim();
+      if (q.length < 2) {
+        listEl.classList.add('hidden');
+        return;
+      }
+
+      const qLower = q.toLowerCase();
+      // 1. Filtra imediatamente as unidades/endereços do catálogo curado da Flórida
+      const localMatches = FLORIDA_PLACES_CATALOG.filter(item => {
+        return item.name.toLowerCase().includes(qLower) ||
+               item.branch.toLowerCase().includes(qLower) ||
+               item.address.toLowerCase().includes(qLower);
+      }).slice(0, 8);
+
+      currentAutocompleteResults = [...localMatches];
+      renderAutocompleteDropdown(mode, currentAutocompleteResults, true);
+
+      // 2. Busca ao vivo em toda a Flórida (Photon OpenStreetMap API) para mostrar qualquer outro endereço/unidade
+      clearTimeout(autocompleteTimer);
+      autocompleteTimer = setTimeout(async () => {
+        try {
+          let biasLat = 28.35, biasLng = -81.51;
+          if (mode === 'act') {
+            const dayId = document.getElementById('act-day-id').value;
+            const day = (appState.days || []).find(d => d.id === dayId);
+            if (day && day.phase === 'miami') { biasLat = 25.79; biasLng = -80.25; }
+          } else {
+            const spCity = document.getElementById('sp-city').value;
+            if (spCity === 'Miami') { biasLat = 25.79; biasLng = -80.25; }
+          }
+
+          const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q + ' Florida')}&lat=${biasLat}&lon=${biasLng}&bbox=-82.5,25.0,-79.8,29.2&limit=8`;
+          const res = await fetch(url);
+          if (!res.ok) return;
+          const data = await res.json();
+          const remoteItems = [];
+          (data.features || []).forEach(feat => {
+            const p = feat.properties || {};
+            const coords = (feat.geometry && feat.geometry.coordinates) || [];
+            if (!p.name || coords.length < 2) return;
+            const lng = coords[0], lat = coords[1];
+            const streetPart = [p.housenumber, p.street].filter(Boolean).join(' ');
+            const cityPart = p.city || p.town || p.county || (lat < 26.8 ? 'Miami' : 'Orlando');
+            const fullAddr = [streetPart, cityPart, 'FL', p.postcode].filter(Boolean).join(', ');
+            if (!streetPart && localMatches.length > 0) return;
+
+            // Evita duplicar o mesmo endereço que já veio do catálogo curado
+            const isDup = localMatches.some(lm =>
+              Math.abs(lm.lat - lat) < 0.003 && Math.abs(lm.lng - lng) < 0.003
+            );
+            if (isDup) return;
+
+            const mapped = mapOsmToAppMeta(p.osm_key, p.osm_value, p.name);
+            remoteItems.push({
+              name: p.name,
+              branch: `${cityPart}${streetPart ? ' • ' + streetPart : ''}`,
+              address: fullAddr || `${p.name}, ${cityPart}, FL`,
+              city: lat < 26.8 ? 'Miami' : 'Orlando',
+              category: mapped.category,
+              tags: mapped.tags,
+              lat,
+              lng,
+              notes: ''
+            });
+          });
+
+          currentAutocompleteResults = [...localMatches, ...remoteItems].slice(0, 10);
+          renderAutocompleteDropdown(mode, currentAutocompleteResults, false);
+        } catch (e) {
+          renderAutocompleteDropdown(mode, currentAutocompleteResults, false);
+        }
+      }, 260);
+    }
+
+    function renderAutocompleteDropdown(mode, items, isLoadingMore) {
+      const listEl = document.getElementById(mode === 'act' ? 'act-autocomplete-list' : 'sp-autocomplete-list');
+      if (!items || items.length === 0) {
+        if (isLoadingMore) {
+          listEl.innerHTML = `<div style="padding:12px; font-size:12px; color:var(--muted); text-align:center;">🔍 Buscando endereços na Flórida...</div>`;
+          listEl.classList.remove('hidden');
+        } else {
+          listEl.classList.add('hidden');
+        }
+        return;
+      }
+
+      listEl.innerHTML = `
+        <div class="autocomplete-header">
+          <span>📍 Escolha a unidade / endereço (${items.length})</span>
+          <button type="button" onclick="document.getElementById('${mode === 'act' ? 'act-autocomplete-list' : 'sp-autocomplete-list'}').classList.add('hidden')" style="border:none; background:none; color:var(--primary); font-weight:800; cursor:pointer; font-size:11px;">Fechar ✕</button>
+        </div>
+        ${items.map((item, idx) => {
+          const meta = CATEGORY_META[item.category] || CATEGORY_META.passeio;
+          return `
+            <div class="autocomplete-item" onclick="selectPlaceSuggestion('${mode}', ${idx})">
+              <div class="autocomplete-icon">${meta.icon}</div>
+              <div class="autocomplete-main">
+                <div class="autocomplete-title">${escapeHtml(item.name)}</div>
+                <span class="autocomplete-branch">${escapeHtml(item.branch)}</span>
+                <div class="autocomplete-addr">📍 ${escapeHtml(item.address)}</div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      `;
+      listEl.classList.remove('hidden');
+    }
+
+    async function selectPlaceSuggestion(mode, idx) {
+      const item = currentAutocompleteResults[idx];
+      if (!item) return;
+
+      const listEl = document.getElementById(mode === 'act' ? 'act-autocomplete-list' : 'sp-autocomplete-list');
+      const msgEl = document.getElementById(mode === 'act' ? 'act-autofill-msg' : 'sp-autofill-msg');
+      listEl.classList.add('hidden');
+
+      const autoPhoto = getAutoImage(item.name, item.category, item.tags || []);
+
+      if (mode === 'act') {
+        document.getElementById('act-title').value = `${item.name} (${item.branch.split('•')[0].trim()})`;
+        document.getElementById('act-category').value = item.category || 'passeio';
+        document.getElementById('act-location').value = item.address;
+        document.getElementById('act-lat').value = item.lat;
+        document.getElementById('act-lng').value = item.lng;
+        if (item.notes) {
+          document.getElementById('act-notes').value = item.notes;
+        }
+        document.getElementById('act-image').value = autoPhoto;
+        if (msgEl) msgEl.classList.remove('hidden');
+
+        // Tenta buscar foto real da fachada na Wikipedia se não for uma das já mapeadas
+        const realImg = await fetchRealPlacePhoto(item.name);
+        if (realImg && document.getElementById('act-image').value === autoPhoto) {
+          document.getElementById('act-image').value = realImg;
+        }
+      } else {
+        document.getElementById('sp-title').value = `${item.name} (${item.branch.split('•')[0].trim()})`;
+        document.getElementById('sp-city').value = item.city || 'Orlando';
+        document.getElementById('sp-tags').value = (item.tags || ['passeio']).join(', ');
+        document.getElementById('sp-location').value = item.address;
+        document.getElementById('sp-lat').value = item.lat;
+        document.getElementById('sp-lng').value = item.lng;
+        if (item.notes) {
+          document.getElementById('sp-notes').value = item.notes;
+        }
+        document.getElementById('sp-image').value = autoPhoto;
+        if (msgEl) msgEl.classList.remove('hidden');
+
+        const realImg = await fetchRealPlacePhoto(item.name);
+        if (realImg && document.getElementById('sp-image').value === autoPhoto) {
+          document.getElementById('sp-image').value = realImg;
+        }
+      }
+    }
+
     // ================= ACTIVITY MODAL =================
     function openActivityModal(dayId, itemId = null) {
       const day = appState.days.find(d => d.id === dayId);
@@ -2247,6 +2620,8 @@
 
       document.getElementById('act-day-id').value = dayId;
       document.getElementById('act-item-id').value = itemId || '';
+      document.getElementById('act-autocomplete-list').classList.add('hidden');
+      document.getElementById('act-autofill-msg').classList.add('hidden');
 
       const presetsList = QUICK_PRESETS[day.phase] || QUICK_PRESETS.orlando;
       document.getElementById('quick-presets').innerHTML = presetsList.map((p, idx) => `
@@ -2264,6 +2639,8 @@
         document.getElementById('act-location').value = item.location || '';
         document.getElementById('act-image').value = item.image || '';
         document.getElementById('act-notes').value = item.notes || '';
+        document.getElementById('act-lat').value = item.lat || '';
+        document.getElementById('act-lng').value = item.lng || '';
       } else {
         document.getElementById('modal-title').textContent = `Adicionar em ${day.dateStr}`;
         document.getElementById('act-time').value = '10:00';
@@ -2272,6 +2649,8 @@
         document.getElementById('act-location').value = '';
         document.getElementById('act-image').value = '';
         document.getElementById('act-notes').value = '';
+        document.getElementById('act-lat').value = '';
+        document.getElementById('act-lng').value = '';
       }
       document.getElementById('activity-modal').classList.remove('hidden');
     }
@@ -2284,9 +2663,12 @@
       document.getElementById('act-title').value = preset.title;
       document.getElementById('act-location').value = preset.location;
       document.getElementById('act-notes').value = preset.notes;
+      document.getElementById('act-image').value = getAutoImage(preset.title, preset.category);
+      document.getElementById('act-autofill-msg').classList.remove('hidden');
     }
 
     function closeActivityModal() {
+      document.getElementById('act-autocomplete-list').classList.add('hidden');
       document.getElementById('activity-modal').classList.add('hidden');
     }
 
@@ -2300,6 +2682,9 @@
       const title = document.getElementById('act-title').value.trim();
       const category = document.getElementById('act-category').value;
       let customImg = document.getElementById('act-image').value.trim();
+      const customLat = parseFloat(document.getElementById('act-lat').value);
+      const customLng = parseFloat(document.getElementById('act-lng').value);
+
       if (!customImg) {
         const realPhoto = await fetchRealPlacePhoto(title);
         if (realPhoto) customImg = realPhoto;
@@ -2312,8 +2697,8 @@
         category,
         title,
         location: document.getElementById('act-location').value.trim(),
-        lat: baseCoords.lat + (Math.random() - 0.5) * 0.04,
-        lng: baseCoords.lng + (Math.random() - 0.5) * 0.04,
+        lat: !isNaN(customLat) ? customLat : (baseCoords.lat + (Math.random() - 0.5) * 0.04),
+        lng: !isNaN(customLng) ? customLng : (baseCoords.lng + (Math.random() - 0.5) * 0.04),
         image: customImg || getAutoImage(title, category),
         notes: document.getElementById('act-notes').value.trim(),
         done: false
@@ -2323,8 +2708,8 @@
         const idx = day.items.findIndex(i => i.id === itemId);
         if (idx !== -1) {
           payload.done = day.items[idx].done;
-          payload.lat = day.items[idx].lat || payload.lat;
-          payload.lng = day.items[idx].lng || payload.lng;
+          if (isNaN(customLat)) payload.lat = day.items[idx].lat || payload.lat;
+          if (isNaN(customLng)) payload.lng = day.items[idx].lng || payload.lng;
           day.items[idx] = payload;
         }
       } else {
