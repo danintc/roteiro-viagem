@@ -680,16 +680,37 @@
       background: var(--primary-light);
     }
     .autocomplete-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
       background: var(--bg-inset);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 17px;
+      font-size: 18px;
       flex-shrink: 0;
       margin-top: 2px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .autocomplete-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .autocomplete-gmaps-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #b45309;
+      background: #fef3c7;
+      padding: 1px 7px;
+      border-radius: 6px;
+      margin-top: 3px;
+      margin-left: 4px;
     }
     .autocomplete-main {
       flex: 1;
@@ -2425,32 +2446,215 @@
     ];
 
     let autocompleteTimer = null;
+    let autocompleteSeq = 0;
     let currentAutocompleteResults = [];
 
     function mapOsmToAppMeta(osmKey = '', osmVal = '', name = '') {
       const k = (osmKey + ' ' + osmVal + ' ' + name).toLowerCase();
-      if (k.includes('theme_park') || k.includes('attraction') || k.includes('disney') || k.includes('universal') || k.includes('seaworld') || k.includes('kennedy')) {
+      if (k.includes('theme_park') || k.includes('parque temático') || k.includes('parque de divers') || k.includes('disney') || k.includes('universal') || k.includes('seaworld') || k.includes('kennedy') || k.includes('legoland') || k.includes('busch gardens')) {
         return { category: 'parque', tags: ['parque', 'passeio'] };
       }
-      if (k.includes('cafe') || k.includes('bakery') || k.includes('ice_cream') || k.includes('cookie') || k.includes('starbucks') || k.includes('dunkin')) {
+      if (k.includes('cafe') || k.includes('cafeteria') || k.includes('bakery') || k.includes('padaria') || k.includes('ice_cream') || k.includes('sorveteria') || k.includes('confeitaria') || k.includes('cookie') || k.includes('crumbl') || k.includes('starbucks') || k.includes('dunkin')) {
         return { category: 'restaurante', tags: ['cafeteria', 'doces'] };
       }
-      if (k.includes('restaurant') || k.includes('fast_food') || k.includes('food') || k.includes('bar') || k.includes('steak') || k.includes('pizza') || k.includes('burger') || k.includes('grill')) {
+      if (k.includes('restaurant') || k.includes('restaurante') || k.includes('lanchonete') || k.includes('hamburgueria') || k.includes('pizzaria') || k.includes('churrascaria') || k.includes('fast_food') || k.includes('food') || k.includes('bar') || k.includes('steak') || k.includes('pizza') || k.includes('burger') || k.includes('grill') || k.includes('diner') || k.includes('bistrô')) {
         return { category: 'restaurante', tags: ['restaurante'] };
       }
-      if (k.includes('supermarket') || k.includes('walmart') || k.includes('target') || k.includes('publix') || k.includes('whole foods') || k.includes('costco')) {
+      if (k.includes('supermarket') || k.includes('supermercado') || k.includes('hipermercado') || k.includes('mercado') || k.includes('grocery') || k.includes('walmart') || k.includes('target') || k.includes('publix') || k.includes('whole foods') || k.includes('costco') || k.includes('aldi') || k.includes('trader joe')) {
         return { category: 'compras', tags: ['mercado', 'shopping'] };
       }
-      if (k.includes('shop') || k.includes('mall') || k.includes('clothes') || k.includes('department_store') || k.includes('outlet') || k.includes('ross') || k.includes('marshalls') || k.includes('burlington') || k.includes('tj maxx') || k.includes('best buy') || k.includes('apple') || k.includes('sephora') || k.includes('ulta')) {
+      if (k.includes('shop') || k.includes('loja') || k.includes('mall') || k.includes('shopping') || k.includes('clothes') || k.includes('roupa') || k.includes('calçado') || k.includes('departamento') || k.includes('department') || k.includes('outlet') || k.includes('ross') || k.includes('marshalls') || k.includes('burlington') || k.includes('tj maxx') || k.includes('homegoods') || k.includes('five below') || k.includes('dollar tree') || k.includes('best buy') || k.includes('apple') || k.includes('sephora') || k.includes('ulta') || k.includes('victoria') || k.includes('nike') || k.includes('adidas') || k.includes('farmácia') || k.includes('drugstore') || k.includes('walgreens') || k.includes('cvs')) {
         return { category: 'compras', tags: ['shopping', 'outlet'] };
       }
-      if (k.includes('hotel') || k.includes('motel') || k.includes('resort') || k.includes('inn') || k.includes('suites')) {
+      if (k.includes('hotel') || k.includes('motel') || k.includes('resort') || k.includes('hospedagem') || k.includes('pousada') || k.includes('inn') || k.includes('suites')) {
         return { category: 'hotel', tags: ['hotel'] };
       }
-      if (k.includes('aerodrome') || k.includes('airport') || k.includes('car_rental')) {
+      if (k.includes('aerodrome') || k.includes('airport') || k.includes('aeroporto') || k.includes('car_rental') || k.includes('locadora') || k.includes('aluguel de carros') || k.includes('estação')) {
         return { category: 'logistica', tags: ['logistica'] };
       }
       return { category: 'passeio', tags: ['passeio'] };
+    }
+
+    // Busca direta no Google Maps (retorna todas as unidades/endereços, categorias em português, nota, avaliações, GPS exato e foto real do local no Google Maps)
+    async function fetchGoogleMapsSuggestions(query, biasLat, biasLng, cityName) {
+      const qHasCity = /orlando|kissimmee|miami|doral|sunrise|florida|\bfl\b/i.test(query);
+      const searchQ = qHasCity ? query : `${query} ${cityName} FL`;
+      const pb = `!4m12!1m3!1d160000!2d${biasLng}!3d${biasLat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!7i10!10b1!12m8!1m1!18b1!2m3!5m1!6e2!20e3!10b1!16b1!19m4!2m3!1i360!2i120!4i8!20m57!2m2!1i203!2i100!3m2!2i4!5b1!6m6!1m2!1i86!2i86!1m2!1i408!2i240!7m42!1m3!1e1!2b0!3e3!1m3!1e2!2b1!3e2!1m3!1e2!2b0!3e3!1m3!1e8!2b0!3e3!1m3!1e10!2b0!3e3!1m3!1e10!2b1!3e2!1m3!1e9!2b1!3e2!1m3!1e10!2b0!3e3!1m3!1e10!2b1!3e2!1m3!1e10!2b0!3e4!2b1!4b1!9b0!22m6!1s!2s!4m1!2i5347!7e81!12e3!24m15!1m4!13m3!2b1!3b1!4b1!2b1!4b1!6m2!1b1!2b1!7m2!1e3!2b1!14b1!20b0!26m4!2m3!1i80!2i92!4i8!34m2!7b1!10b1!37m1!1e81!49m1!3b1`;
+      const gmapUrl = `https://www.google.com/search?tbm=map&hl=pt-BR&gl=us&pb=${pb}&q=${encodeURIComponent(searchQ)}`;
+
+      let rawText = '';
+      try {
+        const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(gmapUrl)}`);
+        if (res.ok) rawText = await res.text();
+      } catch (e) {}
+
+      if (!rawText) {
+        try {
+          const res2 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(gmapUrl)}`);
+          if (res2.ok) {
+            const j = await res2.json();
+            rawText = j.contents || '';
+          }
+        } catch (e) {}
+      }
+
+      if (!rawText) return [];
+      const cleanJson = rawText.replace(/^\)\]\}'\s*/, '');
+      const data = JSON.parse(cleanJson);
+      const entries = (data && data[0] && data[0][1]) || [];
+      const results = [];
+
+      entries.forEach(entry => {
+        if (!entry || entry.length <= 14 || !entry[14]) return;
+        const p = entry[14];
+        const name = p[11];
+        const coords = p[9];
+        if (!name || !coords || coords.length < 4) return;
+        const lat = Number(coords[2]);
+        const lng = Number(coords[3]);
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        // Endereço completo no Google Maps
+        let address = p[39] || p[18] || (Array.isArray(p[2]) ? p[2].join(', ') : '') || `${name}, ${cityName}, FL`;
+        if (address.toLowerCase().startsWith(name.toLowerCase() + ', ')) {
+          address = address.slice(name.length + 2).trim();
+        }
+
+        // Rua / unidade curta para diferenciar quando há múltiplos endereços
+        const streetShort = (Array.isArray(p[2]) && p[2][0]) ? p[2][0] : address.split(',')[0].trim();
+        const addrParts = address.split(',').map(s => s.trim());
+        const detectedCity = addrParts.length >= 2 ? addrParts[1].replace(/\s+FL.*$/i, '') : (lat < 26.8 ? 'Miami' : 'Orlando');
+
+        // Categorias em Português vindas do Google Maps
+        const gmapsCats = Array.isArray(p[13]) ? p[13] : [];
+        const primaryGmapsCat = gmapsCats[0] || '';
+        const mapped = mapOsmToAppMeta(gmapsCats.join(' '), '', name);
+
+        // Nota e número de avaliações do Google Maps
+        const rating = (p[4] && p[4][7]) ? Number(p[4][7]).toFixed(1) : null;
+        const reviews = (p[4] && p[4][8]) ? Number(p[4][8]) : null;
+
+        // Foto real do local direto do Google Maps (lh3.googleusercontent.com)
+        let photoUrl = '';
+        let thumbUrl = '';
+        const pStr = JSON.stringify(p);
+        const photoMatch = pStr.match(/https:\/\/lh[0-9]\.googleusercontent\.com\/(?:grass-cs|p)\/[^"\\]+/);
+        if (photoMatch && photoMatch[0]) {
+          const basePhoto = photoMatch[0];
+          photoUrl = basePhoto.replace(/=w\d+-h\d+[^"]*$/, '=w800-h500-k-no');
+          thumbUrl = basePhoto.replace(/=w\d+-h\d+[^"]*$/, '=w160-h160-k-no');
+        }
+
+        const noteParts = [];
+        if (primaryGmapsCat) noteParts.push(`📍 ${primaryGmapsCat}`);
+        if (rating) noteParts.push(`⭐ ${rating}${reviews ? ' (' + reviews.toLocaleString('pt-BR') + ' avaliações no Google Maps)' : ''}`);
+
+        results.push({
+          name,
+          branch: `${detectedCity}${streetShort ? ' • ' + streetShort : ''}`,
+          streetShort,
+          address,
+          city: lat < 26.8 ? 'Miami' : 'Orlando',
+          category: mapped.category,
+          tags: mapped.tags,
+          gmapsCategory: primaryGmapsCat,
+          rating,
+          reviews,
+          photo: photoUrl,
+          thumb: thumbUrl || photoUrl,
+          lat,
+          lng,
+          notes: noteParts.join(' • '),
+          fromGoogleMaps: true
+        });
+      });
+
+      return results;
+    }
+
+    // Busca comercial complementar ultra-rápida (ArcGIS POI) para resposta instantânea enquanto o Google Maps carrega
+    async function fetchArcGisPoiSuggestions(query, biasLat, biasLng) {
+      try {
+        const sugUrl = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=${encodeURIComponent(query)}&location=${biasLng},${biasLat}&searchExtent=-82.5,25.0,-79.8,29.0&maxSuggestions=8&f=json`;
+        const res = await fetch(sugUrl);
+        if (!res.ok) return [];
+        const sdata = await res.json();
+        const sugs = (sdata.suggestions || []).filter(s => !s.isCollection && s.text.includes(',')).slice(0, 6);
+        const resolved = await Promise.all(sugs.map(async s => {
+          try {
+            const cUrl = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?magicKey=${encodeURIComponent(s.magicKey)}&outFields=PlaceName,Place_addr,Type,City,RegionAbbr,Phone&f=json`;
+            const r2 = await fetch(cUrl);
+            const cdata = await r2.json();
+            const c = cdata.candidates && cdata.candidates[0];
+            if (!c || !c.location) return null;
+            const attr = c.attributes || {};
+            const name = attr.PlaceName || s.text.split(',')[0].trim();
+            const address = attr.Place_addr || s.text.replace(/^[^,]+,\s*/, '');
+            const streetShort = address.split(',')[0].trim();
+            const cityPart = attr.City || (c.location.y < 26.8 ? 'Miami' : 'Orlando');
+            const mapped = mapOsmToAppMeta(attr.Type || '', '', name);
+            return {
+              name,
+              branch: `${cityPart}${streetShort ? ' • ' + streetShort : ''}`,
+              streetShort,
+              address,
+              city: c.location.y < 26.8 ? 'Miami' : 'Orlando',
+              category: mapped.category,
+              tags: mapped.tags,
+              gmapsCategory: attr.Type || '',
+              rating: null,
+              reviews: null,
+              photo: '',
+              thumb: '',
+              lat: c.location.y,
+              lng: c.location.x,
+              notes: attr.Phone ? `📞 Tel: ${attr.Phone}` : '',
+              fromGoogleMaps: false
+            };
+          } catch (e) {
+            return null;
+          }
+        }));
+        return resolved.filter(Boolean);
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function mergePlaceSuggestions(localMatches, gmapsItems, arcgisItems) {
+      const merged = [];
+
+      // Prioriza os resultados oficiais do Google Maps (e preserva dicas de proximidade do hotel do catálogo local quando for o mesmo endereço)
+      gmapsItems.forEach(gm => {
+        const localHit = localMatches.find(lm =>
+          Math.abs(lm.lat - gm.lat) < 0.004 && Math.abs(lm.lng - gm.lng) < 0.004
+        );
+        if (localHit && localHit.notes) {
+          gm.notes = gm.notes ? `${localHit.notes} (${gm.notes})` : localHit.notes;
+          if (localHit.branch.includes('Celebration') || localHit.branch.includes('Hampton') || localHit.branch.includes('Mais próximo')) {
+            gm.branch = localHit.branch;
+          }
+        }
+        merged.push(gm);
+      });
+
+      // Adiciona itens do catálogo curado que ainda não estão na lista
+      localMatches.forEach(lm => {
+        const exists = merged.some(m =>
+          Math.abs(m.lat - lm.lat) < 0.004 && Math.abs(m.lng - lm.lng) < 0.004
+        );
+        if (!exists) merged.push(lm);
+      });
+
+      // Adiciona itens do ArcGIS POI que ainda não estão na lista
+      arcgisItems.forEach(ai => {
+        const exists = merged.some(m =>
+          Math.abs(m.lat - ai.lat) < 0.004 && Math.abs(m.lng - ai.lng) < 0.004
+        );
+        if (!exists) merged.push(ai);
+      });
+
+      return merged.slice(0, 12);
     }
 
     function handlePlaceAutocomplete(mode, rawQuery) {
@@ -2465,7 +2669,7 @@
       }
 
       const qLower = q.toLowerCase();
-      // 1. Filtra imediatamente as unidades/endereços do catálogo curado da Flórida
+      // 1. Filtra imediatamente as unidades/endereços do catálogo curado da Flórida (0ms)
       const localMatches = FLORIDA_PLACES_CATALOG.filter(item => {
         return item.name.toLowerCase().includes(qLower) ||
                item.branch.toLowerCase().includes(qLower) ||
@@ -2475,68 +2679,49 @@
       currentAutocompleteResults = [...localMatches];
       renderAutocompleteDropdown(mode, currentAutocompleteResults, true);
 
-      // 2. Busca ao vivo em toda a Flórida (Photon OpenStreetMap API) para mostrar qualquer outro endereço/unidade
+      // 2. Busca ao vivo direto no Google Maps + ArcGIS POI em paralelo
       clearTimeout(autocompleteTimer);
+      const mySeq = ++autocompleteSeq;
       autocompleteTimer = setTimeout(async () => {
-        try {
-          let biasLat = 28.35, biasLng = -81.51;
-          if (mode === 'act') {
-            const dayId = document.getElementById('act-day-id').value;
-            const day = (appState.days || []).find(d => d.id === dayId);
-            if (day && day.phase === 'miami') { biasLat = 25.79; biasLng = -80.25; }
-          } else {
-            const spCity = document.getElementById('sp-city').value;
-            if (spCity === 'Miami') { biasLat = 25.79; biasLng = -80.25; }
-          }
-
-          const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q + ' Florida')}&lat=${biasLat}&lon=${biasLng}&bbox=-82.5,25.0,-79.8,29.2&limit=8`;
-          const res = await fetch(url);
-          if (!res.ok) return;
-          const data = await res.json();
-          const remoteItems = [];
-          (data.features || []).forEach(feat => {
-            const p = feat.properties || {};
-            const coords = (feat.geometry && feat.geometry.coordinates) || [];
-            if (!p.name || coords.length < 2) return;
-            const lng = coords[0], lat = coords[1];
-            const streetPart = [p.housenumber, p.street].filter(Boolean).join(' ');
-            const cityPart = p.city || p.town || p.county || (lat < 26.8 ? 'Miami' : 'Orlando');
-            const fullAddr = [streetPart, cityPart, 'FL', p.postcode].filter(Boolean).join(', ');
-            if (!streetPart && localMatches.length > 0) return;
-
-            // Evita duplicar o mesmo endereço que já veio do catálogo curado
-            const isDup = localMatches.some(lm =>
-              Math.abs(lm.lat - lat) < 0.003 && Math.abs(lm.lng - lng) < 0.003
-            );
-            if (isDup) return;
-
-            const mapped = mapOsmToAppMeta(p.osm_key, p.osm_value, p.name);
-            remoteItems.push({
-              name: p.name,
-              branch: `${cityPart}${streetPart ? ' • ' + streetPart : ''}`,
-              address: fullAddr || `${p.name}, ${cityPart}, FL`,
-              city: lat < 26.8 ? 'Miami' : 'Orlando',
-              category: mapped.category,
-              tags: mapped.tags,
-              lat,
-              lng,
-              notes: ''
-            });
-          });
-
-          currentAutocompleteResults = [...localMatches, ...remoteItems].slice(0, 10);
-          renderAutocompleteDropdown(mode, currentAutocompleteResults, false);
-        } catch (e) {
-          renderAutocompleteDropdown(mode, currentAutocompleteResults, false);
+        let biasLat = 28.39, biasLng = -81.48, cityName = 'Orlando';
+        if (mode === 'act') {
+          const dayId = document.getElementById('act-day-id').value;
+          const day = (appState.days || []).find(d => d.id === dayId);
+          if (day && day.phase === 'miami') { biasLat = 25.78; biasLng = -80.22; cityName = 'Miami'; }
+        } else {
+          const spCity = document.getElementById('sp-city').value;
+          if (spCity === 'Miami') { biasLat = 25.78; biasLng = -80.22; cityName = 'Miami'; }
         }
-      }, 260);
+
+        let gmapsItems = [];
+        let arcgisItems = [];
+
+        // Atualiza assim que o primeiro retornar e novamente quando o Google Maps finalizar
+        const arcPromise = fetchArcGisPoiSuggestions(q, biasLat, biasLng).then(res => {
+          arcgisItems = res || [];
+          if (mySeq === autocompleteSeq && gmapsItems.length === 0 && arcgisItems.length > 0) {
+            currentAutocompleteResults = mergePlaceSuggestions(localMatches, [], arcgisItems);
+            renderAutocompleteDropdown(mode, currentAutocompleteResults, true);
+          }
+        });
+
+        const gmapsPromise = fetchGoogleMapsSuggestions(q, biasLat, biasLng, cityName).then(res => {
+          gmapsItems = res || [];
+        });
+
+        await Promise.allSettled([gmapsPromise, arcPromise]);
+        if (mySeq !== autocompleteSeq) return;
+
+        currentAutocompleteResults = mergePlaceSuggestions(localMatches, gmapsItems, arcgisItems);
+        renderAutocompleteDropdown(mode, currentAutocompleteResults, false);
+      }, 220);
     }
 
     function renderAutocompleteDropdown(mode, items, isLoadingMore) {
       const listEl = document.getElementById(mode === 'act' ? 'act-autocomplete-list' : 'sp-autocomplete-list');
       if (!items || items.length === 0) {
         if (isLoadingMore) {
-          listEl.innerHTML = `<div style="padding:12px; font-size:12px; color:var(--muted); text-align:center;">🔍 Buscando endereços na Flórida...</div>`;
+          listEl.innerHTML = `<div style="padding:14px; font-size:12.5px; color:var(--muted); text-align:center; font-weight:600;">🔍 Buscando unidades e endereços no Google Maps...</div>`;
           listEl.classList.remove('hidden');
         } else {
           listEl.classList.add('hidden');
@@ -2546,17 +2731,26 @@
 
       listEl.innerHTML = `
         <div class="autocomplete-header">
-          <span>📍 Escolha a unidade / endereço (${items.length})</span>
+          <span>📍 ${isLoadingMore ? 'Buscando no Google Maps...' : `Sugestões do Google Maps (${items.length} endereços)`}</span>
           <button type="button" onclick="document.getElementById('${mode === 'act' ? 'act-autocomplete-list' : 'sp-autocomplete-list'}').classList.add('hidden')" style="border:none; background:none; color:var(--primary); font-weight:800; cursor:pointer; font-size:11px;">Fechar ✕</button>
         </div>
         ${items.map((item, idx) => {
           const meta = CATEGORY_META[item.category] || CATEGORY_META.passeio;
+          const thumbSrc = item.thumb || item.photo || getAutoImage(item.name, item.category, item.tags || []);
+          const ratingBadge = item.rating
+            ? `<span class="autocomplete-gmaps-meta">⭐ ${escapeHtml(item.rating)}${item.gmapsCategory ? ' • ' + escapeHtml(item.gmapsCategory) : ''}</span>`
+            : (item.gmapsCategory ? `<span class="autocomplete-gmaps-meta">${escapeHtml(item.gmapsCategory)}</span>` : '');
           return `
             <div class="autocomplete-item" onclick="selectPlaceSuggestion('${mode}', ${idx})">
-              <div class="autocomplete-icon">${meta.icon}</div>
+              <div class="autocomplete-icon">
+                <img src="${escapeHtml(thumbSrc)}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='${meta.icon}'">
+              </div>
               <div class="autocomplete-main">
                 <div class="autocomplete-title">${escapeHtml(item.name)}</div>
-                <span class="autocomplete-branch">${escapeHtml(item.branch)}</span>
+                <div>
+                  <span class="autocomplete-branch">${escapeHtml(item.branch)}</span>
+                  ${ratingBadge}
+                </div>
                 <div class="autocomplete-addr">📍 ${escapeHtml(item.address)}</div>
               </div>
             </div>
@@ -2574,10 +2768,14 @@
       const msgEl = document.getElementById(mode === 'act' ? 'act-autofill-msg' : 'sp-autofill-msg');
       listEl.classList.add('hidden');
 
-      const autoPhoto = getAutoImage(item.name, item.category, item.tags || []);
+      const bestPhoto = item.photo || getAutoImage(item.name, item.category, item.tags || []);
+      const branchLabel = item.streetShort || item.branch.split('•').pop().trim();
+      const displayTitle = branchLabel && !item.name.toLowerCase().includes(branchLabel.toLowerCase())
+        ? `${item.name} (${branchLabel})`
+        : item.name;
 
       if (mode === 'act') {
-        document.getElementById('act-title').value = `${item.name} (${item.branch.split('•')[0].trim()})`;
+        document.getElementById('act-title').value = displayTitle;
         document.getElementById('act-category').value = item.category || 'passeio';
         document.getElementById('act-location').value = item.address;
         document.getElementById('act-lat').value = item.lat;
@@ -2585,16 +2783,17 @@
         if (item.notes) {
           document.getElementById('act-notes').value = item.notes;
         }
-        document.getElementById('act-image').value = autoPhoto;
+        document.getElementById('act-image').value = bestPhoto;
         if (msgEl) msgEl.classList.remove('hidden');
 
-        // Tenta buscar foto real da fachada na Wikipedia se não for uma das já mapeadas
-        const realImg = await fetchRealPlacePhoto(item.name);
-        if (realImg && document.getElementById('act-image').value === autoPhoto) {
-          document.getElementById('act-image').value = realImg;
+        if (!item.photo) {
+          const realImg = await fetchRealPlacePhoto(item.name);
+          if (realImg && document.getElementById('act-image').value === bestPhoto) {
+            document.getElementById('act-image').value = realImg;
+          }
         }
       } else {
-        document.getElementById('sp-title').value = `${item.name} (${item.branch.split('•')[0].trim()})`;
+        document.getElementById('sp-title').value = displayTitle;
         document.getElementById('sp-city').value = item.city || 'Orlando';
         document.getElementById('sp-tags').value = (item.tags || ['passeio']).join(', ');
         document.getElementById('sp-location').value = item.address;
@@ -2603,12 +2802,14 @@
         if (item.notes) {
           document.getElementById('sp-notes').value = item.notes;
         }
-        document.getElementById('sp-image').value = autoPhoto;
+        document.getElementById('sp-image').value = bestPhoto;
         if (msgEl) msgEl.classList.remove('hidden');
 
-        const realImg = await fetchRealPlacePhoto(item.name);
-        if (realImg && document.getElementById('sp-image').value === autoPhoto) {
-          document.getElementById('sp-image').value = realImg;
+        if (!item.photo) {
+          const realImg = await fetchRealPlacePhoto(item.name);
+          if (realImg && document.getElementById('sp-image').value === bestPhoto) {
+            document.getElementById('sp-image').value = realImg;
+          }
         }
       }
     }
