@@ -64,6 +64,7 @@
       }
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { overflow-x: hidden; }
     ::selection { background: var(--accent-gold); color: #14171a; }
     :focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 2px; }
     body {
@@ -77,64 +78,81 @@
       font-variant-numeric: tabular-nums;
       caret-color: var(--primary);
     }
-    .container { max-width: 680px; margin: 0 auto; padding: 0 14px; }
+    .container { max-width: 680px; margin: 0 auto; padding: 0 10px; }
     
-    /* Header Editorial Impeccable - Sem gradiente clichê, com acabamento Lacquer & Gold */
+    /* Header Editorial Impeccable - Ultra Compacto e Otimizado */
     .app-header {
       background: #12161b;
       color: #f7f5f0;
-      padding-top: calc(env(safe-area-inset-top, 44px) + 12px);
-      padding-right: 14px;
-      padding-bottom: 14px;
-      padding-left: 14px;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+      padding-right: 10px;
+      padding-bottom: 7px;
+      padding-left: 10px;
       position: sticky;
       top: 0;
       z-index: 40;
-      border-bottom: 2px solid rgba(200, 138, 43, 0.45);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+      border-bottom: 1.5px solid rgba(200, 138, 43, 0.4);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
     }
-    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .header-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .header-actions-wrap {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
     .pill-date {
-      display: inline-block;
-      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
       color: #f3d082;
       background: rgba(200, 138, 43, 0.18);
       border: 1px solid rgba(200, 138, 43, 0.4);
-      padding: 3px 10px;
+      padding: 1.5px 7px;
       border-radius: 999px;
-      margin-bottom: 4px;
+      white-space: nowrap;
+      margin: 0;
     }
     .app-title {
       margin: 0;
       font-family: "Fraunces", Georgia, serif;
-      font-size: 22px;
+      font-size: 16px;
       font-weight: 700;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.02em;
       color: #ffffff;
-      text-wrap: balance;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .btn-header {
       background: rgba(255,255,255,0.12);
       color: #fff;
       border: 1px solid rgba(255,255,255,0.28);
-      padding: 9px 14px;
-      border-radius: 12px;
-      font-size: 13px;
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 11.5px;
       font-weight: 800;
       font-family: inherit;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 5px;
       transition: transform 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
     }
     .btn-header:active { transform: scale(0.97); }
     .unsaved-dot {
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 999px;
       background: #fbbf24;
       box-shadow: 0 0 0 2px rgba(0,0,0,0.35);
@@ -144,20 +162,20 @@
     .main-tabs {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
-      margin-top: 14px;
+      gap: 4px;
+      margin-top: 6px;
       background: #1c222a;
-      padding: 4px;
-      border-radius: 12px;
+      padding: 2.5px;
+      border-radius: 9px;
       border: 1px solid rgba(255,255,255,0.1);
     }
     .tab-btn {
       border: none;
       background: transparent;
       color: rgba(255,255,255,0.78);
-      padding: 8px 4px;
-      border-radius: 9px;
-      font-size: 12.5px;
+      padding: 5px 2px;
+      border-radius: 7px;
+      font-size: 11.5px;
       font-weight: 700;
       font-family: inherit;
       cursor: pointer;
@@ -192,14 +210,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      margin: 12px 0 8px 0;
+      gap: 6px;
+      margin: 6px 0 4px 0;
     }
     .scroll-strip {
       display: flex;
-      gap: 7px;
+      gap: 6px;
       overflow-x: auto;
-      padding-bottom: 4px;
+      padding-bottom: 3px;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
@@ -209,9 +227,9 @@
       border: 1px solid var(--border);
       background: var(--card);
       color: var(--text);
-      padding: 7px 13px;
+      padding: 4px 10px;
       border-radius: 999px;
-      font-size: 12.5px;
+      font-size: 11.5px;
       font-weight: 700;
       font-family: inherit;
       white-space: nowrap;
@@ -230,21 +248,21 @@
     /* Day Strip (Seletor Rápido de Dias no Topo) */
     .day-strip {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
-      padding: 6px 0 12px 0;
+      padding: 3px 0 7px 0;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
     .day-strip::-webkit-scrollbar { display: none; }
     .day-pill {
-      min-width: 82px;
+      min-width: 66px;
       flex-shrink: 0;
       background: var(--card);
       border: 1px solid var(--border);
       color: var(--text);
-      border-radius: 14px;
-      padding: 9px 11px;
+      border-radius: 11px;
+      padding: 5px 8px;
       text-align: left;
       font-family: inherit;
       cursor: pointer;
@@ -259,33 +277,33 @@
     @media (prefers-color-scheme: dark) {
       .day-pill.active { color: #12161b; }
     }
-    .day-pill-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 13.5px; }
-    .day-pill-sub { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+    .day-pill-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 12px; }
+    .day-pill-sub { font-size: 10px; opacity: 0.85; margin-top: 1px; }
 
     /* Cards Gerais (Abas Salvos, Mapa, Info) */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
+      border-radius: 14px;
+      padding: 13px;
+      margin-bottom: 12px;
       box-shadow: var(--shadow-sm);
     }
 
     /* ================= BARRA DE SEPARAÇÃO DIÁRIA LIMPA (SEM REDUNDÂNCIA) ================= */
     .day-section {
-      margin-bottom: 28px;
+      margin-bottom: 18px;
     }
     .day-separator-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 12px;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 10px;
       color: #ffffff;
       box-shadow: var(--shadow-sm);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .day-separator-bar.phase-orlando {
       background: var(--orlando-bg);
@@ -297,27 +315,27 @@
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       min-width: 0;
     }
     .day-bar-date {
       font-family: "Fraunces", Georgia, serif;
-      font-size: 16px;
+      font-size: 14.5px;
       font-weight: 700;
       letter-spacing: -0.02em;
       color: #ffffff;
     }
     .day-bar-meta {
-      font-size: 12.5px;
+      font-size: 11.5px;
       font-weight: 700;
       color: rgba(255, 255, 255, 0.88);
     }
     .day-bar-city {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
       background: rgba(255, 255, 255, 0.16);
       color: #ffffff;
-      padding: 2px 8px;
+      padding: 1.5px 7px;
       border-radius: 999px;
       white-space: nowrap;
     }
@@ -325,9 +343,9 @@
       background: rgba(255, 255, 255, 0.18);
       color: #ffffff;
       border: 1px solid rgba(255, 255, 255, 0.32);
-      border-radius: 9px;
-      padding: 6px 11px;
-      font-size: 12px;
+      border-radius: 8px;
+      padding: 4px 9px;
+      font-size: 11.5px;
       font-weight: 800;
       font-family: inherit;
       cursor: pointer;
@@ -343,12 +361,12 @@
     /* Lista de Programas do Dia */
     .day-programs-timeline {
       position: relative;
-      padding-left: 16px;
-      margin-left: 8px;
+      padding-left: 14px;
+      margin-left: 6px;
       border-left: 2px solid var(--border-strong);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .badge {
@@ -396,19 +414,20 @@
     .day-programs-timeline .item-card {
       position: relative;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 11px 13px;
+      border-radius: 13px;
+      padding: 9px 11px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
       background: var(--card);
       box-shadow: var(--shadow-sm);
+      overflow: hidden;
     }
     .day-programs-timeline .item-card::before {
       content: "";
       position: absolute;
-      left: -23px;
-      top: 18px;
+      left: -21px;
+      top: 15px;
       width: 10px;
       height: 10px;
       border-radius: 50%;
@@ -491,28 +510,24 @@
     .item-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       width: 100%;
       margin-top: 3px;
-      padding-top: 6px;
+      padding-top: 5px;
       border-top: 1px solid var(--border);
       white-space: nowrap;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .item-actions::-webkit-scrollbar {
-      display: none;
+      overflow: visible;
     }
     .btn-gmaps-compact {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 3px 8px;
-      border-radius: 7px;
+      gap: 3.5px;
+      padding: 2.5px 6px;
+      border-radius: 6px;
       background: var(--bg-inset);
       color: var(--text);
       border: 1px solid var(--border);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       text-decoration: none;
       white-space: nowrap;
@@ -522,16 +537,17 @@
       transform: scale(0.97);
     }
     .link-btn {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       font-family: inherit;
       color: var(--primary);
       text-decoration: none;
       background: none;
       border: none;
-      padding: 0;
+      padding: 2px 3px;
       cursor: pointer;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .link-muted { color: var(--muted); }
     .link-danger { color: var(--danger); }
@@ -946,14 +962,14 @@
     .card-dist-corner {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      font-size: 11px;
+      gap: 2.5px;
+      font-size: 10.5px;
       font-weight: 700;
       color: #059669;
       background: rgba(16, 185, 129, 0.1);
       border: 1px solid rgba(16, 185, 129, 0.25);
-      padding: 1.5px 6px;
-      border-radius: 6px;
+      padding: 1.5px 5px;
+      border-radius: 5px;
       white-space: nowrap;
       pointer-events: none;
       flex-shrink: 0;
@@ -998,17 +1014,18 @@
     .gps-header-chip {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 2px 9px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      gap: 4px;
+      padding: 3px 7px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       color: #ffffff;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       cursor: pointer;
       font-family: inherit;
       transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
     }
     .gps-header-chip:active {
       background: rgba(255, 255, 255, 0.3);
@@ -1059,23 +1076,21 @@
   <header class="app-header">
     <div class="container">
       <div class="header-top">
-        <div>
-          <span class="pill-date">04 Nov – 19 Nov • Família</span>
+        <div class="header-title-wrap">
           <h1 class="app-title">Orlando & Miami 🏰🌴</h1>
-          <div style="display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap;">
-            <div id="header-save-status" style="font-size:12px; opacity:0.95; font-weight:600;">
-              ✅ Roteiro salvo
-            </div>
-            <button type="button" onclick="requestUserLocation(true)" id="btn-gps-header" class="gps-header-chip" title="Localização GPS">
-              <span class="gps-status-indicator active" id="gps-status-indicator"></span>
-              <span id="gps-status-text">GPS ativo</span>
-            </button>
-          </div>
+          <span class="pill-date">04–19 Nov</span>
         </div>
-        <button onclick="openCloudModal()" id="btn-top-save" class="btn-header" style="padding: 9px 14px; font-size: 13px;">
-          <span id="btn-top-save-label">💾 Salvar</span>
-          <span id="unsaved-indicator" class="unsaved-dot hidden" title="Informações não salvas"></span>
-        </button>
+        <div class="header-actions-wrap">
+          <button type="button" onclick="requestUserLocation(true)" id="btn-gps-header" class="gps-header-chip" title="Localização GPS">
+            <span class="gps-status-indicator active" id="gps-status-indicator"></span>
+            <span id="gps-status-text">GPS</span>
+          </button>
+          <button onclick="openCloudModal()" id="btn-top-save" class="btn-header">
+            <span id="btn-top-save-label">💾 Salvar</span>
+            <span id="unsaved-indicator" class="unsaved-dot hidden" title="Informações não salvas"></span>
+          </button>
+          <div id="header-save-status" class="hidden"></div>
+        </div>
       </div>
 
       <!-- 4 Main Navigation Tabs (Wanderlog / TripIt style) -->
@@ -1088,7 +1103,7 @@
     </div>
   </header>
 
-  <main class="container" style="padding-top: 12px;">
+  <main class="container" style="padding-top: 6px;">
 
     <!-- Aviso grande e claro quando houver informações não salvas -->
     <div id="publish-banner" class="sync-banner hidden" style="background: rgba(245, 158, 11, 0.16); border-color: #f59e0b;">
@@ -1589,10 +1604,7 @@
       if (km < 10) {
         return `${km.toFixed(1).replace('.', ',')} km`;
       }
-      if (km < 100) {
-        return `${km.toFixed(1).replace('.', ',')} km`;
-      }
-      return `${Math.round(km).toLocaleString('pt-BR')} km`;
+      return `${Math.round(km)} km`;
     }
 
     function resolveItemCoords(item, phase = 'orlando') {
@@ -1628,7 +1640,7 @@
           if (hotel) {
             const distFromHotel = calculateDistanceKm(hotel.lat, hotel.lng, numLat, numLng);
             if (distFromHotel != null && distFromHotel < 200) {
-              return `<span class="card-dist-corner dist-hotel" title="Distância até o hotel ${hotel.name}">🏨 ${formatDistanceText(distFromHotel)} hotel</span>`;
+              return `<span class="card-dist-corner dist-hotel" title="Distância até o hotel ${hotel.name}">🏨 ${formatDistanceText(distFromHotel)}</span>`;
             }
           }
           return `<span class="card-dist-corner" title="Distância real">📍 ${formatDistanceText(distFromUser)}</span>`;
@@ -1640,7 +1652,7 @@
       if (hotel) {
         const distFromHotel = calculateDistanceKm(hotel.lat, hotel.lng, numLat, numLng);
         if (distFromHotel != null && distFromHotel < 200) {
-          return `<span class="card-dist-corner dist-hotel" title="Distância até o hotel ${hotel.name}">🏨 ${formatDistanceText(distFromHotel)} hotel</span>`;
+          return `<span class="card-dist-corner dist-hotel" title="Distância até o hotel ${hotel.name}">🏨 ${formatDistanceText(distFromHotel)}</span>`;
         }
       }
       return '';
@@ -1756,16 +1768,16 @@
       if (!txt) return;
 
       if (userRealLocation) {
-        txt.textContent = 'GPS ativo';
+        txt.textContent = 'GPS';
         if (ind) ind.className = 'gps-status-indicator active';
       } else if (status === 'requesting') {
-        txt.textContent = 'Localizando...';
+        txt.textContent = 'GPS...';
         if (ind) ind.className = 'gps-status-indicator requesting';
       } else if (status === 'denied') {
         txt.textContent = 'Ativar GPS';
         if (ind) ind.className = 'gps-status-indicator denied';
       } else {
-        txt.textContent = 'Ativar GPS';
+        txt.textContent = 'GPS';
         if (ind) ind.className = 'gps-status-indicator';
       }
     }
@@ -2209,8 +2221,7 @@
               <span>${d.dateStr}</span>
               <span>${d.phase === 'orlando' ? '🏰' : '🌴'}</span>
             </div>
-            <div class="day-pill-sub">${d.weekday.split('-')[0]}</div>
-            <div class="day-pill-sub" style="font-weight:700; margin-top:4px;">${d.items.length} ${d.items.length === 1 ? 'item' : 'itens'}</div>
+            <div class="day-pill-sub">${d.weekday.split('-')[0]} • ${d.items.length} ${d.items.length === 1 ? 'item' : 'itens'}</div>
           </button>
         `;
       }).join('');
@@ -2284,7 +2295,7 @@
           <div class="item-actions">
             <a href="${mapsUrl}" target="_blank" class="btn-gmaps-compact">
               ${GMAPS_LOGO_SVG}
-              <span>Google Maps</span>
+              <span>Maps</span>
             </a>
             <button onclick="openActivityModal('${dayId}', '${item.id}')" class="link-btn link-muted">✏️ Editar</button>
             <button onclick="deleteActivity('${dayId}', '${item.id}')" class="link-btn link-danger">🗑️ Excluir</button>
@@ -2680,7 +2691,7 @@
                 </button>
                 <a href="${gmapsLink}" target="_blank" class="btn-gmaps-compact">
                   ${GMAPS_LOGO_SVG}
-                  <span>Google Maps</span>
+                  <span>Maps</span>
                 </a>
                 ${distBadge ? `<div style="margin-left:auto;">${distBadge}</div>` : ''}
               </div>
@@ -2787,9 +2798,9 @@
               </div>
             </div>
             <div class="map-place-actions">
-              <a href="${gmapsLink}" target="_blank" class="btn-gmaps-compact" style="padding:5px 12px;">
+              <a href="${gmapsLink}" target="_blank" class="btn-gmaps-compact" style="padding:4px 10px;">
                 ${GMAPS_LOGO_SVG}
-                <span>Abrir no Google Maps</span>
+                <span>Maps</span>
               </a>
               ${distBadge ? `<div style="margin-left:auto;">${distBadge}</div>` : ''}
             </div>
