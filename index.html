@@ -481,7 +481,7 @@
 
     .item-title { font-size: 15px; font-weight: 800; margin: 6px 0 4px 0; line-height: 1.3; color: var(--text); }
     .item-notes { font-size: 12.5px; color: var(--muted); margin: 0; line-height: 1.45; }
-    .item-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .item-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 10px; padding-top: 8px; padding-right: 75px; border-top: 1px solid var(--border); }
     .link-btn {
       font-size: 12.5px;
       font-weight: 700;
@@ -897,7 +897,42 @@
       font-size: 15px;
       line-height: 1;
     }
-    /* Badges de Distância Real & Status do GPS */
+    /* Badges de Distância Real no Canto Inferior Direito & Status Minimalista do GPS */
+    .card-dist-corner {
+      position: absolute;
+      right: 12px;
+      bottom: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #059669;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 1px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .card-dist-corner.dist-hotel {
+      color: #4f46e5;
+      background: rgba(79, 70, 229, 0.1);
+      border-color: rgba(79, 70, 229, 0.25);
+    }
+    @media (prefers-color-scheme: dark) {
+      .card-dist-corner {
+        color: #34d399;
+        background: rgba(16, 185, 129, 0.16);
+        border-color: rgba(16, 185, 129, 0.35);
+      }
+      .card-dist-corner.dist-hotel {
+        color: #a5b4fc;
+        background: rgba(99, 102, 241, 0.16);
+        border-color: rgba(99, 102, 241, 0.35);
+      }
+    }
     .dist-badge {
       display: inline-flex;
       align-items: center;
@@ -917,63 +952,43 @@
       background: #e0e7ff;
       border-color: #c7d2fe;
     }
-    .gps-status-bar {
-      display: flex;
+    /* Chip minimalista no Topo do App */
+    .gps-header-chip {
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 12px;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      gap: 5px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
     }
-    .gps-status-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text);
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .gps-header-chip:active {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(0.96);
     }
     .gps-status-indicator {
-      width: 9px;
-      height: 9px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #94a3b8;
       flex-shrink: 0;
     }
     .gps-status-indicator.active {
-      background: #10b981;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+      background: #34d399;
+      box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.4);
     }
     .gps-status-indicator.requesting {
-      background: #f59e0b;
-      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+      background: #fbbf24;
+      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.4);
     }
     .gps-status-indicator.denied {
-      background: #ef4444;
-    }
-    .btn-gps-refresh {
-      border: none;
-      background: var(--primary-light);
-      color: var(--primary);
-      font-weight: 700;
-      font-size: 11px;
-      padding: 5px 9px;
-      border-radius: 7px;
-      cursor: pointer;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .btn-gps-refresh:active {
-      transform: scale(0.96);
+      background: #f87171;
     }
     .user-gps-container {
       display: flex;
@@ -1005,8 +1020,14 @@
         <div>
           <span class="pill-date">04 Nov – 19 Nov • Família</span>
           <h1 class="app-title">Orlando & Miami 🏰🌴</h1>
-          <div id="header-save-status" style="font-size:12px; margin-top:3px; opacity:0.95; font-weight:600;">
-            ✅ Roteiro salvo
+          <div style="display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap;">
+            <div id="header-save-status" style="font-size:12px; opacity:0.95; font-weight:600;">
+              ✅ Roteiro salvo
+            </div>
+            <button type="button" onclick="requestUserLocation(true)" id="btn-gps-header" class="gps-header-chip" title="Localização GPS">
+              <span class="gps-status-indicator active" id="gps-status-indicator"></span>
+              <span id="gps-status-text">GPS ativo</span>
+            </button>
           </div>
         </div>
         <button onclick="openCloudModal()" id="btn-top-save" class="btn-header" style="padding: 9px 14px; font-size: 13px;">
@@ -1026,17 +1047,6 @@
   </header>
 
   <main class="container" style="padding-top: 12px;">
-
-    <!-- Barra de Status do GPS e Distâncias Reais -->
-    <div id="gps-status-bar" class="gps-status-bar">
-      <div class="gps-status-left">
-        <span class="gps-status-indicator" id="gps-status-indicator"></span>
-        <span id="gps-status-text">Detectando sua localização para calcular distâncias reais...</span>
-      </div>
-      <button type="button" onclick="requestUserLocation(true)" class="btn-gps-refresh" id="btn-gps-refresh">
-        📍 Atualizar GPS
-      </button>
-    </div>
 
     <!-- Aviso grande e claro quando houver informações não salvas -->
     <div id="publish-banner" class="sync-banner hidden" style="background: rgba(245, 158, 11, 0.16); border-color: #f59e0b;">
@@ -1532,7 +1542,7 @@
       if (km == null || isNaN(km)) return '';
       if (km < 1) {
         const meters = Math.max(10, Math.round(km * 1000));
-        return `${meters} m`;
+        return `${meters}m`;
       }
       if (km < 10) {
         return `${km.toFixed(1).replace('.', ',')} km`;
@@ -1566,25 +1576,32 @@
       const numLat = Number(lat), numLng = Number(lng);
       if (isNaN(numLat) || isNaN(numLng) || (numLat === 0 && numLng === 0)) return '';
 
-      const badges = [];
       const distFromUser = getUserDistanceTo(numLat, numLng);
       if (distFromUser != null) {
-        badges.push(`<span class="dist-badge" title="Distância real em linha reta da sua posição GPS atual">📍 a ${formatDistanceText(distFromUser)} de você</span>`);
-      }
-
-      // Se o usuário ainda não ativou o GPS ou está longe (> 400km, ex: no Brasil), exibe também como referência a distância do hotel da cidade
-      if (distFromUser == null || distFromUser > 400) {
-        const hotelKey = (phase === 'miami' || numLat < 26.8) ? 'miami' : 'orlando';
-        const hotel = HOTEL_LOCATIONS[hotelKey];
-        if (hotel) {
-          const distFromHotel = calculateDistanceKm(hotel.lat, hotel.lng, numLat, numLng);
-          if (distFromHotel != null && distFromHotel < 200) {
-            badges.push(`<span class="dist-badge dist-hotel" title="Distância em relação ao hotel ${hotel.name}">🏨 a ${formatDistanceText(distFromHotel)} do hotel</span>`);
+        if (distFromUser <= 400) {
+          return `<span class="card-dist-corner" title="Distância real pelo GPS">📍 ${formatDistanceText(distFromUser)}</span>`;
+        } else {
+          const hotelKey = (phase === 'miami' || numLat < 26.8) ? 'miami' : 'orlando';
+          const hotel = HOTEL_LOCATIONS[hotelKey];
+          if (hotel) {
+            const distFromHotel = calculateDistanceKm(hotel.lat, hotel.lng, numLat, numLng);
+            if (distFromHotel != null && distFromHotel < 200) {
+              return `<span class="card-dist-corner dist-hotel" title="Distância até o hotel ${hotel.name}">🏨 ${formatDistanceText(distFromHotel)} hotel</span>`;
+            }
           }
+          return `<span class="card-dist-corner" title="Distância real">📍 ${formatDistanceText(distFromUser)}</span>`;
         }
       }
 
-      return badges.join(' ');
+      const hotelKey = (phase === 'miami' || numLat < 26.8) ? 'miami' : 'orlando';
+      const hotel = HOTEL_LOCATIONS[hotelKey];
+      if (hotel) {
+        const distFromHotel = calculateDistanceKm(hotel.lat, hotel.lng, numLat, numLng);
+        if (distFromHotel != null && distFromHotel < 200) {
+          return `<span class="card-dist-corner dist-hotel" title="Distância até o hotel ${hotel.name}">🏨 ${formatDistanceText(distFromHotel)} hotel</span>`;
+        }
+      }
+      return '';
     }
 
     function initGeolocation() {
@@ -1694,25 +1711,20 @@
     function updateGpsUI(status = null) {
       const txt = document.getElementById('gps-status-text');
       const ind = document.getElementById('gps-status-indicator');
-      const btn = document.getElementById('btn-gps-refresh');
       if (!txt) return;
 
       if (userRealLocation) {
-        const acc = Math.round(userRealLocation.accuracy || 20);
-        txt.innerHTML = `🟢 <strong>GPS Ativo:</strong> distâncias reais a partir da sua posição (~${acc}m)`;
+        txt.textContent = 'GPS ativo';
         if (ind) ind.className = 'gps-status-indicator active';
-        if (btn) btn.innerHTML = '🎯 Atualizar';
       } else if (status === 'requesting') {
-        txt.innerHTML = `⏳ Obtendo sua localização via GPS...`;
+        txt.textContent = 'Localizando...';
         if (ind) ind.className = 'gps-status-indicator requesting';
       } else if (status === 'denied') {
-        txt.innerHTML = `📍 Toque para ativar o GPS e ver distâncias reais`;
+        txt.textContent = 'Ativar GPS';
         if (ind) ind.className = 'gps-status-indicator denied';
-        if (btn) btn.innerHTML = '📍 Ativar GPS';
       } else {
-        txt.innerHTML = `📍 Toque para ativar o GPS e ver distâncias reais`;
+        txt.textContent = 'Ativar GPS';
         if (ind) ind.className = 'gps-status-indicator';
-        if (btn) btn.innerHTML = '📍 Ativar GPS';
       }
     }
 
@@ -2217,10 +2229,9 @@
             ${item.done ? '✓' : ''}
           </button>
           <div class="item-body">
-            <div class="item-meta" style="flex-wrap:wrap; gap:4px; align-items:center;">
+            <div class="item-meta">
               <span class="time-pill">${item.time || '--:--'}</span>
               <span class="cat-pill ${meta.cls}">${meta.icon} ${meta.label}</span>
-              ${distBadge}
             </div>
             <div class="item-title" style="${item.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(item.title)}</div>
             ${item.notes ? `<p class="item-notes">${escapeHtml(item.notes)}</p>` : ''}
@@ -2231,6 +2242,7 @@
             </div>
           </div>
           <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" class="item-thumb" loading="lazy" onerror="this.src='${meta.defaultImg}'">
+          ${distBadge}
         </div>
       `;
     }
@@ -2296,21 +2308,20 @@
         const distBadge = renderDistanceBadge(p.lat, p.lng, (p.city || '').toLowerCase().includes('miami') ? 'miami' : 'orlando');
 
         return `
-          <div class="saved-card">
+          <div class="saved-card" style="position: relative;">
             <div class="saved-img-wrap">
               <img src="${escapeHtml(imgUrl)}" class="saved-img" loading="lazy" alt="${escapeHtml(p.title)}">
               <span class="saved-list-badge">${listLabel}</span>
               <span class="saved-city-badge">${escapeHtml(p.city || 'Flórida')}</span>
             </div>
             <div class="saved-content">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; margin-bottom:4px;">
-                <div>${(p.tags || []).map(t => `<span class="tag-pill">#${escapeHtml(t)}</span>`).join('')}</div>
-                ${distBadge}
+              <div style="margin-bottom:4px;">
+                ${(p.tags || []).map(t => `<span class="tag-pill">#${escapeHtml(t)}</span>`).join('')}
               </div>
               <div style="font-weight:800; font-size:15px; margin-bottom:4px;">${escapeHtml(p.title)}</div>
               ${p.location ? `<div style="font-size:11px; color:var(--muted); margin-bottom:6px;">📍 ${escapeHtml(p.location)}</div>` : ''}
               ${p.notes ? `<p style="font-size:12px; color:var(--muted); margin:0 0 10px 0; flex:1;">${escapeHtml(p.notes)}</p>` : '<div style="flex:1;"></div>'}
-              <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--border); gap:6px; flex-wrap:wrap;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; padding-right:75px; border-top:1px solid var(--border); gap:6px; flex-wrap:wrap;">
                 <a href="${mapsUrl}" target="_blank" class="btn-gmaps" style="padding:5px 10px; font-size:11px;">${GMAPS_LOGO_SVG} Abrir no Google Maps</a>
                 <button onclick="openScheduleSavedModal('${p.id}')" class="btn-add" style="padding:5px 10px; font-size:11px;">📅 + Colocar num Dia</button>
                 <div style="display:flex; gap:8px;">
@@ -2319,6 +2330,7 @@
                 </div>
               </div>
             </div>
+            ${distBadge}
           </div>
         `;
       }).join('');
@@ -2605,18 +2617,17 @@
           const isSelected = selectedMapPlaceIndex === idx;
           const distBadge = renderDistanceBadge(p.lat, p.lng, p.region);
           return `
-            <div id="map-list-card-${idx}" class="map-place-card ${isSelected ? 'selected' : ''}">
+            <div id="map-list-card-${idx}" class="map-place-card ${isSelected ? 'selected' : ''}" style="position: relative;">
               <div class="map-place-top" onclick="selectMapPlace(${idx}, true)">
                 <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" class="map-place-thumb" loading="lazy" onerror="this.src='${p.defaultImg}'">
                 <div style="flex:1; min-width:0;">
                   <div style="font-size:11px; font-weight:800; color:${p.color}; margin-bottom:2px;">${escapeHtml(p.subtitle)}</div>
                   <div style="font-size:14px; font-weight:800; color:var(--text); line-height:1.25;">${escapeHtml(p.title)}</div>
-                  ${distBadge ? `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:3px;">${distBadge}</div>` : ''}
                   <div style="font-size:12px; color:var(--muted); margin-top:3px;">📍 ${escapeHtml(p.location)}</div>
                   ${p.notes ? `<div style="font-size:12px; color:var(--muted); margin-top:4px; line-height:1.35;">${escapeHtml(p.notes)}</div>` : ''}
                 </div>
               </div>
-              <div class="map-place-actions">
+              <div class="map-place-actions" style="padding-right: 75px;">
                 <button type="button" onclick="selectMapPlace(${idx}, true)" class="chip" style="font-size:12px; padding:7px 12px; color:var(--primary); border-color:var(--primary);">
                   🎯 Ver Pino no Mapa
                 </button>
@@ -2625,6 +2636,7 @@
                   <span>Abrir no Google Maps</span>
                 </a>
               </div>
+              ${distBadge}
             </div>
           `;
         }).join('');
@@ -2713,7 +2725,7 @@
       if (selectedCardEl) {
         selectedCardEl.classList.remove('hidden');
         selectedCardEl.innerHTML = `
-          <div class="map-place-card selected" style="margin-bottom:0; background:var(--primary-light);">
+          <div class="map-place-card selected" style="margin-bottom:0; background:var(--primary-light); position: relative;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <span style="font-size:11px; font-weight:800; color:var(--primary); text-transform:uppercase;">📌 Local Selecionado no Mapa</span>
               <button type="button" onclick="document.getElementById('selected-map-place-card').classList.add('hidden')" style="border:none; background:none; color:var(--muted); font-size:16px; cursor:pointer;">✕</button>
@@ -2723,7 +2735,6 @@
               <div style="flex:1; min-width:0;">
                 <div style="font-size:11px; font-weight:800; color:${p.color}; margin-bottom:2px;">${escapeHtml(p.subtitle)}</div>
                 <div style="font-size:15px; font-weight:800; color:var(--text);">${escapeHtml(p.title)}</div>
-                ${distBadge ? `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:3px;">${distBadge}</div>` : ''}
                 <div style="font-size:12px; color:var(--muted); margin-top:3px;">📍 ${escapeHtml(p.location)}</div>
                 ${p.notes ? `<div style="font-size:12px; color:var(--text); margin-top:4px;">${escapeHtml(p.notes)}</div>` : ''}
               </div>
@@ -2734,6 +2745,7 @@
                 <span>Abrir no Google Maps</span>
               </a>
             </div>
+            ${distBadge}
           </div>
         `;
       }
