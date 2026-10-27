@@ -392,15 +392,15 @@
       cursor: pointer;
     }
 
-    /* Cards de Programa / Atividade (Sem aninhamento confuso, com nó na linha do tempo) */
-    .item-card {
+    /* Cards de Programa / Atividade (Compactos, alinhados na horizontal) */
+    .day-programs-timeline .item-card {
       position: relative;
       border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 14px;
+      border-radius: 14px;
+      padding: 11px 13px;
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
+      flex-direction: column;
+      gap: 7px;
       background: var(--card);
       box-shadow: var(--shadow-sm);
     }
@@ -408,7 +408,7 @@
       content: "";
       position: absolute;
       left: -23px;
-      top: 22px;
+      top: 18px;
       width: 10px;
       height: 10px;
       border-radius: 50%;
@@ -417,10 +417,16 @@
       box-shadow: 0 0 0 2px var(--border-strong);
     }
     .item-card.done { opacity: 0.58; background: var(--bg-inset); }
+    .item-card-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+    }
     .check-btn {
-      width: 24px;
-      height: 24px;
-      border-radius: 7px;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
       border: 2px solid var(--border-strong);
       background: var(--bg);
       color: #fff;
@@ -430,8 +436,9 @@
       justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
-      margin-top: 2px;
+      margin-top: 1px;
       padding: 0;
+      font-size: 13px;
     }
     .check-btn.checked {
       background: var(--success);
@@ -439,9 +446,9 @@
     }
     .item-body { flex: 1; min-width: 0; }
     .item-thumb {
-      width: 82px;
-      height: 82px;
-      border-radius: 12px;
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
       object-fit: cover;
       flex-shrink: 0;
       background: var(--bg-inset);
@@ -449,19 +456,19 @@
     }
     .item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
     .time-pill {
-      font-size: 12.5px;
+      font-size: 11.5px;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       background: var(--bg-inset);
       color: var(--text);
       border: 1px solid var(--border);
-      padding: 2px 8px;
+      padding: 1px 6px;
       border-radius: 6px;
     }
     .cat-pill {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 800;
-      padding: 2px 8px;
+      padding: 1px 6px;
       border-radius: 6px;
     }
     .cat-parque { background: rgba(147, 51, 234, 0.14); color: #7e22ce; }
@@ -479,11 +486,43 @@
       .cat-logistica { color: #93c5fd; }
     }
 
-    .item-title { font-size: 15px; font-weight: 800; margin: 6px 0 4px 0; line-height: 1.3; color: var(--text); }
-    .item-notes { font-size: 12.5px; color: var(--muted); margin: 0; line-height: 1.45; }
-    .item-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 10px; padding-top: 8px; padding-right: 75px; border-top: 1px solid var(--border); }
+    .item-title { font-size: 14.5px; font-weight: 800; margin: 3px 0 3px 0; line-height: 1.25; color: var(--text); }
+    .item-notes { font-size: 12px; color: var(--muted); margin: 0; line-height: 1.4; }
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 3px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+      white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .item-actions::-webkit-scrollbar {
+      display: none;
+    }
+    .btn-gmaps-compact {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 7px;
+      background: var(--bg-inset);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-gmaps-compact:active {
+      transform: scale(0.97);
+    }
     .link-btn {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       font-family: inherit;
       color: var(--primary);
@@ -492,6 +531,7 @@
       border: none;
       padding: 0;
       cursor: pointer;
+      white-space: nowrap;
     }
     .link-muted { color: var(--muted); }
     .link-danger { color: var(--danger); }
@@ -875,11 +915,16 @@
     .map-place-actions {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 8px;
-      margin-top: 10px;
-      padding-top: 10px;
+      margin-top: 8px;
+      padding-top: 8px;
       border-top: 1px solid var(--border);
+      white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .map-place-actions::-webkit-scrollbar {
+      display: none;
     }
     .custom-gmap-pin {
       display: flex;
@@ -899,9 +944,6 @@
     }
     /* Badges de Distância Real no Canto Inferior Direito & Status Minimalista do GPS */
     .card-dist-corner {
-      position: absolute;
-      right: 12px;
-      bottom: 10px;
       display: inline-flex;
       align-items: center;
       gap: 3px;
@@ -910,11 +952,11 @@
       color: #059669;
       background: rgba(16, 185, 129, 0.1);
       border: 1px solid rgba(16, 185, 129, 0.25);
-      padding: 1px 7px;
+      padding: 1.5px 6px;
       border-radius: 6px;
       white-space: nowrap;
       pointer-events: none;
-      z-index: 2;
+      flex-shrink: 0;
     }
     .card-dist-corner.dist-hotel {
       color: #4f46e5;
@@ -2225,24 +2267,29 @@
 
       return `
         <div class="item-card ${item.done ? 'done' : ''}">
-          <button onclick="toggleItemDone('${dayId}', '${item.id}')" class="check-btn ${item.done ? 'checked' : ''}">
-            ${item.done ? '✓' : ''}
-          </button>
-          <div class="item-body">
-            <div class="item-meta">
-              <span class="time-pill">${item.time || '--:--'}</span>
-              <span class="cat-pill ${meta.cls}">${meta.icon} ${meta.label}</span>
+          <div class="item-card-main">
+            <button onclick="toggleItemDone('${dayId}', '${item.id}')" class="check-btn ${item.done ? 'checked' : ''}">
+              ${item.done ? '✓' : ''}
+            </button>
+            <div class="item-body">
+              <div class="item-meta">
+                <span class="time-pill">${item.time || '--:--'}</span>
+                <span class="cat-pill ${meta.cls}">${meta.icon} ${meta.label}</span>
+              </div>
+              <div class="item-title" style="${item.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(item.title)}</div>
+              ${item.notes ? `<p class="item-notes">${escapeHtml(item.notes)}</p>` : ''}
             </div>
-            <div class="item-title" style="${item.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(item.title)}</div>
-            ${item.notes ? `<p class="item-notes">${escapeHtml(item.notes)}</p>` : ''}
-            <div class="item-actions">
-              <a href="${mapsUrl}" target="_blank" class="btn-gmaps" style="padding:4px 9px; font-size:11px;">${GMAPS_LOGO_SVG} Abrir no Google Maps</a>
-              <button onclick="openActivityModal('${dayId}', '${item.id}')" class="link-btn link-muted">✏️ Editar</button>
-              <button onclick="deleteActivity('${dayId}', '${item.id}')" class="link-btn link-danger">🗑️ Excluir</button>
-            </div>
+            <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" class="item-thumb" loading="lazy" onerror="this.src='${meta.defaultImg}'">
           </div>
-          <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" class="item-thumb" loading="lazy" onerror="this.src='${meta.defaultImg}'">
-          ${distBadge}
+          <div class="item-actions">
+            <a href="${mapsUrl}" target="_blank" class="btn-gmaps-compact">
+              ${GMAPS_LOGO_SVG}
+              <span>Google Maps</span>
+            </a>
+            <button onclick="openActivityModal('${dayId}', '${item.id}')" class="link-btn link-muted">✏️ Editar</button>
+            <button onclick="deleteActivity('${dayId}', '${item.id}')" class="link-btn link-danger">🗑️ Excluir</button>
+            ${distBadge ? `<div style="margin-left:auto;">${distBadge}</div>` : ''}
+          </div>
         </div>
       `;
     }
@@ -2321,16 +2368,16 @@
               <div style="font-weight:800; font-size:15px; margin-bottom:4px;">${escapeHtml(p.title)}</div>
               ${p.location ? `<div style="font-size:11px; color:var(--muted); margin-bottom:6px;">📍 ${escapeHtml(p.location)}</div>` : ''}
               ${p.notes ? `<p style="font-size:12px; color:var(--muted); margin:0 0 10px 0; flex:1;">${escapeHtml(p.notes)}</p>` : '<div style="flex:1;"></div>'}
-              <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; padding-right:75px; border-top:1px solid var(--border); gap:6px; flex-wrap:wrap;">
-                <a href="${mapsUrl}" target="_blank" class="btn-gmaps" style="padding:5px 10px; font-size:11px;">${GMAPS_LOGO_SVG} Abrir no Google Maps</a>
-                <button onclick="openScheduleSavedModal('${p.id}')" class="btn-add" style="padding:5px 10px; font-size:11px;">📅 + Colocar num Dia</button>
-                <div style="display:flex; gap:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--border); gap:6px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <a href="${mapsUrl}" target="_blank" class="btn-gmaps-compact">${GMAPS_LOGO_SVG} Maps</a>
+                  <button onclick="openScheduleSavedModal('${p.id}')" class="link-btn" style="font-size:11.5px;">📅 + Roteiro</button>
                   <button onclick="openSavedPlaceModal('${p.id}')" class="link-btn link-muted">✏️</button>
                   <button onclick="deleteSavedPlace('${p.id}')" class="link-btn link-danger">🗑️</button>
                 </div>
+                ${distBadge ? `<div>${distBadge}</div>` : ''}
               </div>
             </div>
-            ${distBadge}
           </div>
         `;
       }).join('');
@@ -2627,16 +2674,16 @@
                   ${p.notes ? `<div style="font-size:12px; color:var(--muted); margin-top:4px; line-height:1.35;">${escapeHtml(p.notes)}</div>` : ''}
                 </div>
               </div>
-              <div class="map-place-actions" style="padding-right: 75px;">
-                <button type="button" onclick="selectMapPlace(${idx}, true)" class="chip" style="font-size:12px; padding:7px 12px; color:var(--primary); border-color:var(--primary);">
-                  🎯 Ver Pino no Mapa
+              <div class="map-place-actions">
+                <button type="button" onclick="selectMapPlace(${idx}, true)" class="chip" style="font-size:11.5px; padding:4px 9px; color:var(--primary); border-color:var(--primary); margin:0; flex-shrink:0;">
+                  🎯 Ver no Mapa
                 </button>
-                <a href="${gmapsLink}" target="_blank" class="btn-gmaps">
+                <a href="${gmapsLink}" target="_blank" class="btn-gmaps-compact">
                   ${GMAPS_LOGO_SVG}
-                  <span>Abrir no Google Maps</span>
+                  <span>Google Maps</span>
                 </a>
+                ${distBadge ? `<div style="margin-left:auto;">${distBadge}</div>` : ''}
               </div>
-              ${distBadge}
             </div>
           `;
         }).join('');
@@ -2739,13 +2786,13 @@
                 ${p.notes ? `<div style="font-size:12px; color:var(--text); margin-top:4px;">${escapeHtml(p.notes)}</div>` : ''}
               </div>
             </div>
-            <div class="map-place-actions" style="justify-content:flex-end;">
-              <a href="${gmapsLink}" target="_blank" class="btn-gmaps" style="width:100%; padding:10px; font-size:13px;">
+            <div class="map-place-actions">
+              <a href="${gmapsLink}" target="_blank" class="btn-gmaps-compact" style="padding:5px 12px;">
                 ${GMAPS_LOGO_SVG}
                 <span>Abrir no Google Maps</span>
               </a>
+              ${distBadge ? `<div style="margin-left:auto;">${distBadge}</div>` : ''}
             </div>
-            ${distBadge}
           </div>
         `;
       }
